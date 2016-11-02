@@ -944,7 +944,7 @@ cmd_destroy() {
   # This is a tactic to remove files on the host when we do not have 
   # root permissions on the host. Using containers to destroy files created
   # inside of containers avoids certain ownership permission issues.
-  docker run --rm -v "${CHE_CONFIG}":/root/che-config \
+  docker_exec run --rm -v "${CHE_CONFIG}":/root/che-config \
                   -v "${CHE_INSTANCE}":/root/che-instance \
                       alpine sh -c "rm -rf /root/che-instance/* && rm -rf /root/che-config/*"
 
