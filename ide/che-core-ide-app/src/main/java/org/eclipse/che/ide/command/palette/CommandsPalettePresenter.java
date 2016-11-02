@@ -38,6 +38,8 @@ public class CommandsPalettePresenter implements CommandsPaletteView.ActionDeleg
     /** Open Commands Palette. */
     public void open() {
         view.show();
+
+        view.setCommands(commandManager.getWorkspaceCommands());
     }
 
     @Override

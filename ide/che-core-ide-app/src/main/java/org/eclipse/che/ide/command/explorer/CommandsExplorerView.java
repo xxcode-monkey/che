@@ -56,6 +56,14 @@ public interface CommandsExplorerView extends View<CommandsExplorerView.ActionDe
     /** Returns the currently selected command. */
     CommandImpl getSelectedCommand();
 
+    /**
+     * Set whether saving command is enabled or not.
+     *
+     * @param enable
+     *         {@code true} if command saving is enabled and {@code false} otherwise
+     */
+    void setSaveEnabled(boolean enable);
+
     /** The action delegate for this view. */
     interface ActionDelegate extends BaseActionDelegate {
 
@@ -66,6 +74,14 @@ public interface CommandsExplorerView extends View<CommandsExplorerView.ActionDe
          *         selected command
          */
         void onCommandSelected(CommandImpl command);
+
+        /**
+         * Called when reverting command is requested.
+         *
+         * @param command
+         *         command reverting of which is requested
+         */
+        void onCommandRevert(CommandImpl command);
 
         /**
          * Called when saving command is requested.

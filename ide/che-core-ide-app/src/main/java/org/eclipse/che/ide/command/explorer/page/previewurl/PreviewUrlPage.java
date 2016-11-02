@@ -50,10 +50,14 @@ public class PreviewUrlPage extends AbstractCommandsExplorerPage implements Prev
     public void resetFrom(CommandImpl command) {
         super.resetFrom(command);
 
-        final String previewUrl = command.getAttributes().get(COMMAND_PREVIEW_URL_ATTRIBUTE_NAME);
-        previewUrlInitial = previewUrl != null ? previewUrl : "";
+        previewUrlInitial = getCommandPreviewUrl(command);
 
         view.setPreviewUrl(previewUrlInitial);
+    }
+
+    @Override
+    public boolean isDirty() {
+        return !(previewUrlInitial.equals(getCommandPreviewUrl(editedCommand)));
     }
 
     @Override
@@ -61,5 +65,10 @@ public class PreviewUrlPage extends AbstractCommandsExplorerPage implements Prev
         editedCommand.getAttributes().put(COMMAND_PREVIEW_URL_ATTRIBUTE_NAME, previewUrl);
 
         notifyDirtyStateChanged();
+    }
+
+    private String getCommandPreviewUrl(CommandImpl command) {
+        final String previewUrl = editedCommand.getAttributes().get(COMMAND_PREVIEW_URL_ATTRIBUTE_NAME);
+        return previewUrl != null ? previewUrl : "";
     }
 }

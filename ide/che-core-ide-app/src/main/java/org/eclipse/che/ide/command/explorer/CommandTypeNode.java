@@ -24,12 +24,12 @@ import java.util.List;
  *
  * @author Artem Zatsarynnyi
  */
-class CommandTypeNode extends AbstractTreeNode {
+public class CommandTypeNode extends AbstractTreeNode {
 
     private final CommandType       commandType;
     private final List<CommandNode> commands;
 
-    CommandTypeNode(CommandType commandType, List<CommandNode> commands) {
+    public CommandTypeNode(CommandType commandType, List<CommandNode> commands) {
         this.commandType = commandType;
         this.commands = commands;
     }

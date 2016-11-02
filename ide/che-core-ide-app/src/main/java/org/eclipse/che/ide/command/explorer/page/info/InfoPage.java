@@ -50,7 +50,12 @@ public class InfoPage extends AbstractCommandsExplorerPage implements InfoPageVi
 
         commandNameInitial = command.getName();
 
-        view.setName(command.getName());
+        view.setCommandName(command.getName());
+    }
+
+    @Override
+    public boolean isDirty() {
+        return !(commandNameInitial.equals(editedCommand.getName()));
     }
 
     @Override

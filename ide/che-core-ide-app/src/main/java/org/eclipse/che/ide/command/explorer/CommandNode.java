@@ -22,11 +22,11 @@ import java.util.List;
  *
  * @author Artem Zatsarynnyi
  */
-class CommandNode extends AbstractTreeNode {
+public class CommandNode extends AbstractTreeNode {
 
     private final CommandImpl command;
 
-    CommandNode(CommandImpl command) {
+    public CommandNode(CommandImpl command) {
         this.command = command;
     }
 

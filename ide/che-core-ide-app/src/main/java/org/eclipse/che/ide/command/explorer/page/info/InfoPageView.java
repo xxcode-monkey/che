@@ -23,10 +23,10 @@ import org.eclipse.che.ide.api.mvp.View;
 public interface InfoPageView extends View<InfoPageView.ActionDelegate> {
 
     /** Returns the command's name value. */
-    String getName();
+    String getCommandName();
 
     /** Sets the command's name value. */
-    void setName(String name);
+    void setCommandName(String name);
 
     /** The action delegate for this view. */
     interface ActionDelegate {

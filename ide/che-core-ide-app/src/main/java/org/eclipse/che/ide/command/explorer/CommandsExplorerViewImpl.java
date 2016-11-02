@@ -17,6 +17,7 @@ import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DeckPanel;
 import com.google.gwt.user.client.ui.IsWidget;
@@ -109,6 +110,8 @@ public class CommandsExplorerViewImpl extends BaseView<CommandsExplorerView.Acti
 
         setContentWidget(UI_BINDER.createAndBindUi(this));
 
+        setSaveEnabled(false);
+
         saveButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -147,8 +150,13 @@ public class CommandsExplorerViewImpl extends BaseView<CommandsExplorerView.Acti
 
     @Override
     public CommandImpl getSelectedCommand() {
-        // TODO
         return null;
+    }
+
+    @Override
+    public void setSaveEnabled(boolean enable) {
+        cancelButton.setEnabled(enable);
+        saveButton.setEnabled(enable);
     }
 
     private void renderWorkspaceCommands(Map<CommandType, List<CommandImpl>> workspaceCommands) {
@@ -190,6 +198,16 @@ public class CommandsExplorerViewImpl extends BaseView<CommandsExplorerView.Acti
         }
 
         projectCommandsTree.expandAll();
+    }
+
+    @UiHandler("cancelButton")
+    public void handleCancelButton(ClickEvent clickEvent) {
+        delegate.onCommandRevert(getSelectedCommand());
+    }
+
+    @UiHandler("saveButton")
+    public void handleSaveButton(ClickEvent clickEvent) {
+        delegate.onCommandSave(getSelectedCommand());
     }
 
     interface CommandsExplorerViewImplUiBinder extends UiBinder<Widget, CommandsExplorerViewImpl> {

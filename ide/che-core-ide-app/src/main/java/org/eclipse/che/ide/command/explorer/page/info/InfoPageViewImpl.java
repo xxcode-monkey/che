@@ -11,8 +11,11 @@
 package org.eclipse.che.ide.command.explorer.page.info;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
@@ -40,18 +43,30 @@ public class InfoPageViewImpl extends Composite implements InfoPageView {
     }
 
     @Override
-    public String getName() {
+    public String getCommandName() {
         return commandName.getValue();
     }
 
     @Override
-    public void setName(String name) {
+    public void setCommandName(String name) {
         commandName.setValue(name);
     }
 
     @Override
     public void setDelegate(ActionDelegate delegate) {
         this.delegate = delegate;
+    }
+
+    @UiHandler({"commandName"})
+    void onCommandNameChanged(KeyUpEvent event) {
+        // name value may not be updated immediately after keyUp
+        // therefore use the timer with zero delay
+        new Timer() {
+            @Override
+            public void run() {
+                delegate.onNameChanged(getCommandName());
+            }
+        }.schedule(0);
     }
 
     interface InfoPageViewImplUiBinder extends UiBinder<Widget, InfoPageViewImpl> {

@@ -27,8 +27,8 @@ import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.parts.base.BasePresenter;
 import org.eclipse.che.ide.api.resources.Project;
-import org.eclipse.che.ide.command.explorer.page.arguments.ArgumentsPage;
 import org.eclipse.che.ide.command.explorer.page.CommandsExplorerPage;
+import org.eclipse.che.ide.command.explorer.page.arguments.ArgumentsPage;
 import org.eclipse.che.ide.command.explorer.page.info.InfoPage;
 import org.eclipse.che.ide.command.explorer.page.previewurl.PreviewUrlPage;
 import org.vectomatic.dom.svg.ui.SVGResource;
@@ -47,7 +47,9 @@ import static org.eclipse.che.ide.api.parts.PartStackType.NAVIGATION;
  */
 @Singleton
 public class CommandsExplorerPresenter extends BasePresenter implements CommandsExplorerView.ActionDelegate,
-                                                                        WsAgentStateHandler, CommandManager.CommandChangedListener {
+                                                                        WsAgentStateHandler,
+                                                                        CommandManager.CommandChangedListener,
+                                                                        CommandsExplorerPage.DirtyStateListener {
 
     private final CommandsExplorerView view;
     private final WorkspaceAgent       workspaceAgent;
@@ -129,13 +131,12 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
     public void onCommandSelected(CommandImpl command) {
         for (CommandsExplorerPage page : pages) {
             page.resetFrom(command);
-            page.setDirtyStateListener(new CommandsExplorerPage.DirtyStateListener() {
-                @Override
-                public void onDirtyStateChanged() {
-
-                }
-            });
+            page.setDirtyStateListener(this);
         }
+    }
+
+    @Override
+    public void onCommandRevert(CommandImpl command) {
     }
 
     @Override
@@ -214,5 +215,17 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
         }
 
         view.setCommands(workspaceCommands, projectsCommands);
+    }
+
+    @Override
+    public void onDirtyStateChanged() {
+        for (CommandsExplorerPage page : pages) {
+            if (page.isDirty()) {
+                view.setSaveEnabled(true);
+                return;
+            }
+        }
+
+        view.setSaveEnabled(false);
     }
 }

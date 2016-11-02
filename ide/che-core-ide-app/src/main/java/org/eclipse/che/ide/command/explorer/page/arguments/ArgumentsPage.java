@@ -54,6 +54,11 @@ public class ArgumentsPage extends AbstractCommandsExplorerPage implements Argum
     }
 
     @Override
+    public boolean isDirty() {
+        return !(commandLineInitial.equals(editedCommand.getCommandLine()));
+    }
+
+    @Override
     public void onCommandLineChanged() {
         editedCommand.setCommandLine(view.getCommandLine());
 

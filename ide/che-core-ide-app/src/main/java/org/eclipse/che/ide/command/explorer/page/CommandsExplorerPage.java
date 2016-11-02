@@ -39,6 +39,13 @@ public interface CommandsExplorerPage {
      */
     void resetFrom(CommandImpl command);
 
+    /**
+     * Whether the page has been modified or not?
+     *
+     * @return {@code true} if page is modified, and {@code false} - otherwise
+     */
+    boolean isDirty();
+
     /** Sets {@link DirtyStateListener}. */
     void setDirtyStateListener(DirtyStateListener listener);
 
