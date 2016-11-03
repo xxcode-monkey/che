@@ -26,6 +26,7 @@ import static java.util.Collections.unmodifiableMap;
 public class CommandImpl implements Command {
 
     private final String              type;
+    private final ApplicableContext   applicableContext;
     private       String              name;
     private       String              commandLine;
     private       Map<String, String> attributes;
@@ -49,6 +50,7 @@ public class CommandImpl implements Command {
         this.commandLine = commandLine;
         this.type = type;
         this.attributes = unmodifiableMap(attributes);
+        this.applicableContext = new ApplicableContext();
     }
 
     /** Creates copy of the given {@link Command}. */
@@ -89,6 +91,10 @@ public class CommandImpl implements Command {
 
     public void setAttributes(Map<String, String> attributes) {
         this.attributes = unmodifiableMap(attributes);
+    }
+
+    public ApplicableContext getApplicableContext() {
+        return applicableContext;
     }
 
     @Override
