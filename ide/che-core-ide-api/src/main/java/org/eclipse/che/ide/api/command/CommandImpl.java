@@ -53,7 +53,7 @@ public class CommandImpl implements Command {
         this.applicableContext = new ApplicableContext();
     }
 
-    /** Creates copy of the given {@link Command}. */
+    /** Creates a copy of the given {@link Command}. */
     public CommandImpl(Command command) {
         this(command.getName(),
              command.getCommandLine(),
