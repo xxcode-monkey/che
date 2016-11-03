@@ -23,6 +23,8 @@ import static java.util.Collections.unmodifiableList;
 public class ApplicableContext {
 
     private boolean      workspaceApplicable;
+    private boolean      projectApplicable;
+    private boolean      fileApplicable;
     private List<String> applicableProjects;
 
     public ApplicableContext() {
@@ -33,8 +35,24 @@ public class ApplicableContext {
         return workspaceApplicable;
     }
 
-    public void setWorkspaceApplicable() {
-        this.workspaceApplicable = workspaceApplicable;
+    public void setWorkspaceApplicable(boolean applicable) {
+        this.workspaceApplicable = applicable;
+    }
+
+    public boolean isProjectApplicable() {
+        return projectApplicable;
+    }
+
+    public void setProjectApplicable(boolean applicable) {
+        this.projectApplicable = applicable;
+    }
+
+    public boolean isFileApplicable() {
+        return fileApplicable;
+    }
+
+    public void setFileApplicable(boolean applicable) {
+        this.fileApplicable = applicable;
     }
 
     public List<String> getApplicableProjects() {
@@ -43,5 +61,9 @@ public class ApplicableContext {
 
     public void addApplicableProject(String projectPath) {
         applicableProjects.add(projectPath);
+    }
+
+    public void removeApplicableProject(String projectPath) {
+        applicableProjects.remove(projectPath);
     }
 }
