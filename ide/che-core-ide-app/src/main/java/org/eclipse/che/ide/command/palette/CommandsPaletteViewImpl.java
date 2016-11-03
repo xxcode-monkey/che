@@ -11,8 +11,10 @@
 package org.eclipse.che.ide.command.palette;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
@@ -64,6 +66,13 @@ public class CommandsPaletteViewImpl extends Window implements CommandsPaletteVi
     }
 
     @Override
+    public void show() {
+        super.show();
+
+        filterField.setValue("");
+    }
+
+    @Override
     public void setCommands(List<CommandImpl> workspaceCommands) {
         // group of workspace commands in map
         Map<CommandType, List<CommandImpl>> workspaceCommandsByType = new HashMap<>();
@@ -80,6 +89,11 @@ public class CommandsPaletteViewImpl extends Window implements CommandsPaletteVi
         }
 
         renderWorkspaceCommands(workspaceCommandsByType);
+    }
+
+    @Override
+    public String getFilterValue() {
+        return filterField.getValue();
     }
 
     private void renderWorkspaceCommands(Map<CommandType, List<CommandImpl>> workspaceCommands) {
@@ -101,6 +115,11 @@ public class CommandsPaletteViewImpl extends Window implements CommandsPaletteVi
     @Override
     public void setDelegate(ActionDelegate delegate) {
         this.delegate = delegate;
+    }
+
+    @UiHandler({"filterField"})
+    void onFilterChanged(KeyUpEvent event) {
+        delegate.onFilterChanged(getFilterValue());
     }
 
     interface CommandsPaletteViewImplUiBinder extends UiBinder<Widget, CommandsPaletteViewImpl> {

@@ -31,6 +31,9 @@ public interface CommandsPaletteView extends View<CommandsPaletteView.ActionDele
     /** Sets the commands to display in the view. */
     void setCommands(List<CommandImpl> commands);
 
+    /** Returns value of the command name filter. */
+    String getFilterValue();
+
     /** The action delegate for this view. */
     interface ActionDelegate {
 
