@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.eclipse.che.ide.core;
 
+import elemental.json.Json;
+import elemental.json.JsonFactory;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.gwt.inject.client.assistedinject.GinFactoryModuleBuilder;
@@ -27,10 +30,11 @@ import org.eclipse.che.ide.actions.find.FindActionView;
 import org.eclipse.che.ide.actions.find.FindActionViewImpl;
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.auth.OAuthServiceClient;
-import org.eclipse.che.ide.api.auth.OAuthServiceClientImpl;
+import org.eclipse.che.ide.api.oauth.OAuthServiceClient;
+import org.eclipse.che.ide.oauth.OAuthServiceClientImpl;
 import org.eclipse.che.ide.api.command.CommandTypeRegistry;
 import org.eclipse.che.ide.api.component.Component;
+import org.eclipse.che.ide.api.component.StateComponent;
 import org.eclipse.che.ide.api.component.WsAgentComponent;
 import org.eclipse.che.ide.api.data.tree.NodeInterceptor;
 import org.eclipse.che.ide.api.data.tree.settings.SettingsProvider;
@@ -56,13 +60,15 @@ import org.eclipse.che.ide.api.factory.FactoryServiceClientImpl;
 import org.eclipse.che.ide.api.filetypes.FileType;
 import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
 import org.eclipse.che.ide.api.git.GitServiceClient;
-import org.eclipse.che.ide.api.git.GitServiceClientImpl;
+import org.eclipse.che.ide.machine.WsAgentInitializer;
+import org.eclipse.che.ide.api.machine.WsAgentMessageBusProvider;
+import org.eclipse.che.ide.git.GitServiceClientImpl;
 import org.eclipse.che.ide.api.icon.IconRegistry;
 import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
 import org.eclipse.che.ide.api.machine.MachineServiceClient;
-import org.eclipse.che.ide.api.machine.MachineServiceClientImpl;
+import org.eclipse.che.ide.machine.MachineServiceClientImpl;
 import org.eclipse.che.ide.api.machine.RecipeServiceClient;
-import org.eclipse.che.ide.api.machine.RecipeServiceClientImpl;
+import org.eclipse.che.ide.machine.RecipeServiceClientImpl;
 import org.eclipse.che.ide.api.macro.Macro;
 import org.eclipse.che.ide.api.macro.MacroProcessor;
 import org.eclipse.che.ide.api.macro.MacroRegistry;
@@ -74,19 +80,20 @@ import org.eclipse.che.ide.api.parts.PartStack;
 import org.eclipse.che.ide.api.parts.PartStackUIResources;
 import org.eclipse.che.ide.api.parts.PartStackView;
 import org.eclipse.che.ide.api.parts.Perspective;
+import org.eclipse.che.ide.api.parts.PerspectiveView;
 import org.eclipse.che.ide.api.parts.ProjectExplorerPart;
-import org.eclipse.che.ide.api.parts.WorkBenchView;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.preferences.PreferencePagePresenter;
 import org.eclipse.che.ide.api.preferences.PreferencesManager;
 import org.eclipse.che.ide.api.project.ProjectImportersServiceClient;
-import org.eclipse.che.ide.api.project.ProjectImportersServiceClientImpl;
+import org.eclipse.che.ide.machine.WsAgentStateController;
+import org.eclipse.che.ide.project.ProjectImportersServiceClientImpl;
 import org.eclipse.che.ide.api.project.ProjectServiceClient;
-import org.eclipse.che.ide.api.project.ProjectServiceClientImpl;
+import org.eclipse.che.ide.project.ProjectServiceClientImpl;
 import org.eclipse.che.ide.api.project.ProjectTemplateServiceClient;
-import org.eclipse.che.ide.api.project.ProjectTemplateServiceClientImpl;
+import org.eclipse.che.ide.project.ProjectTemplateServiceClientImpl;
 import org.eclipse.che.ide.api.project.ProjectTypeServiceClient;
-import org.eclipse.che.ide.api.project.ProjectTypeServiceClientImpl;
+import org.eclipse.che.ide.project.ProjectTypeServiceClientImpl;
 import org.eclipse.che.ide.api.project.type.ProjectTemplateRegistry;
 import org.eclipse.che.ide.api.project.type.ProjectTypeRegistry;
 import org.eclipse.che.ide.api.project.type.wizard.PreSelectedProjectTypeManager;
@@ -101,17 +108,17 @@ import org.eclipse.che.ide.api.resources.ResourceInterceptor;
 import org.eclipse.che.ide.api.resources.modification.ClipboardManager;
 import org.eclipse.che.ide.api.selection.SelectionAgent;
 import org.eclipse.che.ide.api.ssh.SshServiceClient;
-import org.eclipse.che.ide.api.ssh.SshServiceClientImpl;
+import org.eclipse.che.ide.ssh.SshServiceClientImpl;
 import org.eclipse.che.ide.api.theme.Theme;
 import org.eclipse.che.ide.api.theme.ThemeAgent;
 import org.eclipse.che.ide.api.user.PreferencesServiceClient;
-import org.eclipse.che.ide.api.user.PreferencesServiceClientImpl;
+import org.eclipse.che.ide.user.PreferencesServiceClientImpl;
 import org.eclipse.che.ide.api.user.UserProfileServiceClient;
-import org.eclipse.che.ide.api.user.UserProfileServiceClientImpl;
+import org.eclipse.che.ide.user.UserProfileServiceClientImpl;
 import org.eclipse.che.ide.api.user.UserServiceClient;
-import org.eclipse.che.ide.api.user.UserServiceClientImpl;
+import org.eclipse.che.ide.user.UserServiceClientImpl;
 import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
-import org.eclipse.che.ide.api.workspace.WorkspaceServiceClientImpl;
+import org.eclipse.che.ide.workspace.WorkspaceServiceClientImpl;
 import org.eclipse.che.ide.client.StartUpActionsProcessor;
 import org.eclipse.che.ide.client.WorkspaceStateRestorer;
 import org.eclipse.che.ide.command.CommandProducerActionFactory;
@@ -296,6 +303,8 @@ import org.eclipse.che.ide.workspace.perspectives.general.PerspectiveViewImpl;
 import org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective;
 import org.eclipse.che.ide.workspace.start.workspacewidget.WorkspaceWidget;
 import org.eclipse.che.ide.workspace.start.workspacewidget.WorkspaceWidgetImpl;
+import org.eclipse.che.providers.DynaProvider;
+import org.eclipse.che.providers.DynaProviderImpl;
 
 import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
@@ -342,6 +351,8 @@ public class CoreGinModule extends AbstractGinModule {
         bind(ThemeAgent.class).to(ThemeAgentImpl.class).in(Singleton.class);
         bind(FileTypeRegistry.class).to(FileTypeRegistryImpl.class).in(Singleton.class);
 
+        bind(DynaProvider.class).to(DynaProviderImpl.class);
+
         GinMultibinder.newSetBinder(binder(), OAuth2Authenticator.class).addBinding().to(DefaultOAuthAuthenticatorImpl.class);
 
         configureComponents();
@@ -357,6 +368,10 @@ public class CoreGinModule extends AbstractGinModule {
         configureWebSocket();
         configureClientServerEventService();
 
+        GinMapBinder<String, StateComponent> stateComponents = GinMapBinder.newMapBinder(binder(), String.class, StateComponent.class);
+        stateComponents.addBinding("workspace").to(WorkspacePresenter.class);
+        stateComponents.addBinding("editor").to(EditorAgentImpl.class);
+
         GinMultibinder<PersistenceComponent> persistenceComponentsMultibinder =
                 GinMultibinder.newSetBinder(binder(), PersistenceComponent.class);
         persistenceComponentsMultibinder.addBinding().to(ShowHiddenFilesPersistenceComponent.class);
@@ -371,6 +386,9 @@ public class CoreGinModule extends AbstractGinModule {
         bind(ClipboardManager.class).to(ClipboardManagerImpl.class);
 
         GinMultibinder.newSetBinder(binder(), ResourceInterceptor.class).addBinding().to(ResourceInterceptor.NoOpInterceptor.class);
+
+        bind(WsAgentMessageBusProvider.class).to(WsAgentStateController.class).in(Singleton.class);
+        bind(WsAgentInitializer.class).to(WsAgentStateController.class).in(Singleton.class);
     }
 
     private void configureClientServerEventService() {
@@ -530,7 +548,7 @@ public class CoreGinModule extends AbstractGinModule {
         bind(PartStackUIResources.class).to(Resources.class).in(Singleton.class);
         // Views
         bind(WorkspaceView.class).to(WorkspaceViewImpl.class).in(Singleton.class);
-        bind(WorkBenchView.class).to(PerspectiveViewImpl.class).in(Singleton.class);
+        bind(PerspectiveView.class).to(PerspectiveViewImpl.class);
         bind(MainMenuView.class).to(MainMenuViewImpl.class).in(Singleton.class);
         bind(StatusPanelGroupView.class).to(StatusPanelGroupViewImpl.class).in(Singleton.class);
 
@@ -629,5 +647,18 @@ public class CoreGinModule extends AbstractGinModule {
     @Singleton
     protected PartStackEventHandler providePartStackEventHandler(FocusManager partAgentPresenter) {
         return partAgentPresenter.getPartStackHandler();
+    }
+
+    @Provides
+    @Singleton
+    @Named("defaultPerspectiveId")
+    protected String defaultPerspectiveId() {
+        return PROJECT_PERSPECTIVE_ID;
+    }
+
+    @Provides
+    @Singleton
+    protected JsonFactory provideJsonFactory() {
+        return Json.instance();
     }
 }
