@@ -11,6 +11,8 @@
 package org.eclipse.che.ide.command.manager;
 
 import org.eclipse.che.api.core.model.machine.Machine;
+import org.eclipse.che.api.promises.client.Operation;
+import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.command.ApplicableContext;
 import org.eclipse.che.ide.api.command.CommandImpl;
@@ -19,7 +21,6 @@ import org.eclipse.che.ide.api.command.CommandPage;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * //
@@ -28,10 +29,13 @@ import java.util.Set;
  */
 public class CommandManager2Impl implements CommandManager2 {
 
-    private final Set<CommandManagerDelegate> delegates;
+    private final CommandManagerDelegate workspaceManagerDelegates;
+    private final CommandManagerDelegate projectManagerDelegates;
 
-    public CommandManager2Impl(Set<CommandManagerDelegate> delegates) {
-        this.delegates = delegates;
+    public CommandManager2Impl(CommandManagerDelegate workspaceManagerDelegates,
+                               CommandManagerDelegate projectManagerDelegates) {
+        this.workspaceManagerDelegates = workspaceManagerDelegates;
+        this.projectManagerDelegates = projectManagerDelegates;
     }
 
     @Override
@@ -41,6 +45,13 @@ public class CommandManager2Impl implements CommandManager2 {
 
     @Override
     public Promise<CommandImpl> createCommand(String type, ApplicableContext applicableContext) {
+        workspaceManagerDelegates.createCommand(type, applicableContext).then(new Operation<CommandImpl>() {
+            @Override
+            public void apply(CommandImpl arg) throws OperationException {
+
+            }
+        });
+
         return null;
     }
 

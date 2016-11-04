@@ -18,16 +18,9 @@
 
     <!--<ui:with field="datasourceUiResources" type="org.eclipse.che.ide.ext.datasource.client.DatasourceUiResources"/>-->
 
-    <g:DockLayoutPanel unit="PX" ui:field="mainContainer">
+    <g:DockLayoutPanel unit="PX">
         <g:west size="250">
-            <g:SplitLayoutPanel ui:field="splitPanel">
-                <g:north size="300">
-                    <che:smartTree.Tree ui:field="workspaceCommandsTree"/>
-                </g:north>
-                <g:center>
-                    <che:smartTree.Tree ui:field="projectCommandsTree"/>
-                </g:center>
-            </g:SplitLayoutPanel>
+            <che:smartTree.Tree ui:field="commandsTree"/>
         </g:west>
         <g:center>
             <g:DockLayoutPanel>

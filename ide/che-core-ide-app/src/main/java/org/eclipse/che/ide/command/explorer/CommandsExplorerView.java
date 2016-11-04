@@ -17,7 +17,6 @@ import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.command.CommandType;
 import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.api.parts.base.BaseActionDelegate;
-import org.eclipse.che.ide.api.resources.Project;
 
 import java.util.List;
 import java.util.Map;
@@ -47,11 +46,8 @@ public interface CommandsExplorerView extends View<CommandsExplorerView.ActionDe
      *
      * @param workspaceCommands
      *         workspace commands grouped by type
-     * @param projectsCommands
-     *         workspace commands grouped by project and type
      */
-    void setCommands(Map<CommandType, List<CommandImpl>> workspaceCommands,
-                     Map<Project, Map<CommandType, List<CommandImpl>>> projectsCommands);
+    void setCommands(Map<CommandType, List<CommandImpl>> workspaceCommands);
 
     /** Returns the currently selected command. */
     CommandImpl getSelectedCommand();

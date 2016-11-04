@@ -177,7 +177,7 @@ public class CommandManagerImpl implements CommandManager {
             public CommandImpl apply(WorkspaceDto arg) throws FunctionException {
                 workspaceCommands.put(command.getName(), command);
 
-                fireCommandAdded(command);
+                notifyCommandAdded(command);
 
                 return command;
             }
@@ -202,7 +202,7 @@ public class CommandManagerImpl implements CommandManager {
                                              workspaceCommands.remove(commandName);
                                              workspaceCommands.put(updatedCommand.getName(), updatedCommand);
 
-                                             fireCommandUpdated(updatedCommand);
+                                             notifyCommandUpdated(updatedCommand);
 
                                              return updatedCommand;
                                          }
@@ -214,7 +214,7 @@ public class CommandManagerImpl implements CommandManager {
         return workspaceServiceClient.deleteCommand(appContext.getWorkspaceId(), commandName).then(new Function<WorkspaceDto, Void>() {
             @Override
             public Void apply(WorkspaceDto arg) throws FunctionException {
-                fireCommandRemoved(workspaceCommands.remove(commandName));
+                notifyCommandRemoved(workspaceCommands.remove(commandName));
 
                 return null;
             }
@@ -299,7 +299,7 @@ public class CommandManagerImpl implements CommandManager {
             public CommandImpl apply(Void arg) throws FunctionException {
                 commands.put(command.getName(), command);
 
-                fireCommandAdded(command);
+                notifyCommandAdded(command);
 
                 return command;
             }
@@ -328,7 +328,7 @@ public class CommandManagerImpl implements CommandManager {
             public CommandImpl apply(Void arg) throws FunctionException {
                 commands.put(updatedCommand.getName(), updatedCommand);
 
-                fireCommandUpdated(updatedCommand);
+                notifyCommandUpdated(updatedCommand);
 
                 return updatedCommand;
             }
@@ -349,7 +349,7 @@ public class CommandManagerImpl implements CommandManager {
         return updateProject(project, new ArrayList<>(commandsToUpdate.values())).then(new Operation<Void>() {
             @Override
             public void apply(Void arg) throws OperationException {
-                fireCommandRemoved(commands.remove(name));
+                notifyCommandRemoved(commands.remove(name));
             }
         });
     }
@@ -438,19 +438,19 @@ public class CommandManagerImpl implements CommandManager {
         commandChangedListeners.remove(listener);
     }
 
-    private void fireCommandAdded(CommandImpl command) {
+    private void notifyCommandAdded(CommandImpl command) {
         for (CommandChangedListener listener : commandChangedListeners) {
             listener.onCommandAdded(command);
         }
     }
 
-    private void fireCommandRemoved(CommandImpl command) {
+    private void notifyCommandRemoved(CommandImpl command) {
         for (CommandChangedListener listener : commandChangedListeners) {
             listener.onCommandRemoved(command);
         }
     }
 
-    private void fireCommandUpdated(CommandImpl command) {
+    private void notifyCommandUpdated(CommandImpl command) {
         for (CommandChangedListener listener : commandChangedListeners) {
             listener.onCommandUpdated(command);
         }

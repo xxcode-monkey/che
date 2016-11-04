@@ -28,7 +28,6 @@ import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.command.CommandType;
 import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.api.parts.base.BaseView;
-import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.ui.radiobuttongroup.RadioButtonGroup;
 import org.eclipse.che.ide.ui.smartTree.NodeLoader;
 import org.eclipse.che.ide.ui.smartTree.NodeStorage;
@@ -50,10 +49,7 @@ public class CommandsExplorerViewImpl extends BaseView<CommandsExplorerView.Acti
     private static final CommandsExplorerViewImplUiBinder UI_BINDER = GWT.create(CommandsExplorerViewImplUiBinder.class);
 
     @UiField(provided = true)
-    Tree workspaceCommandsTree;
-
-    @UiField(provided = true)
-    Tree projectCommandsTree;
+    Tree commandsTree;
 
     @UiField
     RadioButtonGroup pagesSwitcher;
@@ -78,27 +74,10 @@ public class CommandsExplorerViewImpl extends BaseView<CommandsExplorerView.Acti
 
         setTitle("Commands Explorer");
 
-        workspaceCommandsTree = new Tree(new NodeStorage(), new NodeLoader());
-        workspaceCommandsTree.getSelectionModel().setSelectionMode(SINGLE);
-        workspaceCommandsTree.setPresentationRenderer(new CommandsTreeRenderer(workspaceCommandsTree.getTreeStyles(),
-                                                                               resources,
-                                                                               delegate));
-        workspaceCommandsTree.getSelectionModel().addSelectionHandler(new SelectionHandler<Node>() {
-            @Override
-            public void onSelection(SelectionEvent<Node> event) {
-                Node selectedNode = event.getSelectedItem();
-                if (selectedNode instanceof CommandNode) {
-                    delegate.onCommandSelected(((CommandNode)selectedNode).getCommand());
-                }
-            }
-        });
-
-        projectCommandsTree = new Tree(new NodeStorage(), new NodeLoader());
-        projectCommandsTree.getSelectionModel().setSelectionMode(SINGLE);
-        projectCommandsTree.setPresentationRenderer(new CommandsTreeRenderer(projectCommandsTree.getTreeStyles(),
-                                                                             resources,
-                                                                             delegate));
-        projectCommandsTree.getSelectionModel().addSelectionHandler(new SelectionHandler<Node>() {
+        commandsTree = new Tree(new NodeStorage(), new NodeLoader());
+        commandsTree.getSelectionModel().setSelectionMode(SINGLE);
+        commandsTree.setPresentationRenderer(new CommandsTreeRenderer(commandsTree.getTreeStyles(), resources, delegate));
+        commandsTree.getSelectionModel().addSelectionHandler(new SelectionHandler<Node>() {
             @Override
             public void onSelection(SelectionEvent<Node> event) {
                 Node selectedNode = event.getSelectedItem();
@@ -142,10 +121,8 @@ public class CommandsExplorerViewImpl extends BaseView<CommandsExplorerView.Acti
     }
 
     @Override
-    public void setCommands(Map<CommandType, List<CommandImpl>> workspaceCommands,
-                            Map<Project, Map<CommandType, List<CommandImpl>>> projectsCommands) {
-        renderWorkspaceCommands(workspaceCommands);
-        renderProjectsCommands(projectsCommands);
+    public void setCommands(Map<CommandType, List<CommandImpl>> workspaceCommands) {
+        renderCommands(workspaceCommands);
     }
 
     @Override
@@ -159,8 +136,8 @@ public class CommandsExplorerViewImpl extends BaseView<CommandsExplorerView.Acti
         saveButton.setEnabled(enable);
     }
 
-    private void renderWorkspaceCommands(Map<CommandType, List<CommandImpl>> workspaceCommands) {
-        workspaceCommandsTree.getNodeStorage().clear();
+    private void renderCommands(Map<CommandType, List<CommandImpl>> workspaceCommands) {
+        commandsTree.getNodeStorage().clear();
 
         for (Map.Entry<CommandType, List<CommandImpl>> entry : workspaceCommands.entrySet()) {
             List<CommandNode> commandNodes = new ArrayList<>(entry.getValue().size());
@@ -169,35 +146,10 @@ public class CommandsExplorerViewImpl extends BaseView<CommandsExplorerView.Acti
             }
 
             CommandTypeNode commandTypeNode = new CommandTypeNode(entry.getKey(), commandNodes);
-            workspaceCommandsTree.getNodeStorage().add(commandTypeNode);
+            commandsTree.getNodeStorage().add(commandTypeNode);
         }
 
-        workspaceCommandsTree.expandAll();
-    }
-
-    private void renderProjectsCommands(Map<Project, Map<CommandType, List<CommandImpl>>> projectsCommands) {
-        projectCommandsTree.getNodeStorage().clear();
-
-        for (Map.Entry<Project, Map<CommandType, List<CommandImpl>>> entry1 : projectsCommands.entrySet()) {
-            final Project project = entry1.getKey();
-
-            List<CommandTypeNode> commandTypeNodes = new ArrayList<>();
-            for (Map.Entry<CommandType, List<CommandImpl>> entry2 : entry1.getValue().entrySet()) {
-
-                List<CommandNode> commandNodes = new ArrayList<>();
-                for (CommandImpl command : entry2.getValue()) {
-                    commandNodes.add(new CommandNode(command));
-                }
-
-                CommandType commandType = entry2.getKey();
-                commandTypeNodes.add(new CommandTypeNode(commandType, commandNodes));
-            }
-
-            ProjectNode projectNode = new ProjectNode(project.getName(), commandTypeNodes);
-            projectCommandsTree.getNodeStorage().add(projectNode);
-        }
-
-        projectCommandsTree.expandAll();
+        commandsTree.expandAll();
     }
 
     @UiHandler("cancelButton")

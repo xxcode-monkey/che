@@ -26,7 +26,6 @@ import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.parts.base.BasePresenter;
-import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.command.explorer.page.CommandsExplorerPage;
 import org.eclipse.che.ide.command.explorer.page.arguments.ArgumentsPage;
 import org.eclipse.che.ide.command.explorer.page.info.InfoPage;
@@ -178,7 +177,6 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
     }
 
     private void refreshView() {
-        // group of workspace commands in map
         Map<CommandType, List<CommandImpl>> workspaceCommands = new HashMap<>();
         for (CommandImpl command : commandManager.getWorkspaceCommands()) {
             final CommandType commandType = commandTypeRegistry.getCommandTypeById(command.getType());
@@ -192,29 +190,7 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
             commands.add(command);
         }
 
-        // group of project commands in map
-        Map<Project, Map<CommandType, List<CommandImpl>>> projectsCommands = new HashMap<>();
-        for (Project project : appContext.getProjects()) {
-            Map<CommandType, List<CommandImpl>> projectCommands = projectsCommands.get(project);
-            if (projectCommands == null) {
-                projectCommands = new HashMap<>();
-                projectsCommands.put(project, projectCommands);
-            }
-
-            for (CommandImpl command : commandManager.getProjectCommands(project)) {
-                final CommandType commandType = commandTypeRegistry.getCommandTypeById(command.getType());
-
-                List<CommandImpl> commands = projectCommands.get(commandType);
-                if (commands == null) {
-                    commands = new ArrayList<>();
-                    projectCommands.put(commandType, commands);
-                }
-
-                commands.add(command);
-            }
-        }
-
-        view.setCommands(workspaceCommands, projectsCommands);
+        view.setCommands(workspaceCommands);
     }
 
     @Override
