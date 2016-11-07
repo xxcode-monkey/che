@@ -26,6 +26,7 @@ import static org.testng.Assert.assertTrue;
 
 /**
  * @author Alexander Garagatyi
+ * @author Alexander Andrienko
  */
 public class DefaultServicesStartStrategyTest {
     DefaultServicesStartStrategy strategy = new DefaultServicesStartStrategy();
@@ -87,13 +88,44 @@ public class DefaultServicesStartStrategyTest {
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,
-          expectedExceptionsMessageRegExp = "Launch order of machines '.*, .*' can't be evaluated")
+          expectedExceptionsMessageRegExp = "Launch order of machines '.*, .*' can't be evaluated.")
     public void shouldFailIfCircularDependencyFound() throws Exception {
         // given
         CheServicesEnvironmentImpl composeEnvironment = new CheServicesEnvironmentImpl();
         composeEnvironment.getServices().put("second", new CheServiceImpl().withDependsOn(singletonList("third")));
         composeEnvironment.getServices().put("third", new CheServiceImpl().withDependsOn(singletonList("second")));
         composeEnvironment.getServices().put("first", new CheServiceImpl());
+
+        // when
+        strategy.order(composeEnvironment);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class, expectedExceptionsMessageRegExp = "A service can not link to itself: .*")
+    public void shouldOrderEvenMachineIsReferencedBySelf() {
+        // given
+        CheServicesEnvironmentImpl composeEnvironment = new CheServicesEnvironmentImpl();
+        composeEnvironment.getServices().put("first", new CheServiceImpl().withLinks(singletonList("first")));
+
+        // when
+        strategy.order(composeEnvironment);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class, expectedExceptionsMessageRegExp = "A service can not depend on itself: .*")
+    public void shouldOrderEvenMachineIsDependsOnBySelf() {
+        // given
+        CheServicesEnvironmentImpl composeEnvironment = new CheServicesEnvironmentImpl();
+        composeEnvironment.getServices().put("first", new CheServiceImpl().withDependsOn(singletonList("first")));
+
+        // when
+        strategy.order(composeEnvironment);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class,
+          expectedExceptionsMessageRegExp = "A service can not contains 'volumes_from' to itself:.*")
+    public void shouldOrderEvenMachineIsVolumesFromBySelf() {
+        // given
+        CheServicesEnvironmentImpl composeEnvironment = new CheServicesEnvironmentImpl();
+        composeEnvironment.getServices().put("first", new CheServiceImpl().withVolumesFrom(singletonList("first")));
 
         // when
         strategy.order(composeEnvironment);
