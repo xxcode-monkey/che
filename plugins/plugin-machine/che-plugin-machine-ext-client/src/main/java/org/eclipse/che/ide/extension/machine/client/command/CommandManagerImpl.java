@@ -244,7 +244,7 @@ public class CommandManagerImpl implements CommandManager {
 
     @Override
     public Promise<CommandImpl> createProjectCommand(Project project, String type) {
-        CommandType commandType = commandTypeRegistry.getCommandTypeById(type);
+        final CommandType commandType = commandTypeRegistry.getCommandTypeById(type);
 
         if (commandType == null) {
             return Promises.reject(JsPromiseError.create("Unknown command type: " + type));

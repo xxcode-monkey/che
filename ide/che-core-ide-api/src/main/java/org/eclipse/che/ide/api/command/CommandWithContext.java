@@ -16,7 +16,7 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * //
+ * Command that has {@link ApplicableContext}.
  *
  * @author Artem Zatsarynnyi
  */
@@ -39,10 +39,10 @@ public class CommandWithContext extends CommandImpl {
         applicableContext = new ApplicableContext();
     }
 
+    /** Returns command's applicable context. */
     public ApplicableContext getApplicableContext() {
         return applicableContext;
     }
-
 
     @Override
     public boolean equals(Object o) {

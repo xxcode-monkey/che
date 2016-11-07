@@ -75,8 +75,9 @@ public class CommandsExplorerViewImpl extends BaseView<CommandsExplorerView.Acti
         setTitle("Commands Explorer");
 
         commandsTree = new Tree(new NodeStorage(), new NodeLoader());
-        commandsTree.getSelectionModel().setSelectionMode(SINGLE);
         commandsTree.setPresentationRenderer(new CommandsTreeRenderer(commandsTree.getTreeStyles(), resources, delegate));
+        commandsTree.getSelectionModel().setSelectionMode(SINGLE);
+
         commandsTree.getSelectionModel().addSelectionHandler(new SelectionHandler<Node>() {
             @Override
             public void onSelection(SelectionEvent<Node> event) {
@@ -89,14 +90,14 @@ public class CommandsExplorerViewImpl extends BaseView<CommandsExplorerView.Acti
 
         setContentWidget(UI_BINDER.createAndBindUi(this));
 
-        setSaveEnabled(false);
-
         saveButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 delegate.onCommandSave(getSelectedCommand());
             }
         });
+
+        setSaveEnabled(false);
     }
 
     @Override
@@ -125,17 +126,6 @@ public class CommandsExplorerViewImpl extends BaseView<CommandsExplorerView.Acti
         renderCommands(workspaceCommands);
     }
 
-    @Override
-    public CommandImpl getSelectedCommand() {
-        return null;
-    }
-
-    @Override
-    public void setSaveEnabled(boolean enable) {
-        cancelButton.setEnabled(enable);
-        saveButton.setEnabled(enable);
-    }
-
     private void renderCommands(Map<CommandType, List<CommandImpl>> workspaceCommands) {
         commandsTree.getNodeStorage().clear();
 
@@ -150,6 +140,17 @@ public class CommandsExplorerViewImpl extends BaseView<CommandsExplorerView.Acti
         }
 
         commandsTree.expandAll();
+    }
+
+    @Override
+    public CommandImpl getSelectedCommand() {
+        return null;
+    }
+
+    @Override
+    public void setSaveEnabled(boolean enable) {
+        cancelButton.setEnabled(enable);
+        saveButton.setEnabled(enable);
     }
 
     @UiHandler("cancelButton")

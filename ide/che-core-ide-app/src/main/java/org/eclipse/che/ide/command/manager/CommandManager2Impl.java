@@ -10,12 +10,21 @@
  *******************************************************************************/
 package org.eclipse.che.ide.command.manager;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+
 import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.api.promises.client.PromiseError;
+import org.eclipse.che.api.promises.client.js.Executor;
+import org.eclipse.che.api.promises.client.js.Promises;
+import org.eclipse.che.api.promises.client.js.RejectFunction;
+import org.eclipse.che.api.promises.client.js.ResolveFunction;
+import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.command.ApplicableContext;
 import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.command.CommandManager2;
@@ -28,36 +37,43 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static java.util.Collections.unmodifiableList;
+
 /**
  * //
  *
  * @author Artem Zatsarynnyi
  */
+@Singleton
 public class CommandManager2Impl implements CommandManager2 {
 
-    private final CommandManagerDelegate workspaceManagerDelegate;
-    private final CommandManagerDelegate projectManagerDelegate;
+    private final WorkspaceCommandManagerDelegate workspaceManagerDelegate;
+    private final ProjectCommandManagerDelegate   projectManagerDelegate;
+    private final AppContext                      appContext;
 
-    public CommandManager2Impl(CommandManagerDelegate workspaceManagerDelegate,
-                               CommandManagerDelegate projectManagerDelegate) {
+    @Inject
+    public CommandManager2Impl(WorkspaceCommandManagerDelegate workspaceManagerDelegate,
+                               ProjectCommandManagerDelegate projectManagerDelegate,
+                               AppContext appContext) {
         this.workspaceManagerDelegate = workspaceManagerDelegate;
         this.projectManagerDelegate = projectManagerDelegate;
+        this.appContext = appContext;
     }
 
     @Override
-    public List<CommandImpl> getCommands() {
+    public List<CommandWithContext> getCommands() {
 
-        // workspace commands
+        // read workspace commands
         final List<CommandImpl> workspaceCommands = workspaceManagerDelegate.getCommands();
 
-        Map<CommandImpl, CommandWithContext> map = new HashMap<>();
+        Map<CommandImpl, CommandWithContext> commandsMap = new HashMap<>();
 
         for (CommandImpl command : workspaceCommands) {
-            CommandWithContext commandWithContext = map.get(command);
+            CommandWithContext commandWithContext = commandsMap.get(command);
 
             if (commandWithContext == null) {
                 commandWithContext = new CommandWithContext(command);
-                map.put(command, commandWithContext);
+                commandsMap.put(command, commandWithContext);
             }
 
             final ApplicableContext applicableContext = commandWithContext.getApplicableContext();
@@ -67,17 +83,16 @@ public class CommandManager2Impl implements CommandManager2 {
         }
 
 
-        // project commands
-        List<Project> allProjects = new ArrayList<>();
-        for (Project project : allProjects) {
+        // read project commands
+        for (Project project : appContext.getProjects()) {
             final List<CommandImpl> projectCommands = projectManagerDelegate.getCommands(project);
 
             for (CommandImpl command : projectCommands) {
-                CommandWithContext commandWithContext = map.get(command);
+                CommandWithContext commandWithContext = commandsMap.get(command);
 
                 if (commandWithContext == null) {
                     commandWithContext = new CommandWithContext(command);
-                    map.put(command, commandWithContext);
+                    commandsMap.put(command, commandWithContext);
                 }
 
                 final ApplicableContext applicableContext = commandWithContext.getApplicableContext();
@@ -87,33 +102,74 @@ public class CommandManager2Impl implements CommandManager2 {
             }
         }
 
-        return null;
+        return unmodifiableList(new ArrayList<>(commandsMap.values()));
     }
 
     @Override
-    public Promise<CommandImpl> createCommand(final String type, final ApplicableContext applicableContext) {
-        workspaceManagerDelegate.createCommand(type, applicableContext).then(new Operation<CommandImpl>() {
+    public Promise<CommandWithContext> createCommand(final String type, final ApplicableContext applicableContext) {
+        createWsCommand(type, applicableContext).then(new Operation<CommandWithContext>() {
+            @Override
+            public void apply(CommandWithContext commandWithContext) throws OperationException {
+
+            }
+        });
+
+        workspaceManagerDelegate.createCommand(type).then(new Operation<CommandImpl>() {
             @Override
             public void apply(CommandImpl arg) throws OperationException {
-
+                CommandWithContext commandWithContext = null;
+                if (arg != null) {
+                    commandWithContext = new CommandWithContext(arg);
+                }
             }
         }).thenPromise(new Function<CommandImpl, Promise<CommandImpl>>() {
             @Override
             public Promise<CommandImpl> apply(CommandImpl arg) throws FunctionException {
-                return projectManagerDelegate.createCommand(type, applicableContext);
+                return projectManagerDelegate.createCommand(type);
             }
         });
 
         return null;
     }
 
+    private Promise<CommandWithContext> createWsCommand(final String type, final ApplicableContext applicableContext) {
+        return Promises.create(new Executor.ExecutorBody<CommandWithContext>() {
+            @Override
+            public void apply(final ResolveFunction<CommandWithContext> resolve, final RejectFunction reject) {
+                if (applicableContext.isWorkspaceApplicable()) {
+                    workspaceManagerDelegate.createCommand(type).then(new Operation<CommandImpl>() {
+                        @Override
+                        public void apply(CommandImpl arg) throws OperationException {
+                            CommandWithContext commandWithContext = null;
+                            if (arg != null) {
+                                commandWithContext = new CommandWithContext(arg);
+                            }
+                            resolve.apply(commandWithContext);
+                        }
+                    }).catchError(new Operation<PromiseError>() {
+                        @Override
+                        public void apply(PromiseError arg) throws OperationException {
+                            reject.apply(arg);
+                        }
+                    });
+                } else {
+                    resolve.apply(null);
+                }
+            }
+        });
+    }
+
     @Override
-    public Promise<CommandImpl> createCommand(String desirableName, String commandLine, String type, Map<String, String> attributes) {
+    public Promise<CommandWithContext> createCommand(String desirableName,
+                                                     String commandLine,
+                                                     String type,
+                                                     Map<String, String> attributes,
+                                                     ApplicableContext applicableContext) {
         return null;
     }
 
     @Override
-    public Promise<CommandImpl> updateCommand(String name, CommandImpl command) {
+    public Promise<CommandWithContext> updateCommand(String name, CommandWithContext command) {
         return null;
     }
 
