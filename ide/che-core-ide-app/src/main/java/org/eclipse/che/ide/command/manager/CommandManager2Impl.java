@@ -110,7 +110,11 @@ public class CommandManager2Impl implements CommandManager2 {
         createWsCommand(type, applicableContext).then(new Operation<CommandWithContext>() {
             @Override
             public void apply(CommandWithContext commandWithContext) throws OperationException {
-
+                for (Project project : appContext.getProjects()) {
+                    if (applicableContext.getApplicableProjects().contains(project.getPath())) {
+                        projectManagerDelegate.createCommand(project, type);
+                    }
+                }
             }
         });
 
