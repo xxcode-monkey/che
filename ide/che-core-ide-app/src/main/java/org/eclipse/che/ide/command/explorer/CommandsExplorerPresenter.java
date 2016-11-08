@@ -30,7 +30,7 @@ import org.eclipse.che.ide.command.explorer.page.CommandsExplorerPage;
 import org.eclipse.che.ide.command.explorer.page.arguments.ArgumentsPage;
 import org.eclipse.che.ide.command.explorer.page.info.InfoPage;
 import org.eclipse.che.ide.command.explorer.page.previewurl.PreviewUrlPage;
-import org.eclipse.che.ide.command.manager.CommandManager2Impl;
+import org.eclipse.che.ide.command.manager.newmanager.CommandManagerImpl3;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 import java.util.ArrayList;
@@ -53,7 +53,7 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
 
     private final CommandsExplorerView view;
     private final WorkspaceAgent       workspaceAgent;
-    private final CommandManager2Impl  commandManager;
+    private final CommandManagerImpl3  commandManager;
     private final AppContext           appContext;
     private final CommandTypeRegistry  commandTypeRegistry;
 
@@ -63,7 +63,7 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
     public CommandsExplorerPresenter(CommandsExplorerView view,
                                      WorkspaceAgent workspaceAgent,
                                      EventBus eventBus,
-                                     CommandManager2Impl commandManager,
+                                     CommandManagerImpl3 commandManager,
                                      AppContext appContext,
                                      CommandTypeRegistry commandTypeRegistry,
                                      InfoPage infoPage,
@@ -180,7 +180,7 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
 
     private void refreshView() {
         Map<CommandType, List<CommandImpl>> workspaceCommands = new HashMap<>();
-        for (CommandImpl command : commandManager.getCommands()) {
+        for (CommandImpl command : commandManager.getWorkspaceCommands()) {
             final CommandType commandType = commandTypeRegistry.getCommandTypeById(command.getType());
 
             List<CommandImpl> commands = workspaceCommands.get(commandType);
