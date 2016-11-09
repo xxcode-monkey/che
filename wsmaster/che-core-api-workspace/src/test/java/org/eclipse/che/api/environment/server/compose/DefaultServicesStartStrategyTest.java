@@ -101,7 +101,7 @@ public class DefaultServicesStartStrategyTest {
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class, expectedExceptionsMessageRegExp = "A service can not link to itself: .*")
-    public void shouldOrderEvenMachineIsReferencedBySelf() {
+    public void shouldFailIfMachineLinksByItSelf() {
         // given
         CheServicesEnvironmentImpl composeEnvironment = new CheServicesEnvironmentImpl();
         composeEnvironment.getServices().put("first", new CheServiceImpl().withLinks(singletonList("first")));
@@ -111,7 +111,7 @@ public class DefaultServicesStartStrategyTest {
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class, expectedExceptionsMessageRegExp = "A service can not depend on itself: .*")
-    public void shouldOrderEvenMachineIsDependsOnBySelf() {
+    public void shouldOFailIfMachineDependsOnByItSelf() {
         // given
         CheServicesEnvironmentImpl composeEnvironment = new CheServicesEnvironmentImpl();
         composeEnvironment.getServices().put("first", new CheServiceImpl().withDependsOn(singletonList("first")));
@@ -122,7 +122,7 @@ public class DefaultServicesStartStrategyTest {
 
     @Test(expectedExceptions = IllegalArgumentException.class,
           expectedExceptionsMessageRegExp = "A service can not contains 'volumes_from' to itself:.*")
-    public void shouldOrderEvenMachineIsVolumesFromBySelf() {
+    public void shouldFailIfMachineContainsVolumesFromByItSelf() {
         // given
         CheServicesEnvironmentImpl composeEnvironment = new CheServicesEnvironmentImpl();
         composeEnvironment.getServices().put("first", new CheServiceImpl().withVolumesFrom(singletonList("first")));
