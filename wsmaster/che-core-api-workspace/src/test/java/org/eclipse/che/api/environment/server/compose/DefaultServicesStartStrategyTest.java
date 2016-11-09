@@ -111,7 +111,7 @@ public class DefaultServicesStartStrategyTest {
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class, expectedExceptionsMessageRegExp = "A service can not depend on itself: .*")
-    public void shouldOFailIfMachineDependsOnByItSelf() {
+    public void shouldFailIfMachineDependsOnByItSelf() {
         // given
         CheServicesEnvironmentImpl composeEnvironment = new CheServicesEnvironmentImpl();
         composeEnvironment.getServices().put("first", new CheServiceImpl().withDependsOn(singletonList("first")));
