@@ -102,7 +102,7 @@ public class CommandManagerImpl implements CommandManager {
         projectCommands = new HashMap<>();
 
         commandChangedListeners = new HashSet<>();
-        retrieveAllCommands();
+        retrieveWorkspaceCommands();
     }
 
     private void retrieveWorkspaceCommands() {
