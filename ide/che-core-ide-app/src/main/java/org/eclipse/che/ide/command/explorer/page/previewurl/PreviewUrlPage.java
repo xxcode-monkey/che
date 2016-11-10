@@ -15,6 +15,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.api.command.CommandImpl;
+import org.eclipse.che.ide.api.command.CommandWithContext;
 import org.eclipse.che.ide.command.explorer.page.AbstractCommandsExplorerPage;
 
 import static org.eclipse.che.api.workspace.shared.Constants.COMMAND_PREVIEW_URL_ATTRIBUTE_NAME;
@@ -47,7 +48,7 @@ public class PreviewUrlPage extends AbstractCommandsExplorerPage implements Prev
     }
 
     @Override
-    public void resetFrom(CommandImpl command) {
+    public void resetFrom(CommandWithContext command) {
         super.resetFrom(command);
 
         previewUrlInitial = getCommandPreviewUrl(command);
@@ -67,7 +68,7 @@ public class PreviewUrlPage extends AbstractCommandsExplorerPage implements Prev
         notifyDirtyStateChanged();
     }
 
-    private String getCommandPreviewUrl(CommandImpl command) {
+    private String getCommandPreviewUrl(CommandWithContext command) {
         final String previewUrl = editedCommand.getAttributes().get(COMMAND_PREVIEW_URL_ATTRIBUTE_NAME);
         return previewUrl != null ? previewUrl : "";
     }

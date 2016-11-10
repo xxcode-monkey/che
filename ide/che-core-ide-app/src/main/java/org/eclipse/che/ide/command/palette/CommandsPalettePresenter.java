@@ -13,7 +13,7 @@ package org.eclipse.che.ide.command.palette;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.ide.api.command.CommandManager;
+import org.eclipse.che.ide.api.command.CommandManager3;
 
 /**
  * Presenter for Commands Palette.
@@ -24,11 +24,11 @@ import org.eclipse.che.ide.api.command.CommandManager;
 public class CommandsPalettePresenter implements CommandsPaletteView.ActionDelegate {
 
     private final CommandsPaletteView view;
-    private final CommandManager      commandManager;
+    private final CommandManager3     commandManager;
 
     @Inject
     public CommandsPalettePresenter(CommandsPaletteView view,
-                                    CommandManager commandManager) {
+                                    CommandManager3 commandManager) {
         this.view = view;
         this.commandManager = commandManager;
 
@@ -39,7 +39,7 @@ public class CommandsPalettePresenter implements CommandsPaletteView.ActionDeleg
     public void open() {
         view.show();
 
-        view.setCommands(commandManager.getWorkspaceCommands());
+        view.setCommands(commandManager.getCommands());
     }
 
     @Override

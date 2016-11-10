@@ -28,6 +28,12 @@ public interface InfoPageView extends View<InfoPageView.ActionDelegate> {
     /** Sets the command's name value. */
     void setCommandName(String name);
 
+    void setWorkspace(boolean value);
+
+    void setPlay(boolean value);
+
+    void setSwift(boolean value);
+
     /** The action delegate for this view. */
     interface ActionDelegate {
 
@@ -38,5 +44,11 @@ public interface InfoPageView extends View<InfoPageView.ActionDelegate> {
          *         changed value of the command's name
          */
         void onNameChanged(String name);
+
+        void onWorkspaceChanged(boolean value);
+
+        void onPlayChanged(boolean value);
+
+        void onSwiftChanged(boolean value);
     }
 }

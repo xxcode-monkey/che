@@ -12,10 +12,12 @@ package org.eclipse.che.ide.command.explorer.page.info;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
@@ -35,6 +37,15 @@ public class InfoPageViewImpl extends Composite implements InfoPageView {
     @UiField
     TextBox commandName;
 
+    @UiField
+    CheckBox workspace;
+
+    @UiField
+    CheckBox play;
+
+    @UiField
+    CheckBox swift;
+
     private ActionDelegate delegate;
 
     @Inject
@@ -53,6 +64,21 @@ public class InfoPageViewImpl extends Composite implements InfoPageView {
     }
 
     @Override
+    public void setWorkspace(boolean value) {
+        workspace.setValue(value);
+    }
+
+    @Override
+    public void setPlay(boolean value) {
+        play.setValue(value);
+    }
+
+    @Override
+    public void setSwift(boolean value) {
+        swift.setValue(value);
+    }
+
+    @Override
     public void setDelegate(ActionDelegate delegate) {
         this.delegate = delegate;
     }
@@ -67,6 +93,21 @@ public class InfoPageViewImpl extends Composite implements InfoPageView {
                 delegate.onNameChanged(getCommandName());
             }
         }.schedule(0);
+    }
+
+    @UiHandler({"workspace"})
+    void onWorkspaceChanged(ValueChangeEvent<Boolean> event) {
+        delegate.onWorkspaceChanged(event.getValue());
+    }
+
+    @UiHandler({"play"})
+    void onPlayChanged(ValueChangeEvent<Boolean> event) {
+        delegate.onPlayChanged(event.getValue());
+    }
+
+    @UiHandler({"swift"})
+    void onSwiftChanged(ValueChangeEvent<Boolean> event) {
+        delegate.onSwiftChanged(event.getValue());
     }
 
     interface InfoPageViewImplUiBinder extends UiBinder<Widget, InfoPageViewImpl> {

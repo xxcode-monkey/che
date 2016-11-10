@@ -86,10 +86,6 @@ class WorkspaceCommandManagerDelegate {
         return workspaceServiceClient.addCommand(appContext.getWorkspaceId(), commandDto).then(new Function<WorkspaceDto, CommandImpl>() {
             @Override
             public CommandImpl apply(WorkspaceDto arg) throws FunctionException {
-//                workspaceCommands.put(command.getName(), command);
-
-//                notifyCommandAdded(command);
-
                 return command;
             }
         });
@@ -118,6 +114,11 @@ class WorkspaceCommandManagerDelegate {
 
     /** Removes the command with the specified {@code commandName}. */
     Promise<Void> removeCommand(String commandName) {
-        return null;
+        return workspaceServiceClient.deleteCommand(appContext.getWorkspaceId(), commandName).then(new Function<WorkspaceDto, Void>() {
+            @Override
+            public Void apply(WorkspaceDto arg) throws FunctionException {
+                return null;
+            }
+        });
     }
 }

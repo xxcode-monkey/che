@@ -117,6 +117,7 @@ import org.eclipse.che.ide.client.WorkspaceStateRestorer;
 import org.eclipse.che.ide.command.CommandProducerActionFactory;
 import org.eclipse.che.ide.command.CommandProducerActionManager;
 import org.eclipse.che.ide.command.CommandTypeRegistryImpl;
+import org.eclipse.che.ide.command.manager.newmanager.CommandManagerImpl3;
 import org.eclipse.che.ide.context.AppContextImpl;
 import org.eclipse.che.ide.editor.EditorAgentImpl;
 import org.eclipse.che.ide.editor.EditorRegistryImpl;
@@ -441,6 +442,7 @@ public class CoreGinModule extends AbstractGinModule {
         wsAgentComponentsBinder.addBinding("Project types").to(ProjectTypeComponent.class);
         wsAgentComponentsBinder.addBinding("Start-up actions processor").to(StartUpActionsProcessor.class);
         wsAgentComponentsBinder.addBinding("ZZ Restore Workspace State").to(WorkspaceStateRestorer.class);
+        wsAgentComponentsBinder.addBinding("Command Manager").to(CommandManagerImpl3.class);
     }
 
     private void configureProjectWizard() {

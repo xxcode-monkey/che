@@ -26,6 +26,7 @@ import com.google.inject.Inject;
 
 import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.command.CommandType;
+import org.eclipse.che.ide.api.command.CommandWithContext;
 import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.api.parts.base.BaseView;
 import org.eclipse.che.ide.ui.radiobuttongroup.RadioButtonGroup;
@@ -129,19 +130,19 @@ public class CommandsExplorerViewImpl extends BaseView<CommandsExplorerView.Acti
     }
 
     @Override
-    public void setCommands(Map<CommandType, List<CommandImpl>> workspaceCommands) {
+    public void setCommands(Map<CommandType, List<CommandWithContext>> workspaceCommands) {
         // TODO: rework this delegating
         treeRenderer.setDelegate(delegate);
 
         renderCommands(workspaceCommands);
     }
 
-    private void renderCommands(Map<CommandType, List<CommandImpl>> workspaceCommands) {
+    private void renderCommands(Map<CommandType, List<CommandWithContext>> workspaceCommands) {
         commandsTree.getNodeStorage().clear();
 
-        for (Map.Entry<CommandType, List<CommandImpl>> entry : workspaceCommands.entrySet()) {
+        for (Map.Entry<CommandType, List<CommandWithContext>> entry : workspaceCommands.entrySet()) {
             List<CommandNode> commandNodes = new ArrayList<>(entry.getValue().size());
-            for (CommandImpl command : entry.getValue()) {
+            for (CommandWithContext command : entry.getValue()) {
                 commandNodes.add(new CommandNode(command));
             }
 
@@ -153,7 +154,7 @@ public class CommandsExplorerViewImpl extends BaseView<CommandsExplorerView.Acti
     }
 
     @Override
-    public CommandImpl getSelectedCommand() {
+    public CommandWithContext getSelectedCommand() {
         return null;
     }
 

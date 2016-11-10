@@ -16,10 +16,15 @@
              xmlns:g='urn:import:com.google.gwt.user.client.ui'>
 
     <g:DockLayoutPanel unit="PX">
-        <g:north size="50">
+        <g:north size="60">
             <g:FlowPanel>
                 <g:Label text="Name"/>
                 <g:TextBox ui:field="commandName" width="400px"/>
+                <g:FlowPanel>
+                    <g:CheckBox ui:field="workspace" text="Workspace"/>
+                    <g:CheckBox ui:field="play" text="play"/>
+                    <g:CheckBox ui:field="swift" text="swift"/>
+                </g:FlowPanel>
             </g:FlowPanel>
         </g:north>
     </g:DockLayoutPanel>

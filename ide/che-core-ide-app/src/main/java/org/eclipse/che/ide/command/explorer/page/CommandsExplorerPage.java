@@ -12,7 +12,7 @@ package org.eclipse.che.ide.command.explorer.page;
 
 import com.google.gwt.user.client.ui.IsWidget;
 
-import org.eclipse.che.ide.api.command.CommandImpl;
+import org.eclipse.che.ide.api.command.CommandWithContext;
 
 /**
  * Page for editing command.
@@ -37,7 +37,7 @@ public interface CommandsExplorerPage {
      * instance for subsequent modifying it directly and show the page's view.
      * <p>This method is called every time when page should be initialized by an edited command.
      */
-    void resetFrom(CommandImpl command);
+    void resetFrom(CommandWithContext command);
 
     /**
      * Whether the page has been modified or not?

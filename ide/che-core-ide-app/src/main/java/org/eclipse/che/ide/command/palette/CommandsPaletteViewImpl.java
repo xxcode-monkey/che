@@ -23,6 +23,7 @@ import com.google.inject.Singleton;
 import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.command.CommandType;
 import org.eclipse.che.ide.api.command.CommandTypeRegistry;
+import org.eclipse.che.ide.api.command.CommandWithContext;
 import org.eclipse.che.ide.command.explorer.CommandNode;
 import org.eclipse.che.ide.command.explorer.CommandTypeNode;
 import org.eclipse.che.ide.ui.smartTree.NodeLoader;
@@ -73,13 +74,13 @@ public class CommandsPaletteViewImpl extends Window implements CommandsPaletteVi
     }
 
     @Override
-    public void setCommands(List<CommandImpl> workspaceCommands) {
+    public void setCommands(List<CommandWithContext> workspaceCommands) {
         // group of workspace commands in map
-        Map<CommandType, List<CommandImpl>> workspaceCommandsByType = new HashMap<>();
-        for (CommandImpl command : workspaceCommands) {
+        Map<CommandType, List<CommandWithContext>> workspaceCommandsByType = new HashMap<>();
+        for (CommandWithContext command : workspaceCommands) {
             final CommandType commandType = commandTypeRegistry.getCommandTypeById(command.getType());
 
-            List<CommandImpl> commands = workspaceCommandsByType.get(commandType);
+            List<CommandWithContext> commands = workspaceCommandsByType.get(commandType);
             if (commands == null) {
                 commands = new ArrayList<>();
                 workspaceCommandsByType.put(commandType, commands);
@@ -96,12 +97,12 @@ public class CommandsPaletteViewImpl extends Window implements CommandsPaletteVi
         return filterField.getValue();
     }
 
-    private void renderWorkspaceCommands(Map<CommandType, List<CommandImpl>> workspaceCommands) {
+    private void renderWorkspaceCommands(Map<CommandType, List<CommandWithContext>> workspaceCommands) {
         workspaceCommandsTree.getNodeStorage().clear();
 
-        for (Map.Entry<CommandType, List<CommandImpl>> entry : workspaceCommands.entrySet()) {
+        for (Map.Entry<CommandType, List<CommandWithContext>> entry : workspaceCommands.entrySet()) {
             List<CommandNode> commandNodes = new ArrayList<>(entry.getValue().size());
-            for (CommandImpl command : entry.getValue()) {
+            for (CommandWithContext command : entry.getValue()) {
                 commandNodes.add(new CommandNode(command));
             }
 

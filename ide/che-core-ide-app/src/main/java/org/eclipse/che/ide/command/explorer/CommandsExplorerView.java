@@ -15,6 +15,7 @@ import com.google.inject.ImplementedBy;
 
 import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.command.CommandType;
+import org.eclipse.che.ide.api.command.CommandWithContext;
 import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.api.parts.base.BaseActionDelegate;
 
@@ -47,10 +48,10 @@ public interface CommandsExplorerView extends View<CommandsExplorerView.ActionDe
      * @param workspaceCommands
      *         workspace commands grouped by type
      */
-    void setCommands(Map<CommandType, List<CommandImpl>> workspaceCommands);
+    void setCommands(Map<CommandType, List<CommandWithContext>> workspaceCommands);
 
     /** Returns the currently selected command. */
-    CommandImpl getSelectedCommand();
+    CommandWithContext getSelectedCommand();
 
     /**
      * Set whether saving command is enabled or not.
@@ -69,7 +70,7 @@ public interface CommandsExplorerView extends View<CommandsExplorerView.ActionDe
          * @param command
          *         selected command
          */
-        void onCommandSelected(CommandImpl command);
+        void onCommandSelected(CommandWithContext command);
 
         /**
          * Called when reverting command is requested.
@@ -77,7 +78,7 @@ public interface CommandsExplorerView extends View<CommandsExplorerView.ActionDe
          * @param command
          *         command reverting of which is requested
          */
-        void onCommandRevert(CommandImpl command);
+        void onCommandRevert(CommandWithContext command);
 
         /**
          * Called when saving command is requested.
@@ -85,7 +86,7 @@ public interface CommandsExplorerView extends View<CommandsExplorerView.ActionDe
          * @param command
          *         command saving of which is requested
          */
-        void onCommandSave(CommandImpl command);
+        void onCommandSave(CommandWithContext command);
 
         /** Called when adding new command is requested. */
         void onCommandAdd();
@@ -96,6 +97,6 @@ public interface CommandsExplorerView extends View<CommandsExplorerView.ActionDe
          * @param command
          *         command removing of which is requested
          */
-        void onCommandRemove(CommandImpl command);
+        void onCommandRemove(CommandWithContext command);
     }
 }

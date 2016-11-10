@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.command.explorer.page;
 
-import org.eclipse.che.ide.api.command.CommandImpl;
+import org.eclipse.che.ide.api.command.CommandWithContext;
 
 /**
  * Abstract {@link CommandsExplorerPage} that provides basic functionality.
@@ -22,7 +22,7 @@ public abstract class AbstractCommandsExplorerPage implements CommandsExplorerPa
     private final String title;
     private final String tooltip;
 
-    protected CommandImpl editedCommand;
+    protected CommandWithContext editedCommand;
 
     private DirtyStateListener listener;
 
@@ -42,7 +42,7 @@ public abstract class AbstractCommandsExplorerPage implements CommandsExplorerPa
     }
 
     @Override
-    public void resetFrom(CommandImpl command) {
+    public void resetFrom(CommandWithContext command) {
         editedCommand = command;
     }
 

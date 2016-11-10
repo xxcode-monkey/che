@@ -10,8 +10,10 @@
  *******************************************************************************/
 package org.eclipse.che.ide.command.manager.newmanager;
 
+import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.JsArrayMixed;
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 import org.eclipse.che.api.core.model.machine.Command;
 import org.eclipse.che.api.machine.shared.dto.CommandDto;
@@ -32,6 +34,7 @@ import org.eclipse.che.ide.api.command.CommandPage;
 import org.eclipse.che.ide.api.command.CommandType;
 import org.eclipse.che.ide.api.command.CommandTypeRegistry;
 import org.eclipse.che.ide.api.command.CommandWithContext;
+import org.eclipse.che.ide.api.component.WsAgentComponent;
 import org.eclipse.che.ide.api.project.MutableProjectConfig;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
@@ -55,7 +58,8 @@ import static org.eclipse.che.api.workspace.shared.Constants.COMMAND_PREVIEW_URL
  *
  * @author Artem Zatsarynnyi
  */
-public class CommandManagerImpl3 implements CommandManager3 {
+@Singleton
+public class CommandManagerImpl3 implements CommandManager3, WsAgentComponent {
 
     private final CommandTypeRegistry             commandTypeRegistry;
     private final AppContext                      appContext;
@@ -64,7 +68,7 @@ public class CommandManagerImpl3 implements CommandManager3 {
     private final DtoFactory                      dtoFactory;
     private final ProjectCommandManagerDelegate   projectCommandManagerDelegate;
     private final WorkspaceCommandManagerDelegate workspaceCommandManagerDelegate;
-    private final PromiseProvider promiseProvider;
+    private final PromiseProvider                 promiseProvider;
 //    private final MacroProcessor          macroProcessor;
 //    private final CommandConsoleFactory   commandConsoleFactory;
 //    private final ProcessesPanelPresenter processesPanelPresenter;
@@ -105,8 +109,6 @@ public class CommandManagerImpl3 implements CommandManager3 {
         commands = new HashMap<>();
 
         commandChangedListeners = new HashSet<>();
-
-        fetchCommands();
     }
 
     private void fetchCommands() {
@@ -120,10 +122,21 @@ public class CommandManagerImpl3 implements CommandManager3 {
 
                     commands.put(command.getName(), commandWithContext);
                 }
+
+                for (Project project : appContext.getProjects()) {
+                    for (CommandImpl projectCommand : projectCommandManagerDelegate.getCommands(project)) {
+                        CommandWithContext commandWithContext = commands.get(projectCommand.getName());
+                        if (commandWithContext == null) {
+                            commandWithContext = new CommandWithContext(projectCommand);
+
+                            commands.put(commandWithContext.getName(), commandWithContext);
+                        }
+
+                        commandWithContext.getApplicableContext().addApplicableProject(project.getPath());
+                    }
+                }
             }
         });
-
-        // TODO: fetch projects's commands
     }
 
     @Override
@@ -157,12 +170,16 @@ public class CommandManagerImpl3 implements CommandManager3 {
 
         if (!applicableContext.getApplicableProjects().isEmpty()) {
             for (final String projectPath : applicableContext.getApplicableProjects()) {
-                Promise<CommandImpl> p = projectCommandManagerDelegate.createCommand(null, type).then(new Operation<CommandImpl>() {
-                    @Override
-                    public void apply(CommandImpl arg) throws OperationException {
-                        cmdWithCntx.getApplicableContext().addApplicableProject(projectPath);
-                    }
-                });
+
+                final Project project = getProjectByPath(projectPath);
+
+                Promise<CommandImpl> p =
+                        projectCommandManagerDelegate.createCommand(project, cmdWithCntx).then(new Operation<CommandImpl>() {
+                            @Override
+                            public void apply(CommandImpl arg) throws OperationException {
+                                cmdWithCntx.getApplicableContext().addApplicableProject(projectPath);
+                            }
+                        });
 
                 commandPromises.add(p);
             }
@@ -176,11 +193,23 @@ public class CommandManagerImpl3 implements CommandManager3 {
         return promiseProvider.all(projectPromisesArray).then(new Function<JsArrayMixed, CommandWithContext>() {
             @Override
             public CommandWithContext apply(JsArrayMixed ignore) throws FunctionException {
+                commands.put(cmdWithCntx.getName(), cmdWithCntx);
+
                 notifyCommandAdded(cmdWithCntx);
 
                 return cmdWithCntx;
             }
         });
+    }
+
+    private Project getProjectByPath(String path) {
+        for (Project project : appContext.getProjects()) {
+            if (path.equals(project.getPath())) {
+                return project;
+            }
+        }
+
+        return null;
     }
 
     @Override
@@ -261,11 +290,51 @@ public class CommandManagerImpl3 implements CommandManager3 {
     }
 
     @Override
-    public Promise<Void> removeWorkspaceCommand(final String commandName) {
-        return workspaceServiceClient.deleteCommand(appContext.getWorkspaceId(), commandName).then(new Function<WorkspaceDto, Void>() {
+    public Promise<Void> removeCommand(final String commandName) {
+
+        final CommandWithContext cmdWithCntx = commands.get(commandName);
+        final ApplicableContext applicableContext = cmdWithCntx.getApplicableContext();
+
+        List<Promise<Void>> commandPromises = new ArrayList<>();
+
+        if (applicableContext.isWorkspaceApplicable()) {
+            Promise<Void> p = workspaceCommandManagerDelegate.removeCommand(commandName).then(new Operation<Void>() {
+                @Override
+                public void apply(Void arg) throws OperationException {
+//                    cmdWithCntx.getApplicableContext().setWorkspaceApplicable(true);
+                }
+            });
+
+            commandPromises.add(p);
+        }
+
+        if (!applicableContext.getApplicableProjects().isEmpty()) {
+            for (final String projectPath : applicableContext.getApplicableProjects()) {
+
+                final Project project = getProjectByPath(projectPath);
+
+                Promise<Void> p = projectCommandManagerDelegate.removeCommand(project, commandName).then(new Operation<Void>() {
+                    @Override
+                    public void apply(Void arg) throws OperationException {
+//                                cmdWithCntx.getApplicableContext().addApplicableProject(projectPath);
+                    }
+                });
+
+                commandPromises.add(p);
+            }
+        }
+
+        Promise[] projectPromisesArray = new Promise[commandPromises.size()];
+        for (Promise<Void> commandPromise : commandPromises) {
+            projectPromisesArray[commandPromises.indexOf(commandPromise)] = commandPromise;
+        }
+
+        return promiseProvider.all(projectPromisesArray).then(new Function<JsArrayMixed, Void>() {
             @Override
-            public Void apply(WorkspaceDto arg) throws FunctionException {
-                notifyCommandRemoved(workspaceCommands.remove(commandName));
+            public Void apply(JsArrayMixed ignore) throws FunctionException {
+                commands.remove(cmdWithCntx.getName());
+
+                notifyCommandRemoved(cmdWithCntx);
 
                 return null;
             }
@@ -540,5 +609,10 @@ public class CommandManagerImpl3 implements CommandManager3 {
         }
 
         return newCommandName;
+    }
+
+    @Override
+    public void start(Callback<WsAgentComponent, Exception> callback) {
+        fetchCommands();
     }
 }

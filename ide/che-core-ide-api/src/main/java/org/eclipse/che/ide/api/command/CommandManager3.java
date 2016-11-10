@@ -51,7 +51,7 @@ public interface CommandManager3 {
     Promise<CommandImpl> updateWorkspaceCommand(String name, CommandImpl command);
 
     /** Removes the workspace command with the specified {@code commandName}. */
-    Promise<Void> removeWorkspaceCommand(String commandName);
+    Promise<Void> removeCommand(String commandName);
 
     /** Returns project commands. */
     List<CommandImpl> getProjectCommands(Project project);

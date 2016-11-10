@@ -14,7 +14,8 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.ide.api.command.CommandImpl;
+import org.eclipse.che.ide.api.command.ApplicableContext;
+import org.eclipse.che.ide.api.command.CommandWithContext;
 import org.eclipse.che.ide.command.explorer.page.AbstractCommandsExplorerPage;
 
 /**
@@ -29,6 +30,8 @@ public class InfoPage extends AbstractCommandsExplorerPage implements InfoPageVi
 
     // initial value of the command's name
     private String commandNameInitial;
+
+    private boolean workspaceInitial;
 
     @Inject
     public InfoPage(InfoPageView view) {
@@ -45,12 +48,27 @@ public class InfoPage extends AbstractCommandsExplorerPage implements InfoPageVi
     }
 
     @Override
-    public void resetFrom(CommandImpl command) {
+    public void resetFrom(CommandWithContext command) {
         super.resetFrom(command);
+
+        final ApplicableContext applicableContext = command.getApplicableContext();
 
         commandNameInitial = command.getName();
 
         view.setCommandName(command.getName());
+        view.setWorkspace(command.getApplicableContext().isWorkspaceApplicable());
+
+        view.setPlay(false);
+        view.setSwift(false);
+
+        // TODO: demo data
+        for (String projectPath : applicableContext.getApplicableProjects()) {
+            if (projectPath.equals("/play")) {
+                view.setPlay(true);
+            } else if (projectPath.equals("/swift")) {
+                view.setSwift(true);
+            }
+        }
     }
 
     @Override
@@ -61,6 +79,29 @@ public class InfoPage extends AbstractCommandsExplorerPage implements InfoPageVi
     @Override
     public void onNameChanged(String name) {
         editedCommand.setName(name);
+
+        notifyDirtyStateChanged();
+    }
+
+    @Override
+    public void onWorkspaceChanged(boolean value) {
+        editedCommand.getApplicableContext().setWorkspaceApplicable(value);
+
+        notifyDirtyStateChanged();
+    }
+
+    @Override
+    public void onPlayChanged(boolean value) {
+        final ApplicableContext applicableContext = editedCommand.getApplicableContext();
+        applicableContext.addApplicableProject("/play");
+
+        notifyDirtyStateChanged();
+    }
+
+    @Override
+    public void onSwiftChanged(boolean value) {
+        final ApplicableContext applicableContext = editedCommand.getApplicableContext();
+        applicableContext.addApplicableProject("/swift");
 
         notifyDirtyStateChanged();
     }

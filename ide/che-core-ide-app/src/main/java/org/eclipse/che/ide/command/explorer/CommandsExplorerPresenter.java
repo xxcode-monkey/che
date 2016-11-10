@@ -23,6 +23,7 @@ import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.command.CommandManager3;
 import org.eclipse.che.ide.api.command.CommandType;
 import org.eclipse.che.ide.api.command.CommandTypeRegistry;
+import org.eclipse.che.ide.api.command.CommandWithContext;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
@@ -31,7 +32,6 @@ import org.eclipse.che.ide.command.explorer.page.CommandsExplorerPage;
 import org.eclipse.che.ide.command.explorer.page.arguments.ArgumentsPage;
 import org.eclipse.che.ide.command.explorer.page.info.InfoPage;
 import org.eclipse.che.ide.command.explorer.page.previewurl.PreviewUrlPage;
-import org.eclipse.che.ide.command.manager.newmanager.CommandManagerImpl3;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 import java.util.ArrayList;
@@ -54,7 +54,7 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
 
     private final CommandsExplorerView view;
     private final WorkspaceAgent       workspaceAgent;
-    private final CommandManagerImpl3  commandManager;
+    private final CommandManager3  commandManager;
     private final AppContext           appContext;
     private final CommandTypeRegistry  commandTypeRegistry;
 
@@ -64,7 +64,7 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
     public CommandsExplorerPresenter(CommandsExplorerView view,
                                      WorkspaceAgent workspaceAgent,
                                      EventBus eventBus,
-                                     CommandManagerImpl3 commandManager,
+                                     CommandManager3 commandManager,
                                      AppContext appContext,
                                      CommandTypeRegistry commandTypeRegistry,
                                      InfoPage infoPage,
@@ -86,6 +86,13 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
         pages.add(infoPage);
         pages.add(argumentsPage);
         pages.add(previewUrlPage);
+    }
+
+    @Override
+    public void onOpen() {
+        super.onOpen();
+
+        refreshView();
     }
 
     @Override
@@ -129,7 +136,7 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
     }
 
     @Override
-    public void onCommandSelected(CommandImpl command) {
+    public void onCommandSelected(CommandWithContext command) {
         for (CommandsExplorerPage page : pages) {
             page.resetFrom(command);
             page.setDirtyStateListener(this);
@@ -137,31 +144,33 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
     }
 
     @Override
-    public void onCommandRevert(CommandImpl command) {
+    public void onCommandRevert(CommandWithContext command) {
     }
 
     @Override
-    public void onCommandSave(CommandImpl command) {
+    public void onCommandSave(CommandWithContext command) {
     }
 
     @Override
     public void onCommandAdd() {
         final ApplicableContext applicableContext = new ApplicableContext();
         applicableContext.setWorkspaceApplicable(true);
+        applicableContext.addApplicableProject("/play");
 
+        // TODO: view.getSelectedType()
         commandManager.createCommand("custom", applicableContext);
     }
 
     @Override
-    public void onCommandRemove(CommandImpl command) {
-        commandManager.removeWorkspaceCommand(command.getName());
+    public void onCommandRemove(CommandWithContext command) {
+        commandManager.removeCommand(command.getName());
     }
 
     @Override
     public void onWsAgentStarted(WsAgentStateEvent event) {
         workspaceAgent.openPart(this, NAVIGATION);
 
-        refreshView();
+//        refreshView();
     }
 
     @Override
@@ -184,20 +193,20 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
     }
 
     private void refreshView() {
-        Map<CommandType, List<CommandImpl>> workspaceCommands = new HashMap<>();
-        for (CommandImpl command : commandManager.getCommands()) {
+        Map<CommandType, List<CommandWithContext>> commands = new HashMap<>();
+        for (CommandWithContext command : commandManager.getCommands()) {
             final CommandType commandType = commandTypeRegistry.getCommandTypeById(command.getType());
 
-            List<CommandImpl> commands = workspaceCommands.get(commandType);
-            if (commands == null) {
-                commands = new ArrayList<>();
-                workspaceCommands.put(commandType, commands);
+            List<CommandWithContext> commandsByType = commands.get(commandType);
+            if (commandsByType == null) {
+                commandsByType = new ArrayList<>();
+                commands.put(commandType, commandsByType);
             }
 
-            commands.add(command);
+            commandsByType.add(command);
         }
 
-        view.setCommands(workspaceCommands);
+        view.setCommands(commands);
     }
 
     @Override

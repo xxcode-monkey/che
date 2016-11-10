@@ -12,7 +12,7 @@ package org.eclipse.che.ide.command.palette;
 
 import com.google.inject.ImplementedBy;
 
-import org.eclipse.che.ide.api.command.CommandImpl;
+import org.eclipse.che.ide.api.command.CommandWithContext;
 import org.eclipse.che.ide.api.mvp.View;
 
 import java.util.List;
@@ -29,7 +29,7 @@ public interface CommandsPaletteView extends View<CommandsPaletteView.ActionDele
     void show();
 
     /** Sets the commands to display in the view. */
-    void setCommands(List<CommandImpl> commands);
+    void setCommands(List<CommandWithContext> commands);
 
     /** Returns value of the command name filter. */
     String getFilterValue();
