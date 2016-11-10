@@ -172,8 +172,8 @@ public interface Resources extends Tree.Resources,
     @Source("hotkeys/print_template.html")
     TextResource printTemplate();
 
-    @Source("actions/execute.svg")
-    SVGResource execute();
+    @Source("actions/evaluate.svg")
+    SVGResource compile();
 
     @Source("command/explorer/remove-command-button.svg")
     SVGResource removeCommandButton();

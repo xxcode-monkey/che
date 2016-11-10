@@ -64,6 +64,8 @@ import static org.eclipse.che.api.workspace.shared.Constants.COMMAND_PREVIEW_URL
  */
 public class CommandManagerImpl implements CommandManager {
 
+    public static final String PREVIEW_URL_ATTR = "previewUrl";
+
     private final CommandTypeRegistry     commandTypeRegistry;
     private final AppContext              appContext;
     private final WorkspaceServiceClient  workspaceServiceClient;
@@ -84,7 +86,6 @@ public class CommandManagerImpl implements CommandManager {
                               WorkspaceServiceClient workspaceServiceClient,
                               MachineServiceClient machineServiceClient,
                               DtoFactory dtoFactory,
-                              EventBus eventBus,
                               MacroProcessor macroProcessor,
                               CommandConsoleFactory commandConsoleFactory,
                               ProcessesPanelPresenter processesPanelPresenter) {
@@ -101,13 +102,7 @@ public class CommandManagerImpl implements CommandManager {
         projectCommands = new HashMap<>();
 
         commandChangedListeners = new HashSet<>();
-
-        eventBus.addHandler(WorkspaceReadyEvent.getType(), new WorkspaceReadyEvent.WorkspaceReadyHandler() {
-            @Override
-            public void onWorkspaceReady(WorkspaceReadyEvent event) {
-                retrieveWorkspaceCommands();
-            }
-        });
+        retrieveAllCommands();
     }
 
     private void retrieveWorkspaceCommands() {
