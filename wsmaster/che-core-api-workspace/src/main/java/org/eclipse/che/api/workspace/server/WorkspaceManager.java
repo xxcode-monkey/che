@@ -22,18 +22,20 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.machine.MachineConfig;
+import org.eclipse.che.api.core.model.workspace.Environment;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.environment.server.CheEnvironmentValidator;
 import org.eclipse.che.api.machine.server.exception.SnapshotException;
 import org.eclipse.che.api.machine.server.spi.SnapshotDao;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
 import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
 import org.eclipse.che.api.machine.server.spi.Instance;
-import org.eclipse.che.api.machine.server.spi.SnapshotDao;
 import org.eclipse.che.api.workspace.server.WorkspaceRuntimes.RuntimeDescriptor;
 import org.eclipse.che.api.workspace.server.event.WorkspaceCreatedEvent;
+import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceRuntimeImpl;
@@ -64,7 +66,6 @@ import static com.google.common.base.MoreObjects.firstNonNull;
 import static java.lang.Boolean.parseBoolean;
 import static java.lang.String.format;
 import static java.lang.System.currentTimeMillis;
-import static java.util.Arrays.asList;
 import static java.util.Collections.emptyMap;
 import static java.util.Comparator.comparing;
 import static java.util.Objects.requireNonNull;
@@ -103,6 +104,7 @@ public class WorkspaceManager {
     private final boolean           defaultAutoSnapshot;
     private final boolean           defaultAutoRestore;
     private final SnapshotDao       snapshotDao;
+    private final CheEnvironmentValidator environmentValidator;
 
     @Inject
     public WorkspaceManager(WorkspaceDao workspaceDao,
@@ -111,7 +113,8 @@ public class WorkspaceManager {
                             AccountManager accountManager,
                             @Named("che.workspace.auto_snapshot") boolean defaultAutoSnapshot,
                             @Named("che.workspace.auto_restore") boolean defaultAutoRestore,
-                            SnapshotDao snapshotDao) {
+                            SnapshotDao snapshotDao,
+                            CheEnvironmentValidator cheEnvironmentValidator) {
         this.workspaceDao = workspaceDao;
         this.runtimes = workspaceRegistry;
         this.accountManager = accountManager;
@@ -119,6 +122,7 @@ public class WorkspaceManager {
         this.defaultAutoSnapshot = defaultAutoSnapshot;
         this.defaultAutoRestore = defaultAutoRestore;
         this.snapshotDao = snapshotDao;
+        this.environmentValidator = cheEnvironmentValidator;
 
         executor = Executors.newCachedThreadPool(new ThreadFactoryBuilder().setNameFormat("WorkspaceManager-%d")
                                                                            .setDaemon(true)
@@ -306,8 +310,7 @@ public class WorkspaceManager {
         requireNonNull(id, "Required non-null workspace id");
         requireNonNull(update, "Required non-null workspace update");
         final WorkspaceImpl workspace = workspaceDao.get(id);
-        ensureRuntimeInfoNotChangedIfWorkspaceRunning(id, workspace, update);
-        updateWorkspaceSnapshots(id, workspace, update);
+        ensureRuntimeInfoNotChangedIfWorkspaceRunning(id, workspace, update); // TODO handle envs one by one. use add/remove/update
         workspace.setConfig(new WorkspaceConfigImpl(update.getConfig()));
         update.getAttributes().put(UPDATED_ATTRIBUTE_NAME, Long.toString(currentTimeMillis()));
         workspace.setAttributes(update.getAttributes());
@@ -488,6 +491,134 @@ public class WorkspaceManager {
     }
 
     /**
+     * Adds new environment into workspace.
+     *
+     * @param workspaceId
+     *         workspace in which new environment will be added
+     * @param newEnvName
+     *         name of new environment
+     * @param newEnvironment
+     *         environment to add
+     * @throws IllegalArgumentException
+     *         when environment configuration is not valid
+     * @throws NotFoundException
+     *         when workspace with specified ID doesn't exist
+     * @throws ConflictException
+     *         when environment with given name already exists
+     * @throws ServerException
+     *         when other error occurs
+     */
+    public void addEnvironment(String workspaceId, String newEnvName, Environment newEnvironment) throws NotFoundException,
+                                                                                                         ServerException,
+                                                                                                         ConflictException {
+        environmentValidator.validate(newEnvName, newEnvironment);
+        final WorkspaceImpl workspace = workspaceDao.get(workspaceId);
+        if (workspace.getConfig().getEnvironments().get(newEnvName) != null) {
+            throw new ConflictException(format("Environment with '%s' name already exists", newEnvName));
+        }
+
+        workspace.getConfig().getEnvironments().put(newEnvName, new EnvironmentImpl(newEnvironment));
+    }
+
+    /**
+     * Updates specified environments.<br/>
+     * To rename environment use {@link #renameEnvironment(String, String, String)}<br/>
+     *
+     * @param workspaceId
+     *         workspace in which specified environment will be updated
+     * @param envName
+     *         name of new environment to update
+     * @param update
+     *         new environment configuration
+     * @return previous environment configuration
+     * @throws NotFoundException
+     *         when workspace with specified ID doesn't exist
+     *         when environment with specified name doesn't exist
+     * @throws ConflictException
+     *         when try to delete active environment of workspace
+     * @throws ServerException
+     *         when other error occurs
+     */
+    public Environment updateEnvironment(String workspaceId, String envName, Environment update) throws ServerException,
+                                                                                                        NotFoundException,
+                                                                                                        ConflictException {
+        environmentValidator.validate(envName, update);
+        final WorkspaceImpl workspace = workspaceDao.get(workspaceId);
+        if (!workspace.getConfig().getEnvironments().containsKey(envName)) {
+            throw new NotFoundException(format("Workspace '%s' doesn't contain environment '%s'", workspaceId, envName));
+        }
+        if (workspace.getRuntime() != null && workspace.getRuntime().getActiveEnv().equals(envName)) {
+            throw new ConflictException(format("Cannot update active environment: '%s'", envName));
+        }
+
+        // TODO try to save snapshots if it possible
+        removeEnvironmentSnapshots(workspaceId, envName);
+
+        return workspace.getConfig().getEnvironments().put(envName, new EnvironmentImpl(update));
+
+    }
+
+    /**
+     * Deletes environment from workspace.
+     *
+     * @param workspaceId
+     *         workspace from which specified environment will be added
+     * @param envName
+     *         name of environment to delete
+     * @return deleted environment
+     * @throws ConflictException
+     *         when try to delete default environment of workspace
+     *         when try to delete active environment of workspace
+     * @throws NotFoundException
+     *         when workspace with specified ID doesn't exist
+     *         when environment with specified name doesn't exist
+     * @throws ServerException
+     *         when other error occurs
+     */
+    public EnvironmentImpl deleteEnvironment(String workspaceId, String envName) throws NotFoundException,
+                                                                                        ServerException,
+                                                                                        ConflictException {
+        final WorkspaceImpl workspace = workspaceDao.get(workspaceId);
+        if (workspace.getConfig().getDefaultEnv().equals(envName)) {
+            throw new ConflictException(format("Cannot delete default environment: '%s'", envName));
+        }
+        if (workspace.getRuntime() != null && workspace.getRuntime().getActiveEnv().equals(envName)) {
+            throw new ConflictException(format("Cannot delete active environment: '%s'", envName));
+        }
+        if (!workspace.getConfig().getEnvironments().containsKey(envName)) {
+            throw new NotFoundException(format("Workspace '%s' doesn't contain environment '%s'", workspaceId, envName));
+        }
+
+        removeEnvironmentSnapshots(workspaceId, envName);
+        return workspace.getConfig().getEnvironments().remove(envName);
+    }
+
+    public void renameEnvironment(String workspaceId, String oldEnvName, String newEnvName) throws NotFoundException,
+                                                                                                   ServerException,
+                                                                                                   ConflictException {
+        final WorkspaceImpl workspace = workspaceDao.get(workspaceId);
+        if (!workspace.getConfig().getEnvironments().containsKey(oldEnvName)) {
+            throw new NotFoundException(format("Workspace '%s' doesn't contain environment '%s'", workspaceId, oldEnvName));
+        }
+        if (workspace.getRuntime() != null && workspace.getRuntime().getActiveEnv().equals(oldEnvName)) {
+            throw new ConflictException(format("Cannot rename active environment: '%s'", oldEnvName));
+        }
+
+        updateEnvironmentSnapshots(workspaceId, oldEnvName, newEnvName);
+        workspace.getConfig().getEnvironments().put(newEnvName, workspace.getConfig().getEnvironments().get(oldEnvName));
+    }
+
+    /** Updates snapshots environment in database */
+    private void updateEnvironmentSnapshots(String workspaceId, String oldEnvName, String newEnvName) throws SnapshotException {
+        for (SnapshotImpl snapshot : snapshotDao.findSnapshots(workspaceId)) {
+            if (snapshot.getEnvName().equals(oldEnvName)) {
+                snapshot.setEnvName(newEnvName);
+                snapshotDao.updateSnapshot(snapshot);
+            }
+        }
+    }
+
+    /**
      * Creates snapshot of runtime workspace.
      *
      * <p>Basically creates {@link SnapshotImpl snapshot} instance for each machine from
@@ -566,6 +697,31 @@ public class WorkspaceManager {
                 LOG.error(e.getLocalizedMessage(), e);
             }
         }
+    }
+
+    /**
+     * Removes all snapshots of all machines of specified environment of workspace.
+     *
+     * @param workspaceId
+     *         workspace id to remove environment snapshots
+     * @param envName
+     *         environment name to remove snapshots from
+     * @throws NotFoundException
+     *           when workspace with given id doesn't exists
+     * @throws ServerException
+     *          when any other error occurs
+     */
+    public void removeEnvironmentSnapshots(String workspaceId, String envName) throws NotFoundException, ServerException {
+        getSnapshot(workspaceId).stream()
+                                .filter(snapshot -> snapshot.getEnvName().equals(envName))
+                                .forEach(snapshot -> {
+                                    try {
+                                        runtimes.removeSnapshot(snapshot);
+                                        snapshotDao.removeSnapshot(snapshot.getId());
+                                    } catch (Exception e) {
+                                        LOG.error(e.getLocalizedMessage(), e);
+                                    }
+                                });
     }
 
     /**
@@ -799,15 +955,6 @@ public class WorkspaceManager {
         }
     }
 
-    private void updateWorkspaceSnapshots(String workspaceId, Workspace workspace, Workspace update) throws SnapshotException {
-        if (!workspace.getConfig().getDefaultEnv().equals(update.getConfig().getDefaultEnv())) { // TODO non-default env
-            for (SnapshotImpl snapshot : snapshotDao.findSnapshots(workspaceId)) {
-                snapshot.setEnvName(update.getConfig().getDefaultEnv()); // TODO non-default env
-                snapshotDao.updateSnapshot(snapshot);
-            }
-        }
-    }
-
     @VisibleForTesting
     void checkWorkspaceIsRunning(WorkspaceImpl workspace, String operation) throws ConflictException {
         if (workspace.getStatus() != RUNNING) {
@@ -915,6 +1062,7 @@ public class WorkspaceManager {
     private void ensureRuntimeInfoNotChangedIfWorkspaceRunning(String id, Workspace workspace, Workspace update) throws ConflictException,
                                                                                                                         NotFoundException,
                                                                                                                         ServerException {
+        // TODO remove this and process envs instead
         if (runtimes.hasRuntime(id)) { // we can change any parameter in stopped workspace
             String activeEnv = runtimes.get(id).getRuntime().getActiveEnv();
             if (!workspace.getConfig().getEnvironments().get(activeEnv).equals(update.getConfig().getEnvironments().get(activeEnv))) {
