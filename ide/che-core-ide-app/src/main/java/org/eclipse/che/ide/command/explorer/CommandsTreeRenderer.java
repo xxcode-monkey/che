@@ -31,7 +31,7 @@ import static com.google.gwt.user.client.Event.ONCLICK;
 class CommandsTreeRenderer extends DefaultPresentationRenderer<Node> {
 
     private final CommandsExplorerResources           resources;
-    private final CommandsExplorerView.ActionDelegate delegate;
+    private       CommandsExplorerView.ActionDelegate delegate;
 
     CommandsTreeRenderer(TreeStyles treeStyles, CommandsExplorerResources resources, CommandsExplorerView.ActionDelegate delegate) {
         super(treeStyles);
@@ -103,5 +103,9 @@ class CommandsTreeRenderer extends DefaultPresentationRenderer<Node> {
         }
 
         return element;
+    }
+
+    public void setDelegate(CommandsExplorerView.ActionDelegate delegate) {
+        this.delegate = delegate;
     }
 }

@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.command;
 
-import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.macro.Macro;
 import org.eclipse.che.ide.api.resources.Project;
@@ -26,7 +25,9 @@ import java.util.Map;
 public interface CommandManager3 {
 
     /** Returns workspace commands. */
-    List<CommandImpl> getWorkspaceCommands();
+    List<CommandWithContext> getCommands();
+
+    Promise<CommandWithContext> createCommand(String type, ApplicableContext applicableContext);
 
     /**
      * Creates new command of the specified type.

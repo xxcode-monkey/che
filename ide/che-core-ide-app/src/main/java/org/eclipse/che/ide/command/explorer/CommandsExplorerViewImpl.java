@@ -47,6 +47,7 @@ import static org.eclipse.che.ide.ui.smartTree.SelectionModel.Mode.SINGLE;
 public class CommandsExplorerViewImpl extends BaseView<CommandsExplorerView.ActionDelegate> implements CommandsExplorerView {
 
     private static final CommandsExplorerViewImplUiBinder UI_BINDER = GWT.create(CommandsExplorerViewImplUiBinder.class);
+    private final CommandsTreeRenderer treeRenderer;
 
     @UiField(provided = true)
     Tree commandsTree;
@@ -75,7 +76,12 @@ public class CommandsExplorerViewImpl extends BaseView<CommandsExplorerView.Acti
         setTitle("Commands Explorer");
 
         commandsTree = new Tree(new NodeStorage(), new NodeLoader());
-        commandsTree.setPresentationRenderer(new CommandsTreeRenderer(commandsTree.getTreeStyles(), resources, delegate));
+
+
+        treeRenderer = new CommandsTreeRenderer(commandsTree.getTreeStyles(), resources, delegate);
+
+
+        commandsTree.setPresentationRenderer(treeRenderer);
         commandsTree.getSelectionModel().setSelectionMode(SINGLE);
 
         commandsTree.getSelectionModel().addSelectionHandler(new SelectionHandler<Node>() {
@@ -100,6 +106,7 @@ public class CommandsExplorerViewImpl extends BaseView<CommandsExplorerView.Acti
         setSaveEnabled(false);
     }
 
+
     @Override
     public void addPage(IsWidget page, String title, String tooltip) {
         final int pageIndex = pageCounter;
@@ -123,6 +130,9 @@ public class CommandsExplorerViewImpl extends BaseView<CommandsExplorerView.Acti
 
     @Override
     public void setCommands(Map<CommandType, List<CommandImpl>> workspaceCommands) {
+        // TODO: rework this delegating
+        treeRenderer.setDelegate(delegate);
+
         renderCommands(workspaceCommands);
     }
 

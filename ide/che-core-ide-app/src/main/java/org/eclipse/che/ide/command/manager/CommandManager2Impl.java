@@ -129,7 +129,7 @@ public class CommandManager2Impl implements CommandManager2 {
         }).thenPromise(new Function<CommandImpl, Promise<CommandImpl>>() {
             @Override
             public Promise<CommandImpl> apply(CommandImpl arg) throws FunctionException {
-                return projectManagerDelegate.createCommand(type);
+                return projectManagerDelegate.createCommand(null, type);
             }
         });
 

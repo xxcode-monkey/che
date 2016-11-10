@@ -18,8 +18,9 @@ import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.command.ApplicableContext;
 import org.eclipse.che.ide.api.command.CommandImpl;
-import org.eclipse.che.ide.api.command.CommandManager;
+import org.eclipse.che.ide.api.command.CommandManager3;
 import org.eclipse.che.ide.api.command.CommandType;
 import org.eclipse.che.ide.api.command.CommandTypeRegistry;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
@@ -48,7 +49,7 @@ import static org.eclipse.che.ide.api.parts.PartStackType.NAVIGATION;
 @Singleton
 public class CommandsExplorerPresenter extends BasePresenter implements CommandsExplorerView.ActionDelegate,
                                                                         WsAgentStateHandler,
-                                                                        CommandManager.CommandChangedListener,
+                                                                        CommandManager3.CommandChangedListener,
                                                                         CommandsExplorerPage.DirtyStateListener {
 
     private final CommandsExplorerView view;
@@ -79,8 +80,7 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
 
         eventBus.addHandler(WsAgentStateEvent.TYPE, this);
 
-        // TODO
-//        commandManager.addCommandChangedListener(this);
+        commandManager.addCommandChangedListener(this);
 
         pages = new ArrayList<>();
         pages.add(infoPage);
@@ -146,10 +146,15 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
 
     @Override
     public void onCommandAdd() {
+        final ApplicableContext applicableContext = new ApplicableContext();
+        applicableContext.setWorkspaceApplicable(true);
+
+        commandManager.createCommand("custom", applicableContext);
     }
 
     @Override
     public void onCommandRemove(CommandImpl command) {
+        commandManager.removeWorkspaceCommand(command.getName());
     }
 
     @Override
@@ -180,7 +185,7 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
 
     private void refreshView() {
         Map<CommandType, List<CommandImpl>> workspaceCommands = new HashMap<>();
-        for (CommandImpl command : commandManager.getWorkspaceCommands()) {
+        for (CommandImpl command : commandManager.getCommands()) {
             final CommandType commandType = commandTypeRegistry.getCommandTypeById(command.getType());
 
             List<CommandImpl> commands = workspaceCommands.get(commandType);
