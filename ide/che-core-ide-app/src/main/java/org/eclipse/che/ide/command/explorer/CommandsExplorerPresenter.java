@@ -17,7 +17,6 @@ import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.command.ApplicableContext;
 import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.command.CommandManager3;
@@ -52,10 +51,12 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
                                                                         CommandManager3.CommandChangedListener,
                                                                         CommandsExplorerPage.DirtyStateListener {
 
+    private static final String TITLE   = "Commands";
+    private static final String TOOLTIP = "Manage commands";
+
     private final CommandsExplorerView view;
     private final WorkspaceAgent       workspaceAgent;
-    private final CommandManager3  commandManager;
-    private final AppContext           appContext;
+    private final CommandManager3      commandManager;
     private final CommandTypeRegistry  commandTypeRegistry;
 
     private final List<CommandsExplorerPage> pages;
@@ -65,7 +66,6 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
                                      WorkspaceAgent workspaceAgent,
                                      EventBus eventBus,
                                      CommandManager3 commandManager,
-                                     AppContext appContext,
                                      CommandTypeRegistry commandTypeRegistry,
                                      InfoPage infoPage,
                                      ArgumentsPage argumentsPage,
@@ -73,7 +73,6 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
         this.view = view;
         this.workspaceAgent = workspaceAgent;
         this.commandManager = commandManager;
-        this.appContext = appContext;
         this.commandTypeRegistry = commandTypeRegistry;
 
         view.setDelegate(this);
@@ -97,7 +96,7 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
 
     @Override
     public int getSize() {
-        return 1000;
+        return 900;
     }
 
     @Override
@@ -111,7 +110,7 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
 
     @Override
     public String getTitle() {
-        return "Commands";
+        return TITLE;
     }
 
     @Override
@@ -126,7 +125,7 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
     @Nullable
     @Override
     public String getTitleToolTip() {
-        return "Manage commands";
+        return TOOLTIP;
     }
 
     @Nullable
@@ -169,8 +168,7 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
     @Override
     public void onWsAgentStarted(WsAgentStateEvent event) {
         workspaceAgent.openPart(this, NAVIGATION);
-
-//        refreshView();
+        workspaceAgent.setActivePart(this);
     }
 
     @Override

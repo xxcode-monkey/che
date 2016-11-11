@@ -14,6 +14,7 @@ import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.JsArrayMixed;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.core.model.machine.Command;
 import org.eclipse.che.api.machine.shared.dto.CommandDto;
@@ -37,6 +38,7 @@ import org.eclipse.che.ide.api.command.CommandWithContext;
 import org.eclipse.che.ide.api.component.WsAgentComponent;
 import org.eclipse.che.ide.api.project.MutableProjectConfig;
 import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.api.workspace.WorkspaceReadyEvent;
 import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
 import org.eclipse.che.ide.dto.DtoFactory;
 
@@ -59,7 +61,7 @@ import static org.eclipse.che.api.workspace.shared.Constants.COMMAND_PREVIEW_URL
  * @author Artem Zatsarynnyi
  */
 @Singleton
-public class CommandManagerImpl3 implements CommandManager3, WsAgentComponent {
+public class CommandManagerImpl3 implements CommandManager3, WsAgentComponent, WorkspaceReadyEvent.WorkspaceReadyHandler {
 
     private final CommandTypeRegistry             commandTypeRegistry;
     private final AppContext                      appContext;
@@ -88,7 +90,8 @@ public class CommandManagerImpl3 implements CommandManager3, WsAgentComponent {
 //                               EventBus eventBus,
                                ProjectCommandManagerDelegate projectCommandManagerDelegate,
                                WorkspaceCommandManagerDelegate workspaceCommandManagerDelegate,
-                               PromiseProvider promiseProvider) {
+                               PromiseProvider promiseProvider,
+                               EventBus eventBus) {
 //                               MacroProcessor macroProcessor
 //                               CommandConsoleFactory commandConsoleFactory,
 //                               ProcessesPanelPresenter processesPanelPresenter) {
@@ -109,6 +112,8 @@ public class CommandManagerImpl3 implements CommandManager3, WsAgentComponent {
         commands = new HashMap<>();
 
         commandChangedListeners = new HashSet<>();
+
+        eventBus.addHandler(WorkspaceReadyEvent.getType(), this);
     }
 
     private void fetchCommands() {
@@ -611,8 +616,14 @@ public class CommandManagerImpl3 implements CommandManager3, WsAgentComponent {
         return newCommandName;
     }
 
+    // TODO: just for eager instantiating
     @Override
     public void start(Callback<WsAgentComponent, Exception> callback) {
+        callback.onSuccess(this);
+    }
+
+    @Override
+    public void onWorkspaceReady(WorkspaceReadyEvent event) {
         fetchCommands();
     }
 }

@@ -20,9 +20,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.eclipse.che.api.project.shared.Constants.COMMANDS_ATTRIBUTE_DESCRIPTION;
-import static org.eclipse.che.api.project.shared.Constants.COMMANDS_ATTRIBUTE_NAME;
-
 /**
  * @author gazarenkov
  */
@@ -50,10 +47,6 @@ public abstract class ProjectTypeDef implements ProjectType {
         this.primaryable = primaryable;
         this.mixable = mixable;
         this.persisted = persisted;
-
-        if (primaryable && parents.isEmpty()) {
-            addVariableDefinition(COMMANDS_ATTRIBUTE_NAME, COMMANDS_ATTRIBUTE_DESCRIPTION, false);
-        }
     }
 
     /**

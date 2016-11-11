@@ -186,12 +186,15 @@ public class ProjectTypes {
                 all.put(pt.getId(), pt);
                 mixins.put(pt.getId(), pt);
                 for (Attribute attr : pt.getAttributes()) {
-                    if (attributeDefs.containsKey(attr.getName())) {
+
+                    final Attribute attribute = attributeDefs.get(attr.getName());
+                    // if project already have attribute with the same name as attr from mixin
+                    // check whether it's the same attribute that comes from the common parent PT, e.g. from Base PT
+                    if (attribute != null && !attribute.getProjectType().equals(attr.getProjectType())) {
                         throw new ProjectTypeConstraintException(
                                 "Attribute name conflict. Duplicated attributes detected " + projectPath +
                                 " Attribute " + attr.getName() + " declared in " + pt.getId() + " already declared in " +
-                                attributeDefs.get(attr.getName()).getProjectType()
-                        );
+                                attributeDefs.get(attr.getName()).getProjectType());
                     }
 
                     attributeDefs.put(attr.getName(), attr);
