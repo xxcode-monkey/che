@@ -145,10 +145,13 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
 
     @Override
     public void onCommandSelected(CommandWithContext command) {
+        // initialize all pages with the selected command
         for (CommandsExplorerPage page : pages) {
-            page.resetFrom(command);
             page.setDirtyStateListener(this);
+            page.resetFrom(command);
         }
+
+        onDirtyStateChanged();
     }
 
     @Override

@@ -53,6 +53,8 @@ public abstract class AbstractCommandsExplorerPage implements CommandsExplorerPa
 
     /** Should be called by page every time when any command modifications on the page have been performed. */
     protected void notifyDirtyStateChanged() {
-        listener.onDirtyStateChanged();
+        if (listener != null) {
+            listener.onDirtyStateChanged();
+        }
     }
 }
