@@ -12,7 +12,7 @@ package org.eclipse.che.ide.api.command;
 
 import org.eclipse.che.api.core.model.machine.Command;
 
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
@@ -39,7 +39,7 @@ public class CommandImpl implements Command {
      *         type of the command
      */
     public CommandImpl(String name, String commandLine, String type) {
-        this(name, commandLine, type, Collections.<String, String>emptyMap());
+        this(name, commandLine, type, new HashMap<String, String>());
     }
 
     public CommandImpl(String name, String commandLine, String type, Map<String, String> attributes) {

@@ -11,8 +11,10 @@
 package org.eclipse.che.ide.command.explorer.page.arguments;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.Widget;
@@ -52,6 +54,11 @@ public class ArgumentsPageViewImpl extends Composite implements ArgumentsPageVie
     @Override
     public void setCommandLine(String commandLine) {
         editorPanel.setValue(commandLine);
+    }
+
+    @UiHandler({"editorPanel"})
+    void onCommandLineChanged(KeyUpEvent event) {
+        delegate.onCommandLineChanged(getCommandLine());
     }
 
     interface ArgumentsPageViewImplUiBinder extends UiBinder<Widget, ArgumentsPageViewImpl> {

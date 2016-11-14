@@ -27,7 +27,7 @@ public class ArgumentsPage extends AbstractCommandsExplorerPage implements Argum
 
     private final ArgumentsPageView view;
 
-    // initial value of the command's name
+    // initial value of the command line value
     private String commandLineInitial;
 
     @Inject
@@ -59,8 +59,8 @@ public class ArgumentsPage extends AbstractCommandsExplorerPage implements Argum
     }
 
     @Override
-    public void onCommandLineChanged() {
-        editedCommand.setCommandLine(view.getCommandLine());
+    public void onCommandLineChanged(String commandLine) {
+        editedCommand.setCommandLine(commandLine);
 
         notifyDirtyStateChanged();
     }

@@ -150,6 +150,21 @@ public class CommandsExplorerViewImpl extends BaseView<CommandsExplorerView.Acti
 
     @Nullable
     @Override
+    public CommandType getSelectedCommandType() {
+        final List<Node> selectedNodes = commandsTree.getSelectionModel().getSelectedNodes();
+
+        if (!selectedNodes.isEmpty()) {
+            final Node selectedNode = selectedNodes.get(0);
+            if (selectedNode instanceof CommandTypeNode) {
+                return ((CommandTypeNode)selectedNode).getCommandType();
+            }
+        }
+
+        return null;
+    }
+
+    @Nullable
+    @Override
     public CommandWithContext getSelectedCommand() {
         final List<Node> selectedNodes = commandsTree.getSelectionModel().getSelectedNodes();
 
@@ -163,19 +178,10 @@ public class CommandsExplorerViewImpl extends BaseView<CommandsExplorerView.Acti
         return null;
     }
 
-    @Nullable
     @Override
-    public CommandType getSelectedCommandType() {
-        final List<Node> selectedNodes = commandsTree.getSelectionModel().getSelectedNodes();
-
-        if (!selectedNodes.isEmpty()) {
-            final Node selectedNode = selectedNodes.get(0);
-            if (selectedNode instanceof CommandTypeNode) {
-                return ((CommandTypeNode)selectedNode).getCommandType();
-            }
-        }
-
-        return null;
+    public void selectCommand(CommandWithContext command) {
+        // TODO
+//        commandsTree.getSelectionModel().setSelection(new ArrayList<Node>());
     }
 
     @Override

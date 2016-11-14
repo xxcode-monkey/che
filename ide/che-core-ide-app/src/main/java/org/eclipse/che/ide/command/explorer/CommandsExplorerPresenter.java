@@ -140,6 +140,7 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
 
     @Override
     public void onCommandTypeSelected(CommandType commandType) {
+        // TODO: should we hide pages?
     }
 
     @Override
@@ -156,25 +157,63 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
 
     @Override
     public void onCommandSave(CommandWithContext command) {
+        // TODO
+        commandManager.updateCommand("previous name", command).catchError(new Operation<PromiseError>() {
+            @Override
+            public void apply(PromiseError arg) throws OperationException {
+                // TODO: replace it with notification
+                Window.alert(arg.getMessage());
+            }
+        });
     }
 
     @Override
     public void onCommandAdd() {
         final ApplicableContext applicableContext = new ApplicableContext();
-
-        // TODO: for demo
+        // by default, command should be applicable to the workspace only
         applicableContext.setWorkspaceApplicable(true);
-        applicableContext.addApplicableProject("/play");
 
         final CommandType selectedCommandType = view.getSelectedCommandType();
         if (selectedCommandType != null) {
-            commandManager.createCommand(selectedCommandType.getId(), applicableContext);
+            commandManager.createCommand(selectedCommandType.getId(), applicableContext).then(new Operation<CommandWithContext>() {
+                @Override
+                public void apply(CommandWithContext arg) throws OperationException {
+                    view.selectCommand(arg);
+                }
+            }).catchError(new Operation<PromiseError>() {
+                @Override
+                public void apply(PromiseError arg) throws OperationException {
+                    // TODO: replace it with notification
+                    Window.alert(arg.getMessage());
+                }
+            });
         }
     }
 
     @Override
+    public void onCommandDuplicate(CommandWithContext command) {
+        commandManager.createCommand(command).then(new Operation<CommandWithContext>() {
+            @Override
+            public void apply(CommandWithContext arg) throws OperationException {
+                view.selectCommand(arg);
+            }
+        }).catchError(new Operation<PromiseError>() {
+            @Override
+            public void apply(PromiseError arg) throws OperationException {
+                // TODO: replace it with notification
+                Window.alert(arg.getMessage());
+            }
+        });
+    }
+
+    @Override
     public void onCommandRemove(CommandWithContext command) {
-        commandManager.removeCommand(command.getName()).catchError(new Operation<PromiseError>() {
+        commandManager.removeCommand(command.getName()).then(new Operation<Void>() {
+            @Override
+            public void apply(Void arg) throws OperationException {
+                // TODO: select another command
+            }
+        }).catchError(new Operation<PromiseError>() {
             @Override
             public void apply(PromiseError arg) throws OperationException {
                 // TODO: replace it with notification
@@ -235,6 +274,7 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
     @Override
     public void onDirtyStateChanged() {
         for (CommandsExplorerPage page : pages) {
+            // if at least one page is modified
             if (page.isDirty()) {
                 view.setSaveEnabled(true);
                 return;

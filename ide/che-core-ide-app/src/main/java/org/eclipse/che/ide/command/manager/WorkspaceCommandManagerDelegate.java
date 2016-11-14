@@ -28,7 +28,6 @@ import org.eclipse.che.ide.dto.DtoFactory;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Responsible for managing the commands which are stored with workspace.
@@ -92,24 +91,24 @@ class WorkspaceCommandManagerDelegate {
     }
 
     /**
-     * Creates new command with the specified arguments.
-     * <p><b>Note</b> that name of the created command may differ from
-     * the specified {@code desirableName} in order to prevent name duplication.
-     */
-    Promise<CommandImpl> createCommand(String desirableName,
-                                       String commandLine,
-                                       String type,
-                                       Map<String, String> attributes) {
-        return null;
-    }
-
-    /**
      * Updates the command with the specified {@code name} by replacing it with the given {@code command}.
      * <p><b>Note</b> that name of the updated command may differ from the name provided by the given {@code command}
      * in order to prevent name duplication.
      */
-    Promise<CommandImpl> updateCommand(String name, CommandImpl command) {
-        return null;
+    Promise<CommandImpl> updateCommand(String name, final CommandImpl command) {
+        final CommandDto commandDto = dtoFactory.createDto(CommandDto.class)
+                                                .withName(command.getName())
+                                                .withCommandLine(command.getCommandLine())
+                                                .withType(command.getType())
+                                                .withAttributes(command.getAttributes());
+
+        return workspaceServiceClient.updateCommand(appContext.getWorkspaceId(), name, commandDto)
+                                     .then(new Function<WorkspaceDto, CommandImpl>() {
+                                         @Override
+                                         public CommandImpl apply(WorkspaceDto arg) throws FunctionException {
+                                             return command;
+                                         }
+                                     });
     }
 
     /** Removes the command with the specified {@code commandName}. */

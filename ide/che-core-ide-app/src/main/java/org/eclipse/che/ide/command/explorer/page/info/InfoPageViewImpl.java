@@ -16,7 +16,6 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.TextBox;
@@ -85,14 +84,7 @@ public class InfoPageViewImpl extends Composite implements InfoPageView {
 
     @UiHandler({"commandName"})
     void onCommandNameChanged(KeyUpEvent event) {
-        // name value may not be updated immediately after keyUp
-        // therefore use the timer with zero delay
-        new Timer() {
-            @Override
-            public void run() {
-                delegate.onNameChanged(getCommandName());
-            }
-        }.schedule(0);
+        delegate.onNameChanged(getCommandName());
     }
 
     @UiHandler({"workspace"})

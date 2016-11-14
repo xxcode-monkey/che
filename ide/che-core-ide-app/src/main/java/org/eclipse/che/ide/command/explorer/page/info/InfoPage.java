@@ -31,6 +31,7 @@ public class InfoPage extends AbstractCommandsExplorerPage implements InfoPageVi
     // initial value of the command's name
     private String commandNameInitial;
 
+    // initial value of the workspace flag
     private boolean workspaceInitial;
 
     @Inject
@@ -54,6 +55,7 @@ public class InfoPage extends AbstractCommandsExplorerPage implements InfoPageVi
         final ApplicableContext applicableContext = command.getApplicableContext();
 
         commandNameInitial = command.getName();
+        workspaceInitial = applicableContext.isWorkspaceApplicable();
 
         view.setCommandName(command.getName());
         view.setWorkspace(command.getApplicableContext().isWorkspaceApplicable());
@@ -73,7 +75,8 @@ public class InfoPage extends AbstractCommandsExplorerPage implements InfoPageVi
 
     @Override
     public boolean isDirty() {
-        return !(commandNameInitial.equals(editedCommand.getName()));
+        return !(commandNameInitial.equals(editedCommand.getName()) &&
+                 workspaceInitial == editedCommand.getApplicableContext().isWorkspaceApplicable());
     }
 
     @Override

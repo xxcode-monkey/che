@@ -16,8 +16,6 @@ import com.google.inject.Singleton;
 import org.eclipse.che.api.machine.shared.dto.CommandDto;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.js.JsPromiseError;
 import org.eclipse.che.api.promises.client.js.Promises;
@@ -87,16 +85,11 @@ class ProjectCommandManagerDelegate {
             }
         }
 
-//        List<CommandImpl> commandsToUpdate = new ArrayList<>(commands.values());
         projectCommands.add(newCommand);
 
         return updateProject(project, projectCommands).then(new Function<Void, CommandImpl>() {
             @Override
             public CommandImpl apply(Void arg) throws FunctionException {
-//                commands.put(newCommand.getName(), newCommand);
-
-//                notifyCommandAdded(command);
-
                 return newCommand;
             }
         });
@@ -143,8 +136,28 @@ class ProjectCommandManagerDelegate {
      * <p><b>Note</b> that name of the updated command may differ from the name provided by the given {@code command}
      * in order to prevent name duplication.
      */
-    Promise<CommandImpl> updateCommand(String name, CommandImpl command) {
-        return null;
+    Promise<CommandImpl> updateCommand(Project project, String name, final CommandImpl command) {
+        final List<CommandImpl> projectCommands = getCommands(project);
+
+        if (projectCommands.isEmpty()) {
+            return Promises.reject(JsPromiseError.create("Command " + name + " isn't associated with the project " + project.getName()));
+        }
+
+        final List<CommandImpl> commandsToUpdate = new ArrayList<>();
+        for (CommandImpl projectCommand : projectCommands) {
+            if (!name.equals(projectCommand.getName())) {
+                commandsToUpdate.add(projectCommand);
+            }
+        }
+
+        commandsToUpdate.add(command);
+
+        return updateProject(project, new ArrayList<>(commandsToUpdate)).then(new Function<Void, CommandImpl>() {
+            @Override
+            public CommandImpl apply(Void arg) throws FunctionException {
+                return command;
+            }
+        });
     }
 
     /** Removes the command with the specified {@code commandName}. */
@@ -152,7 +165,8 @@ class ProjectCommandManagerDelegate {
         final List<CommandImpl> projectCommands = getCommands(project);
 
         if (projectCommands.isEmpty()) {
-            return Promises.reject(JsPromiseError.create("Command " + commandName + " isn't associated with the project " + project.getName()));
+            return Promises.reject(JsPromiseError.create("Command " + commandName + " isn't associated with the project " +
+                                                         project.getName()));
         }
 
         final List<CommandImpl> commandsToUpdate = new ArrayList<>();
@@ -162,11 +176,6 @@ class ProjectCommandManagerDelegate {
             }
         }
 
-        return updateProject(project, new ArrayList<>(commandsToUpdate)).then(new Operation<Void>() {
-            @Override
-            public void apply(Void arg) throws OperationException {
-//                notifyCommandRemoved(commands.remove(name));
-            }
-        });
+        return updateProject(project, new ArrayList<>(commandsToUpdate));
     }
 }

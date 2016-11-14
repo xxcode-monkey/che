@@ -50,13 +50,16 @@ public interface CommandsExplorerView extends View<CommandsExplorerView.ActionDe
      */
     void setCommands(Map<CommandType, List<CommandWithContext>> workspaceCommands);
 
+    /** Returns the currently selected command type or {@code null} if none. */
+    @Nullable
+    CommandType getSelectedCommandType();
+
     /** Returns the currently selected command or {@code null} if none. */
     @Nullable
     CommandWithContext getSelectedCommand();
 
-    /** Returns the currently selected command type or {@code null} if none. */
-    @Nullable
-    CommandType getSelectedCommandType();
+    /** Select the given {@code command}. */
+    void selectCommand(CommandWithContext command);
 
     /**
      * Set whether saving command is enabled or not.
@@ -103,6 +106,14 @@ public interface CommandsExplorerView extends View<CommandsExplorerView.ActionDe
 
         /** Called when adding new command is requested. */
         void onCommandAdd();
+
+        /**
+         * Called when duplicating command is requested.
+         *
+         * @param command
+         *         command duplication of which is requested
+         */
+        void onCommandDuplicate(CommandWithContext command);
 
         /**
          * Called when removing command is requested.

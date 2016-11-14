@@ -70,7 +70,7 @@ class CommandsTreeRenderer extends DefaultPresentationRenderer<Node> {
                 public void onBrowserEvent(Event event) {
                     if (ONCLICK == event.getTypeInt()) {
                         event.stopPropagation();
-//                        delegate.onDuplicateClicked();
+                        delegate.onCommandDuplicate(((CommandNode)node).getCommand());
                     }
                 }
             });

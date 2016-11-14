@@ -37,6 +37,6 @@ public interface ArgumentsPageView extends View<ArgumentsPageView.ActionDelegate
     interface ActionDelegate {
 
         /** Called when command line value has been changed. */
-        void onCommandLineChanged();
+        void onCommandLineChanged(String commandLine);
     }
 }
