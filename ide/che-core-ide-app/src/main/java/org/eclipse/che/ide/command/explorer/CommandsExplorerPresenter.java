@@ -10,12 +10,16 @@
  *******************************************************************************/
 package org.eclipse.che.ide.command.explorer;
 
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.api.promises.client.Operation;
+import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.command.ApplicableContext;
 import org.eclipse.che.ide.api.command.CommandImpl;
@@ -135,6 +139,10 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
     }
 
     @Override
+    public void onCommandTypeSelected(CommandType commandType) {
+    }
+
+    @Override
     public void onCommandSelected(CommandWithContext command) {
         for (CommandsExplorerPage page : pages) {
             page.resetFrom(command);
@@ -153,16 +161,26 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
     @Override
     public void onCommandAdd() {
         final ApplicableContext applicableContext = new ApplicableContext();
+
+        // TODO: for demo
         applicableContext.setWorkspaceApplicable(true);
         applicableContext.addApplicableProject("/play");
 
-        // TODO: view.getSelectedType()
-        commandManager.createCommand("custom", applicableContext);
+        final CommandType selectedCommandType = view.getSelectedCommandType();
+        if (selectedCommandType != null) {
+            commandManager.createCommand(selectedCommandType.getId(), applicableContext);
+        }
     }
 
     @Override
     public void onCommandRemove(CommandWithContext command) {
-        commandManager.removeCommand(command.getName());
+        commandManager.removeCommand(command.getName()).catchError(new Operation<PromiseError>() {
+            @Override
+            public void apply(PromiseError arg) throws OperationException {
+                // TODO: replace it with notification
+                Window.alert(arg.getMessage());
+            }
+        });
     }
 
     @Override
@@ -192,6 +210,13 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
 
     private void refreshView() {
         Map<CommandType, List<CommandWithContext>> commands = new HashMap<>();
+
+        // all registered command types need to be shown in view
+        // so populate map by all registered command types
+        for (CommandType commandType : commandTypeRegistry.getCommandTypes()) {
+            commands.put(commandType, new ArrayList<CommandWithContext>());
+        }
+
         for (CommandWithContext command : commandManager.getCommands()) {
             final CommandType commandType = commandTypeRegistry.getCommandTypeById(command.getType());
 

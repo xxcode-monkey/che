@@ -32,6 +32,7 @@ import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.auth.OAuthServiceClient;
 import org.eclipse.che.ide.api.auth.OAuthServiceClientImpl;
+import org.eclipse.che.ide.api.command.CommandManager3;
 import org.eclipse.che.ide.api.command.CommandTypeRegistry;
 import org.eclipse.che.ide.api.component.Component;
 import org.eclipse.che.ide.api.component.StateComponent;
@@ -121,7 +122,7 @@ import org.eclipse.che.ide.client.WorkspaceStateRestorer;
 import org.eclipse.che.ide.command.CommandProducerActionFactory;
 import org.eclipse.che.ide.command.CommandProducerActionManager;
 import org.eclipse.che.ide.command.CommandTypeRegistryImpl;
-import org.eclipse.che.ide.command.manager.newmanager.CommandManagerImpl3;
+import org.eclipse.che.ide.command.manager.CommandManagerImpl3;
 import org.eclipse.che.ide.context.AppContextImpl;
 import org.eclipse.che.ide.editor.EditorAgentImpl;
 import org.eclipse.che.ide.editor.EditorRegistryImpl;
@@ -510,6 +511,7 @@ public class CoreGinModule extends AbstractGinModule {
 
         // Command API
         bind(CommandTypeRegistry.class).to(CommandTypeRegistryImpl.class).in(Singleton.class);
+        bind(CommandManager3.class).to(CommandManagerImpl3.class).in(Singleton.class);
 
         bind(MacroRegistry.class).to(MacroRegistryImpl.class).in(Singleton.class);
 

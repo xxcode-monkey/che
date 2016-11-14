@@ -24,7 +24,7 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 
-import org.eclipse.che.ide.api.command.CommandImpl;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.command.CommandType;
 import org.eclipse.che.ide.api.command.CommandWithContext;
 import org.eclipse.che.ide.api.data.tree.Node;
@@ -89,20 +89,15 @@ public class CommandsExplorerViewImpl extends BaseView<CommandsExplorerView.Acti
             @Override
             public void onSelection(SelectionEvent<Node> event) {
                 Node selectedNode = event.getSelectedItem();
-                if (selectedNode instanceof CommandNode) {
+                if (selectedNode instanceof CommandTypeNode) {
+                    delegate.onCommandTypeSelected(((CommandTypeNode)selectedNode).getCommandType());
+                } else if (selectedNode instanceof CommandNode) {
                     delegate.onCommandSelected(((CommandNode)selectedNode).getCommand());
                 }
             }
         });
 
         setContentWidget(UI_BINDER.createAndBindUi(this));
-
-        saveButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                delegate.onCommandSave(getSelectedCommand());
-            }
-        });
 
         setSaveEnabled(false);
     }
@@ -153,8 +148,33 @@ public class CommandsExplorerViewImpl extends BaseView<CommandsExplorerView.Acti
         commandsTree.expandAll();
     }
 
+    @Nullable
     @Override
     public CommandWithContext getSelectedCommand() {
+        final List<Node> selectedNodes = commandsTree.getSelectionModel().getSelectedNodes();
+
+        if (!selectedNodes.isEmpty()) {
+            final Node selectedNode = selectedNodes.get(0);
+            if (selectedNode instanceof CommandNode) {
+                return ((CommandNode)selectedNode).getCommand();
+            }
+        }
+
+        return null;
+    }
+
+    @Nullable
+    @Override
+    public CommandType getSelectedCommandType() {
+        final List<Node> selectedNodes = commandsTree.getSelectionModel().getSelectedNodes();
+
+        if (!selectedNodes.isEmpty()) {
+            final Node selectedNode = selectedNodes.get(0);
+            if (selectedNode instanceof CommandTypeNode) {
+                return ((CommandTypeNode)selectedNode).getCommandType();
+            }
+        }
+
         return null;
     }
 

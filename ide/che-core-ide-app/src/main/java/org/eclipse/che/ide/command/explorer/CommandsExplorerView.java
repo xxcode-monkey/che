@@ -13,7 +13,7 @@ package org.eclipse.che.ide.command.explorer;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.inject.ImplementedBy;
 
-import org.eclipse.che.ide.api.command.CommandImpl;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.command.CommandType;
 import org.eclipse.che.ide.api.command.CommandWithContext;
 import org.eclipse.che.ide.api.mvp.View;
@@ -50,8 +50,13 @@ public interface CommandsExplorerView extends View<CommandsExplorerView.ActionDe
      */
     void setCommands(Map<CommandType, List<CommandWithContext>> workspaceCommands);
 
-    /** Returns the currently selected command. */
+    /** Returns the currently selected command or {@code null} if none. */
+    @Nullable
     CommandWithContext getSelectedCommand();
+
+    /** Returns the currently selected command type or {@code null} if none. */
+    @Nullable
+    CommandType getSelectedCommandType();
 
     /**
      * Set whether saving command is enabled or not.
@@ -63,6 +68,14 @@ public interface CommandsExplorerView extends View<CommandsExplorerView.ActionDe
 
     /** The action delegate for this view. */
     interface ActionDelegate extends BaseActionDelegate {
+
+        /**
+         * Called when some command type has been selected.
+         *
+         * @param commandType
+         *         selected command type
+         */
+        void onCommandTypeSelected(CommandType commandType);
 
         /**
          * Called when some command has been selected.

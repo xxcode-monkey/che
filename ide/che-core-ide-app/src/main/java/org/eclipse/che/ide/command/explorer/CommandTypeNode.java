@@ -50,4 +50,8 @@ public class CommandTypeNode extends AbstractTreeNode {
         l.addAll(commands);
         return Promises.resolve(l);
     }
+
+    public CommandType getCommandType() {
+        return commandType;
+    }
 }

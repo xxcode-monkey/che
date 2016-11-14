@@ -8,12 +8,12 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.command.manager.newmanager;
+package org.eclipse.che.ide.command.manager;
+
+import elemental.util.ArrayOf;
 
 import com.google.gwt.core.client.Callback;
-import com.google.gwt.core.client.JsArrayMixed;
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.core.model.machine.Command;
@@ -27,6 +27,7 @@ import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.api.promises.client.js.JsPromiseError;
 import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.command.ApplicableContext;
 import org.eclipse.che.ide.api.command.CommandImpl;
@@ -60,20 +61,15 @@ import static org.eclipse.che.api.workspace.shared.Constants.COMMAND_PREVIEW_URL
  *
  * @author Artem Zatsarynnyi
  */
-@Singleton
 public class CommandManagerImpl3 implements CommandManager3, WsAgentComponent, WorkspaceReadyEvent.WorkspaceReadyHandler {
 
     private final CommandTypeRegistry             commandTypeRegistry;
     private final AppContext                      appContext;
     private final WorkspaceServiceClient          workspaceServiceClient;
-    //    private final MachineServiceClient    machineServiceClient;
     private final DtoFactory                      dtoFactory;
     private final ProjectCommandManagerDelegate   projectCommandManagerDelegate;
     private final WorkspaceCommandManagerDelegate workspaceCommandManagerDelegate;
     private final PromiseProvider                 promiseProvider;
-//    private final MacroProcessor          macroProcessor;
-//    private final CommandConsoleFactory   commandConsoleFactory;
-//    private final ProcessesPanelPresenter processesPanelPresenter;
 
     private final Map<String, CommandImpl>               workspaceCommands;
     private final Map<Project, Map<String, CommandImpl>> projectCommands;
@@ -85,27 +81,18 @@ public class CommandManagerImpl3 implements CommandManager3, WsAgentComponent, W
     public CommandManagerImpl3(CommandTypeRegistry commandTypeRegistry,
                                AppContext appContext,
                                WorkspaceServiceClient workspaceServiceClient,
-//                               MachineServiceClient machineServiceClient,
                                DtoFactory dtoFactory,
-//                               EventBus eventBus,
                                ProjectCommandManagerDelegate projectCommandManagerDelegate,
                                WorkspaceCommandManagerDelegate workspaceCommandManagerDelegate,
                                PromiseProvider promiseProvider,
                                EventBus eventBus) {
-//                               MacroProcessor macroProcessor
-//                               CommandConsoleFactory commandConsoleFactory,
-//                               ProcessesPanelPresenter processesPanelPresenter) {
         this.commandTypeRegistry = commandTypeRegistry;
         this.appContext = appContext;
         this.workspaceServiceClient = workspaceServiceClient;
-//        this.machineServiceClient = machineServiceClient;
         this.dtoFactory = dtoFactory;
         this.projectCommandManagerDelegate = projectCommandManagerDelegate;
         this.workspaceCommandManagerDelegate = workspaceCommandManagerDelegate;
         this.promiseProvider = promiseProvider;
-//        this.macroProcessor = macroProcessor;
-//        this.commandConsoleFactory = commandConsoleFactory;
-//        this.processesPanelPresenter = processesPanelPresenter;
 
         workspaceCommands = new HashMap<>();
         projectCommands = new HashMap<>();
@@ -114,6 +101,11 @@ public class CommandManagerImpl3 implements CommandManager3, WsAgentComponent, W
         commandChangedListeners = new HashSet<>();
 
         eventBus.addHandler(WorkspaceReadyEvent.getType(), this);
+    }
+
+    @Override
+    public void onWorkspaceReady(WorkspaceReadyEvent event) {
+        fetchCommands();
     }
 
     private void fetchCommands() {
@@ -157,8 +149,7 @@ public class CommandManagerImpl3 implements CommandManager3, WsAgentComponent, W
 
     @Override
     public Promise<CommandWithContext> createCommand(final String type, final ApplicableContext applicableContext) {
-
-        final CommandWithContext cmdWithCntx = new CommandWithContext("name", "cmd", type);
+        final CommandWithContext cmdWithCntx = new CommandWithContext(getUniqueCommandName(type, "name"), "cmd", type);
 
         List<Promise<CommandImpl>> commandPromises = new ArrayList<>();
 
@@ -195,9 +186,9 @@ public class CommandManagerImpl3 implements CommandManager3, WsAgentComponent, W
             projectPromisesArray[commandPromises.indexOf(commandPromise)] = commandPromise;
         }
 
-        return promiseProvider.all(projectPromisesArray).then(new Function<JsArrayMixed, CommandWithContext>() {
+        return promiseProvider.all2(projectPromisesArray).then(new Function<ArrayOf<?>, CommandWithContext>() {
             @Override
-            public CommandWithContext apply(JsArrayMixed ignore) throws FunctionException {
+            public CommandWithContext apply(ArrayOf<?> ignore) throws FunctionException {
                 commands.put(cmdWithCntx.getName(), cmdWithCntx);
 
                 notifyCommandAdded(cmdWithCntx);
@@ -207,6 +198,7 @@ public class CommandManagerImpl3 implements CommandManager3, WsAgentComponent, W
         });
     }
 
+    @Nullable
     private Project getProjectByPath(String path) {
         for (Project project : appContext.getProjects()) {
             if (path.equals(project.getPath())) {
@@ -296,36 +288,25 @@ public class CommandManagerImpl3 implements CommandManager3, WsAgentComponent, W
 
     @Override
     public Promise<Void> removeCommand(final String commandName) {
-
         final CommandWithContext cmdWithCntx = commands.get(commandName);
+
+        if (cmdWithCntx == null) {
+            return Promises.reject(JsPromiseError.create("Command " + commandName + " not found."));
+        }
+
         final ApplicableContext applicableContext = cmdWithCntx.getApplicableContext();
 
         List<Promise<Void>> commandPromises = new ArrayList<>();
 
         if (applicableContext.isWorkspaceApplicable()) {
-            Promise<Void> p = workspaceCommandManagerDelegate.removeCommand(commandName).then(new Operation<Void>() {
-                @Override
-                public void apply(Void arg) throws OperationException {
-//                    cmdWithCntx.getApplicableContext().setWorkspaceApplicable(true);
-                }
-            });
-
-            commandPromises.add(p);
+            commandPromises.add(workspaceCommandManagerDelegate.removeCommand(commandName));
         }
 
-        if (!applicableContext.getApplicableProjects().isEmpty()) {
-            for (final String projectPath : applicableContext.getApplicableProjects()) {
+        for (final String projectPath : applicableContext.getApplicableProjects()) {
+            final Project project = getProjectByPath(projectPath);
 
-                final Project project = getProjectByPath(projectPath);
-
-                Promise<Void> p = projectCommandManagerDelegate.removeCommand(project, commandName).then(new Operation<Void>() {
-                    @Override
-                    public void apply(Void arg) throws OperationException {
-//                                cmdWithCntx.getApplicableContext().addApplicableProject(projectPath);
-                    }
-                });
-
-                commandPromises.add(p);
+            if (project != null) {
+                commandPromises.add(projectCommandManagerDelegate.removeCommand(project, commandName));
             }
         }
 
@@ -334,9 +315,9 @@ public class CommandManagerImpl3 implements CommandManager3, WsAgentComponent, W
             projectPromisesArray[commandPromises.indexOf(commandPromise)] = commandPromise;
         }
 
-        return promiseProvider.all(projectPromisesArray).then(new Function<JsArrayMixed, Void>() {
+        return promiseProvider.all2(projectPromisesArray).then(new Function<ArrayOf<?>, Void>() {
             @Override
-            public Void apply(JsArrayMixed ignore) throws FunctionException {
+            public Void apply(ArrayOf<?> ignore) throws FunctionException {
                 commands.remove(cmdWithCntx.getName());
 
                 notifyCommandRemoved(cmdWithCntx);
@@ -509,50 +490,6 @@ public class CommandManagerImpl3 implements CommandManager3, WsAgentComponent, W
         return commandType != null ? commandType.getPages() : Collections.<CommandPage>emptyList();
     }
 
-//    @Override
-//    public void executeCommand(final CommandImpl command, final Machine machine) {
-//        final String outputChannel = "process:output:" + UUID.uuid();
-//
-//        final CommandOutputConsole console = commandConsoleFactory.create(command, machine);
-//        console.listenToOutput(outputChannel);
-//        processesPanelPresenter.addCommandOutput(machine.getId(), console);
-//
-//        macroProcessor.expandMacros(command.getCommandLine()).then(new Operation<String>() {
-//            @Override
-//            public void apply(String arg) throws OperationException {
-//                final CommandImpl toExecute = new CommandImpl(command);
-//                toExecute.setCommandLine(arg);
-//
-//                // if command line has not specified the shell attribute, use bash to be backward compliant for user commands
-//                Map<String, String> attributes = toExecute.getAttributes();
-//                if (attributes == null) {
-//                    attributes = new HashMap<>(1);
-//                    attributes.put("shell", "/bin/bash");
-//                    toExecute.setAttributes(attributes);
-//                } else if (!attributes.containsKey("shell")) {
-//                    attributes = new HashMap<>(attributes.size() + 1);
-//                    attributes.put("shell", "/bin/bash");
-//                    attributes.putAll(toExecute.getAttributes());
-//                    toExecute.setAttributes(attributes);
-//                }
-//
-//                Log.info(CommandManagerImpl3.class,
-//                         "Using shell " + toExecute.getAttributes().get("shell") + " for invoking command '" + command.getName() + "'");
-//
-//                Promise<MachineProcessDto> processPromise = machineServiceClient.executeCommand(machine.getWorkspaceId(),
-//                                                                                                machine.getId(),
-//                                                                                                toExecute,
-//                                                                                                outputChannel);
-//                processPromise.then(new Operation<MachineProcessDto>() {
-//                    @Override
-//                    public void apply(MachineProcessDto process) throws OperationException {
-//                        console.attachToProcess(process);
-//                    }
-//                });
-//            }
-//        });
-//    }
-
     @Override
     public void addCommandChangedListener(CommandChangedListener listener) {
         commandChangedListeners.add(listener);
@@ -581,16 +518,13 @@ public class CommandManagerImpl3 implements CommandManager3, WsAgentComponent, W
         }
     }
 
-    // TODO: need to create different algorithm for checking project commands uniqueness
-    // they have to be unique within the project
-
     /**
      * Returns {@code customName} if it's unique within the given {@code customType}
      * or newly generated name if it isn't unique within the given {@code customType}.
      */
     private String getUniqueCommandName(String customType, String customName) {
         final CommandType commandType = commandTypeRegistry.getCommandTypeById(customType);
-        final Set<String> commandNames = workspaceCommands.keySet();
+        final Set<String> commandNames = commands.keySet();
 
         final String newCommandName;
 
@@ -620,10 +554,5 @@ public class CommandManagerImpl3 implements CommandManager3, WsAgentComponent, W
     @Override
     public void start(Callback<WsAgentComponent, Exception> callback) {
         callback.onSuccess(this);
-    }
-
-    @Override
-    public void onWorkspaceReady(WorkspaceReadyEvent event) {
-        fetchCommands();
     }
 }
