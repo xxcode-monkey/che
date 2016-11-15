@@ -26,7 +26,7 @@ import com.google.inject.Inject;
 
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.command.CommandType;
-import org.eclipse.che.ide.api.command.CommandWithContext;
+import org.eclipse.che.ide.api.command.ContextualCommand;
 import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.api.parts.base.BaseView;
 import org.eclipse.che.ide.command.explorer.node.CommandNode;
@@ -132,19 +132,19 @@ public class CommandsExplorerViewImpl extends BaseView<CommandsExplorerView.Acti
     }
 
     @Override
-    public void setCommands(Map<CommandType, List<CommandWithContext>> workspaceCommands) {
+    public void setCommands(Map<CommandType, List<ContextualCommand>> workspaceCommands) {
         // TODO: rework this delegating
         treeRenderer.setDelegate(delegate);
 
         renderCommands(workspaceCommands);
     }
 
-    private void renderCommands(Map<CommandType, List<CommandWithContext>> workspaceCommands) {
+    private void renderCommands(Map<CommandType, List<ContextualCommand>> workspaceCommands) {
         commandsTree.getNodeStorage().clear();
 
-        for (Map.Entry<CommandType, List<CommandWithContext>> entry : workspaceCommands.entrySet()) {
+        for (Map.Entry<CommandType, List<ContextualCommand>> entry : workspaceCommands.entrySet()) {
             List<CommandNode> commandNodes = new ArrayList<>(entry.getValue().size());
-            for (CommandWithContext command : entry.getValue()) {
+            for (ContextualCommand command : entry.getValue()) {
                 commandNodes.add(commandNodeFactory.newCommandNode(command));
             }
 
@@ -172,7 +172,7 @@ public class CommandsExplorerViewImpl extends BaseView<CommandsExplorerView.Acti
 
     @Nullable
     @Override
-    public CommandWithContext getSelectedCommand() {
+    public ContextualCommand getSelectedCommand() {
         final List<Node> selectedNodes = commandsTree.getSelectionModel().getSelectedNodes();
 
         if (!selectedNodes.isEmpty()) {
@@ -186,7 +186,7 @@ public class CommandsExplorerViewImpl extends BaseView<CommandsExplorerView.Acti
     }
 
     @Override
-    public void selectCommand(CommandWithContext command) {
+    public void selectCommand(ContextualCommand command) {
         // TODO
 //        commandsTree.getSelectionModel().setSelection(new ArrayList<Node>());
     }

@@ -16,7 +16,7 @@ import com.google.inject.assistedinject.Assisted;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.command.CommandManager;
-import org.eclipse.che.ide.api.command.CommandWithContext;
+import org.eclipse.che.ide.api.command.ContextualCommand;
 import org.eclipse.che.ide.api.data.tree.AbstractTreeNode;
 import org.eclipse.che.ide.api.data.tree.HasAction;
 import org.eclipse.che.ide.api.data.tree.Node;
@@ -30,12 +30,12 @@ import java.util.List;
  */
 public class CommandNode extends AbstractTreeNode implements HasAction {
 
-    private final CommandManager     commandManager;
-    private final AppContext         appContext;
-    private final CommandWithContext command;
+    private final CommandManager    commandManager;
+    private final AppContext        appContext;
+    private final ContextualCommand command;
 
     @Inject
-    public CommandNode(CommandManager commandManager, AppContext appContext, @Assisted CommandWithContext command) {
+    public CommandNode(CommandManager commandManager, AppContext appContext, @Assisted ContextualCommand command) {
         this.commandManager = commandManager;
         this.appContext = appContext;
         this.command = command;
@@ -56,7 +56,7 @@ public class CommandNode extends AbstractTreeNode implements HasAction {
         return null;
     }
 
-    public CommandWithContext getCommand() {
+    public ContextualCommand getCommand() {
         return command;
     }
 

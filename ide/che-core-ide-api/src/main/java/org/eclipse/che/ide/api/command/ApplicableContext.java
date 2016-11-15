@@ -16,7 +16,7 @@ import java.util.List;
 import static java.util.Collections.unmodifiableList;
 
 /**
- * The context in which the command may be executed.
+ * The context in which command may be executed.
  *
  * @author Artem Zatsarynnyi
  */

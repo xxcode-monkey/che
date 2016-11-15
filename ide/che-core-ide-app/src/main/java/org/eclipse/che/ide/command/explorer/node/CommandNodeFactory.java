@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.command.explorer.node;
 
-import org.eclipse.che.ide.api.command.CommandWithContext;
+import org.eclipse.che.ide.api.command.ContextualCommand;
 
 /**
  * Factory for {@link CommandNode} instances.
@@ -19,5 +19,5 @@ import org.eclipse.che.ide.api.command.CommandWithContext;
  */
 public interface CommandNodeFactory {
 
-    CommandNode newCommandNode(CommandWithContext command);
+    CommandNode newCommandNode(ContextualCommand command);
 }

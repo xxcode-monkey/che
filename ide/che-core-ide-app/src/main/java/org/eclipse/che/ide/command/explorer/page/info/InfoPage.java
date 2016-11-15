@@ -15,7 +15,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.api.command.ApplicableContext;
-import org.eclipse.che.ide.api.command.CommandWithContext;
+import org.eclipse.che.ide.api.command.ContextualCommand;
 import org.eclipse.che.ide.command.explorer.page.AbstractCommandsExplorerPage;
 
 /**
@@ -49,7 +49,7 @@ public class InfoPage extends AbstractCommandsExplorerPage implements InfoPageVi
     }
 
     @Override
-    public void resetFrom(CommandWithContext command) {
+    public void resetFrom(ContextualCommand command) {
         super.resetFrom(command);
 
         final ApplicableContext applicableContext = command.getApplicableContext();

@@ -15,7 +15,7 @@ import com.google.inject.ImplementedBy;
 
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.command.CommandType;
-import org.eclipse.che.ide.api.command.CommandWithContext;
+import org.eclipse.che.ide.api.command.ContextualCommand;
 import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.api.parts.base.BaseActionDelegate;
 
@@ -48,7 +48,7 @@ public interface CommandsExplorerView extends View<CommandsExplorerView.ActionDe
      * @param workspaceCommands
      *         workspace commands grouped by type
      */
-    void setCommands(Map<CommandType, List<CommandWithContext>> workspaceCommands);
+    void setCommands(Map<CommandType, List<ContextualCommand>> workspaceCommands);
 
     /** Returns the currently selected command type or {@code null} if none. */
     @Nullable
@@ -56,10 +56,10 @@ public interface CommandsExplorerView extends View<CommandsExplorerView.ActionDe
 
     /** Returns the currently selected command or {@code null} if none. */
     @Nullable
-    CommandWithContext getSelectedCommand();
+    ContextualCommand getSelectedCommand();
 
     /** Select the given {@code command}. */
-    void selectCommand(CommandWithContext command);
+    void selectCommand(ContextualCommand command);
 
     /**
      * Set whether saving command is enabled or not.
@@ -86,7 +86,7 @@ public interface CommandsExplorerView extends View<CommandsExplorerView.ActionDe
          * @param command
          *         selected command
          */
-        void onCommandSelected(CommandWithContext command);
+        void onCommandSelected(ContextualCommand command);
 
         /**
          * Called when reverting command is requested.
@@ -94,7 +94,7 @@ public interface CommandsExplorerView extends View<CommandsExplorerView.ActionDe
          * @param command
          *         command reverting of which is requested
          */
-        void onCommandRevert(CommandWithContext command);
+        void onCommandRevert(ContextualCommand command);
 
         /**
          * Called when saving command is requested.
@@ -102,7 +102,7 @@ public interface CommandsExplorerView extends View<CommandsExplorerView.ActionDe
          * @param command
          *         command saving of which is requested
          */
-        void onCommandSave(CommandWithContext command);
+        void onCommandSave(ContextualCommand command);
 
         /** Called when adding new command is requested. */
         void onCommandAdd();
@@ -113,7 +113,7 @@ public interface CommandsExplorerView extends View<CommandsExplorerView.ActionDe
          * @param command
          *         command duplication of which is requested
          */
-        void onCommandDuplicate(CommandWithContext command);
+        void onCommandDuplicate(ContextualCommand command);
 
         /**
          * Called when removing command is requested.
@@ -121,6 +121,6 @@ public interface CommandsExplorerView extends View<CommandsExplorerView.ActionDe
          * @param command
          *         command removing of which is requested
          */
-        void onCommandRemove(CommandWithContext command);
+        void onCommandRemove(ContextualCommand command);
     }
 }

@@ -14,7 +14,7 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.ide.api.command.CommandWithContext;
+import org.eclipse.che.ide.api.command.ContextualCommand;
 import org.eclipse.che.ide.command.explorer.page.AbstractCommandsExplorerPage;
 
 /**
@@ -45,7 +45,7 @@ public class ArgumentsPage extends AbstractCommandsExplorerPage implements Argum
     }
 
     @Override
-    public void resetFrom(CommandWithContext command) {
+    public void resetFrom(ContextualCommand command) {
         super.resetFrom(command);
 
         commandLineInitial = command.getCommandLine();

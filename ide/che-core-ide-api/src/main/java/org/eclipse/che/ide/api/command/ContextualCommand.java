@@ -20,33 +20,33 @@ import java.util.Objects;
  *
  * @author Artem Zatsarynnyi
  */
-public class CommandWithContext extends CommandImpl {
+public class ContextualCommand extends CommandImpl {
 
     private final ApplicableContext applicableContext;
 
-    public CommandWithContext(String name, String commandLine, String type, ApplicableContext applicableContext) {
+    public ContextualCommand(String name, String commandLine, String type, ApplicableContext applicableContext) {
         super(name, commandLine, type);
 
         this.applicableContext = applicableContext;
     }
 
-    public CommandWithContext(String name,
-                              String commandLine,
-                              String type,
-                              Map<String, String> attributes,
-                              ApplicableContext applicableContext) {
+    public ContextualCommand(String name,
+                             String commandLine,
+                             String type,
+                             Map<String, String> attributes,
+                             ApplicableContext applicableContext) {
         super(name, commandLine, type, attributes);
 
         this.applicableContext = applicableContext;
     }
 
-    public CommandWithContext(Command command) {
+    public ContextualCommand(Command command) {
         super(command);
 
         applicableContext = new ApplicableContext();
     }
 
-    public CommandWithContext(CommandWithContext command) {
+    public ContextualCommand(ContextualCommand command) {
         super(command);
 
         this.applicableContext = command.getApplicableContext();
@@ -63,11 +63,11 @@ public class CommandWithContext extends CommandImpl {
             return true;
         }
 
-        if (!(o instanceof CommandWithContext)) {
+        if (!(o instanceof ContextualCommand)) {
             return false;
         }
 
-        CommandWithContext other = (CommandWithContext)o;
+        ContextualCommand other = (ContextualCommand)o;
 
         return Objects.equals(getApplicableContext(), other.getApplicableContext());
     }

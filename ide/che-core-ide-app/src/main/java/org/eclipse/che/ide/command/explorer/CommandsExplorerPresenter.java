@@ -25,7 +25,7 @@ import org.eclipse.che.ide.api.command.ApplicableContext;
 import org.eclipse.che.ide.api.command.CommandManager3;
 import org.eclipse.che.ide.api.command.CommandType;
 import org.eclipse.che.ide.api.command.CommandTypeRegistry;
-import org.eclipse.che.ide.api.command.CommandWithContext;
+import org.eclipse.che.ide.api.command.ContextualCommand;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
@@ -146,7 +146,7 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
     }
 
     @Override
-    public void onCommandSelected(CommandWithContext command) {
+    public void onCommandSelected(ContextualCommand command) {
         // save initial value of the edited command name
         // in order to be able to detect whether the command was renamed during editing or not
         editedCommandNameInitial = command.getName();
@@ -161,11 +161,11 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
     }
 
     @Override
-    public void onCommandRevert(CommandWithContext command) {
+    public void onCommandRevert(ContextualCommand command) {
     }
 
     @Override
-    public void onCommandSave(CommandWithContext command) {
+    public void onCommandSave(ContextualCommand command) {
         commandManager.updateCommand(editedCommandNameInitial, command).catchError(new Operation<PromiseError>() {
             @Override
             public void apply(PromiseError arg) throws OperationException {
@@ -183,9 +183,9 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
 
         final CommandType selectedCommandType = view.getSelectedCommandType();
         if (selectedCommandType != null) {
-            commandManager.createCommand(selectedCommandType.getId(), applicableContext).then(new Operation<CommandWithContext>() {
+            commandManager.createCommand(selectedCommandType.getId(), applicableContext).then(new Operation<ContextualCommand>() {
                 @Override
-                public void apply(CommandWithContext arg) throws OperationException {
+                public void apply(ContextualCommand arg) throws OperationException {
                     view.selectCommand(arg);
                 }
             }).catchError(new Operation<PromiseError>() {
@@ -199,10 +199,10 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
     }
 
     @Override
-    public void onCommandDuplicate(CommandWithContext command) {
-        commandManager.createCommand(command).then(new Operation<CommandWithContext>() {
+    public void onCommandDuplicate(ContextualCommand command) {
+        commandManager.createCommand(command).then(new Operation<ContextualCommand>() {
             @Override
-            public void apply(CommandWithContext arg) throws OperationException {
+            public void apply(ContextualCommand arg) throws OperationException {
                 view.selectCommand(arg);
             }
         }).catchError(new Operation<PromiseError>() {
@@ -215,7 +215,7 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
     }
 
     @Override
-    public void onCommandRemove(CommandWithContext command) {
+    public void onCommandRemove(ContextualCommand command) {
         commandManager.removeCommand(command.getName()).then(new Operation<Void>() {
             @Override
             public void apply(Void arg) throws OperationException {
@@ -241,33 +241,33 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
     }
 
     @Override
-    public void onCommandAdded(CommandWithContext command) {
+    public void onCommandAdded(ContextualCommand command) {
         refreshView();
     }
 
     @Override
-    public void onCommandUpdated(CommandWithContext command) {
+    public void onCommandUpdated(ContextualCommand command) {
         refreshView();
     }
 
     @Override
-    public void onCommandRemoved(CommandWithContext command) {
+    public void onCommandRemoved(ContextualCommand command) {
         refreshView();
     }
 
     private void refreshView() {
-        Map<CommandType, List<CommandWithContext>> commands = new HashMap<>();
+        Map<CommandType, List<ContextualCommand>> commands = new HashMap<>();
 
         // all registered command types need to be shown in view
         // so populate map by all registered command types
         for (CommandType commandType : commandTypeRegistry.getCommandTypes()) {
-            commands.put(commandType, new ArrayList<CommandWithContext>());
+            commands.put(commandType, new ArrayList<ContextualCommand>());
         }
 
-        for (CommandWithContext command : commandManager.getCommands()) {
+        for (ContextualCommand command : commandManager.getCommands()) {
             final CommandType commandType = commandTypeRegistry.getCommandTypeById(command.getType());
 
-            List<CommandWithContext> commandsByType = commands.get(commandType);
+            List<ContextualCommand> commandsByType = commands.get(commandType);
             if (commandsByType == null) {
                 commandsByType = new ArrayList<>();
                 commands.put(commandType, commandsByType);
