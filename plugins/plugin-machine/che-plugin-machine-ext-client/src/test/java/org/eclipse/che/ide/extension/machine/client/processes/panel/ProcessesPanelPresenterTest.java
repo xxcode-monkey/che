@@ -19,6 +19,7 @@ import org.eclipse.che.api.core.model.machine.MachineStatus;
 import org.eclipse.che.api.machine.shared.dto.MachineConfigDto;
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.api.machine.shared.dto.MachineProcessDto;
+import org.eclipse.che.api.machine.shared.dto.execagent.GetProcessesResponseDto;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
@@ -30,21 +31,21 @@ import org.eclipse.che.ide.api.command.CommandTypeRegistry;
 import org.eclipse.che.ide.api.dialogs.ConfirmDialog;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.machine.DevMachine;
+import org.eclipse.che.ide.api.machine.ExecAgentCommandManager;
 import org.eclipse.che.ide.api.machine.MachineEntity;
 import org.eclipse.che.ide.api.machine.MachineManager;
 import org.eclipse.che.ide.api.machine.MachineServiceClient;
+import org.eclipse.che.ide.api.machine.events.MachineStateEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode;
 import org.eclipse.che.ide.api.outputconsole.OutputConsole;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
-import org.eclipse.che.ide.api.workspace.event.EnvironmentOutputEvent;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
 import org.eclipse.che.ide.extension.machine.client.MachineResources;
 import org.eclipse.che.ide.extension.machine.client.inject.factories.EntityFactory;
 import org.eclipse.che.ide.extension.machine.client.inject.factories.TerminalFactory;
-import org.eclipse.che.ide.api.machine.events.MachineStateEvent;
 import org.eclipse.che.ide.extension.machine.client.outputspanel.console.CommandConsoleFactory;
 import org.eclipse.che.ide.extension.machine.client.outputspanel.console.CommandOutputConsole;
 import org.eclipse.che.ide.extension.machine.client.perspective.terminal.TerminalPresenter;
@@ -60,7 +61,6 @@ import org.mockito.Matchers;
 import org.mockito.Mock;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import static org.eclipse.che.ide.extension.machine.client.processes.ProcessTreeNode.ProcessNodeType.COMMAND_NODE;
@@ -126,9 +126,13 @@ public class ProcessesPanelPresenterTest {
     private EntityFactory                 entityFactory;
     @Mock
     private WorkspaceRuntimeDto           workspaceRuntime;
+    @Mock
+    private ExecAgentCommandManager       execAgentCommandManager;
 
     @Mock
     private Promise<List<MachineProcessDto>> processesPromise;
+    @Mock
+    private Promise<List<GetProcessesResponseDto>> promise;
 
     @Captor
     private ArgumentCaptor<AcceptsOneWidget>                   acceptsOneWidgetCaptor;
@@ -149,17 +153,17 @@ public class ProcessesPanelPresenterTest {
         when(appContext.getWorkspace()).thenReturn(workspace);
         when(workspace.getRuntime()).thenReturn(workspaceRuntime);
 
-        when(machineService.getProcesses(anyString(), anyString())).thenReturn(processesPromise);
         when(processesPromise.then(Matchers.<Operation<List<MachineProcessDto>>>anyObject())).thenReturn(processesPromise);
         when(commandConsoleFactory.create(anyString())).thenReturn(mock(OutputConsole.class));
 
         when(appContext.getWorkspaceId()).thenReturn(WORKSPACE_ID);
 
+        when(promise.then(any(Operation.class))).thenReturn(promise);
+
         presenter = new ProcessesPanelPresenter(view,
                                                 localizationConstant,
                                                 resources,
                                                 eventBus,
-                                                machineService,
                                                 workspaceAgent,
                                                 appContext,
                                                 notificationManager,
@@ -168,7 +172,8 @@ public class ProcessesPanelPresenterTest {
                                                 commandConsoleFactory,
                                                 dialogFactory,
                                                 consoleTreeContextMenuFactory,
-                                                commandTypeRegistry);
+                                                commandTypeRegistry,
+                                                execAgentCommandManager);
     }
 
     @Test
@@ -607,13 +612,7 @@ public class ProcessesPanelPresenterTest {
         when(commandConsoleFactory.create(anyObject(),
                                           any(org.eclipse.che.api.core.model.machine.Machine.class))).thenReturn(outputConsole);
 
+        when(execAgentCommandManager.getProcesses(anyBoolean())).thenReturn(promise);
         presenter.onWsAgentStarted(event);
-
-        verify(machineService.getProcesses(WORKSPACE_ID, MACHINE_ID)).then(processesCaptor.capture());
-        processesCaptor.getValue().apply(processes);
-
-        verify(outputConsole).listenToOutput(eq(OUTPUT_CHANNEL));
-        verify(outputConsole).attachToProcess(machineProcessDto);
     }
-
 }

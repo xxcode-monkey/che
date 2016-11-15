@@ -21,6 +21,7 @@ import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.api.machine.shared.dto.MachineLogMessageDto;
 import org.eclipse.che.api.machine.shared.dto.MachineProcessDto;
 import org.eclipse.che.api.machine.shared.dto.event.MachineStatusEvent;
+import org.eclipse.che.api.machine.shared.dto.execagent.GetProcessesResponseDto;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
@@ -34,6 +35,7 @@ import org.eclipse.che.ide.api.component.Component;
 import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.dialogs.MessageDialog;
+import org.eclipse.che.ide.api.machine.ExecAgentCommandManager;
 import org.eclipse.che.ide.api.machine.MachineManager;
 import org.eclipse.che.ide.api.machine.MachineServiceClient;
 import org.eclipse.che.ide.api.notification.NotificationManager;
@@ -79,7 +81,10 @@ import static org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEven
 import static org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent.EventType.STARTING;
 import static org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent.EventType.STOPPED;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
@@ -109,23 +114,21 @@ public class WorkspaceEventsHandlerTest {
     @Mock
     private DialogFactory                       dialogFactory;
     @Mock
-    private DtoUnmarshallerFactory              dtoUnmarshallerFactory;
+    private DtoUnmarshallerFactory                             dtoUnmarshallerFactory;
     @Mock
-    private Provider<MachineManager>            machineManagerProvider;
+    private Provider<MachineManager>                           machineManagerProvider;
     @Mock
-    private MessageLoader                       snapshotLoader;
+    private MessageLoader                                      snapshotLoader;
     @Mock
-    private Provider<DefaultWorkspaceComponent> wsComponentProvider;
+    private Provider<DefaultWorkspaceComponent>                wsComponentProvider;
     @Mock
-    private WorkspaceSnapshotCreator            snapshotCreator;
+    private WorkspaceSnapshotCreator                           snapshotCreator;
     @Mock
-    private WorkspaceServiceClient              workspaceServiceClient;
+    private WorkspaceServiceClient                             workspaceServiceClient;
     @Mock
-    private MachineServiceClient                machineServiceClient;
+    private Promise<List<MachineProcessDto>>                   machineProcessPromise;
     @Mock
-    private Promise<List<MachineProcessDto>>    processPromise;
-    @Mock
-    private StartWorkspaceNotification          startWorkspaceNotification;
+    private StartWorkspaceNotification                         startWorkspaceNotification;
     @Captor
     private ArgumentCaptor<Operation<List<MachineProcessDto>>> processCaptor;
 
@@ -164,9 +167,11 @@ public class WorkspaceEventsHandlerTest {
     private Promise<WorkspaceDto>                workspacePromise;
     @Mock
     private Promise<List<WorkspaceDto>>          workspacesPromise;
-
     @Mock
-    private AsyncRequestFactory                  asyncRequestFactory;
+    private ExecAgentCommandManager              execAgentCommandManager;
+    @Mock
+    private Promise<List<GetProcessesResponseDto>> processPromise;
+
     @Mock
     private LoaderPresenter                      loader;
 
@@ -187,13 +192,12 @@ public class WorkspaceEventsHandlerTest {
                                                             notificationManager,
                                                             messageBusProvider,
                                                             machineManagerProvider,
-                                                            machineServiceClient,
                                                             snapshotCreator,
                                                             workspaceServiceClient,
                                                             startWorkspaceNotification,
                                                             wsComponentProvider,
-                                                            asyncRequestFactory,
-															loader);
+                                                            loader,
+                                                            execAgentCommandManager);
         when(wsComponentProvider.get()).thenReturn(workspaceComponent);
         when(workspace.getId()).thenReturn(WORKSPACE_ID);
         when(workspaceStatusEvent.getWorkspaceId()).thenReturn(WORKSPACE_ID);
@@ -245,8 +249,7 @@ public class WorkspaceEventsHandlerTest {
         when(workspaceConfig.getEnvironments()).thenReturn(environments);
         MachineConfigDto devMachineConfig = mock(MachineConfigDto.class);
         when(devMachineConfig.getName()).thenReturn(MACHINE_NAME);
-
-        when(machineServiceClient.getProcesses(WORKSPACE_ID, MACHINE_NAME)).thenReturn(processPromise);
+        when(execAgentCommandManager.getProcesses(anyBoolean())).thenReturn(mock(Promise.class));
 
         workspaceEventsHandler.trackWorkspaceEvents(workspace, callback);
 
@@ -395,11 +398,12 @@ public class WorkspaceEventsHandlerTest {
         MachineConfigDto devMachineConfig = mock(MachineConfigDto.class);
         when(devMachineConfig.getName()).thenReturn(MACHINE_NAME);
 
-        when(machineServiceClient.getProcesses(WORKSPACE_ID, MACHINE_NAME)).thenReturn(processPromise);
+        when(execAgentCommandManager.getProcesses(anyBoolean())).thenReturn(processPromise);
 
         workspaceEventsHandler.trackWorkspaceEvents(workspace, callback);
         workspaceEventsHandler.wsAgentLogSubscriptionHandler.onMessageReceived("");
-        verify(processPromise).then(processCaptor.capture());
+
+        verify(processPromise).then(any(Operation.class));
 
         verify(eventBus).fireEvent(Matchers.<EnvironmentOutputEvent> anyObject());
     }

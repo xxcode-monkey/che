@@ -12,10 +12,11 @@ package org.eclipse.che.ide.extension.machine.client.perspective.widgets.machine
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 
-import org.eclipse.che.ide.api.machine.MachineServiceClient;
 import org.eclipse.che.api.machine.shared.dto.MachineProcessDto;
+import org.eclipse.che.api.machine.shared.dto.execagent.GetProcessesResponseDto;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.ide.api.machine.ExecAgentCommandManager;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -28,6 +29,7 @@ import java.util.List;
 
 import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -43,8 +45,6 @@ public class ProcessesPresenterTest {
     //constructor mocks
     @Mock
     private ProcessesView        view;
-    @Mock
-    private MachineServiceClient service;
 
     //additional mocks
     @Mock
@@ -53,9 +53,13 @@ public class ProcessesPresenterTest {
     private List<MachineProcessDto>          descriptors;
     @Mock
     private AcceptsOneWidget                 container;
+    @Mock
+    private ExecAgentCommandManager          execAgentCommandManager;
+    @Mock
+    private Promise<List<GetProcessesResponseDto>> promise;
 
     @Captor
-    private ArgumentCaptor<Operation<List<MachineProcessDto>>> operationCaptor;
+    private ArgumentCaptor<Operation<List<GetProcessesResponseDto>>> operationCaptor;
 
     @InjectMocks
     private ProcessesPresenter presenter;
@@ -67,16 +71,11 @@ public class ProcessesPresenterTest {
 
     @Test
     public void processesShouldBeGot() throws Exception {
-        when(service.getProcesses(WORKSPACE_ID, MACHINE_ID)).thenReturn(processPromise);
+        when(execAgentCommandManager.getProcesses(anyBoolean())).thenReturn(promise);
 
         presenter.showProcesses(WORKSPACE_ID, MACHINE_ID);
 
-        verify(service).getProcesses(WORKSPACE_ID, MACHINE_ID);
-
-        verify(processPromise).then(operationCaptor.capture());
-        operationCaptor.getValue().apply(descriptors);
-
-        verify(view).setProcesses(descriptors);
+        verify(promise).then(operationCaptor.capture());
     }
 
     @Test
