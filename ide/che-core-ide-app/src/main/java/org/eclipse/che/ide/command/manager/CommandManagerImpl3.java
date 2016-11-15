@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.command.manager;
 
 import elemental.util.ArrayOf;
+import elemental.util.Collections;
 
 import com.google.gwt.core.client.Callback;
 import com.google.inject.Inject;
@@ -22,7 +23,6 @@ import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseProvider;
-import org.eclipse.che.api.promises.client.js.JsPromiseError;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.command.ApplicableContext;
@@ -43,6 +43,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static org.eclipse.che.api.promises.client.js.JsPromiseError.create;
 import static org.eclipse.che.api.workspace.shared.Constants.COMMAND_PREVIEW_URL_ATTRIBUTE_NAME;
 
 /**
@@ -59,8 +60,7 @@ public class CommandManagerImpl3 implements CommandManager3, WsAgentComponent, W
     private final PromiseProvider                 promiseProvider;
 
     private final Map<String, ContextualCommand> commands;
-
-    private final Set<CommandChangedListener> commandChangedListeners;
+    private final Set<CommandChangedListener>    commandChangedListeners;
 
     @Inject
     public CommandManagerImpl3(CommandTypeRegistry commandTypeRegistry,
@@ -76,10 +76,15 @@ public class CommandManagerImpl3 implements CommandManager3, WsAgentComponent, W
         this.promiseProvider = promiseProvider;
 
         commands = new HashMap<>();
-
         commandChangedListeners = new HashSet<>();
 
         eventBus.addHandler(WorkspaceReadyEvent.getType(), this);
+    }
+
+    // TODO: just for eager instantiating
+    @Override
+    public void start(Callback<WsAgentComponent, Exception> callback) {
+        callback.onSuccess(this);
     }
 
     @Override
@@ -132,39 +137,38 @@ public class CommandManagerImpl3 implements CommandManager3, WsAgentComponent, W
     }
 
     @Override
-    public Promise<ContextualCommand> createCommand(String type, ApplicableContext applicableContext) {
-        final CommandType commandType = commandTypeRegistry.getCommandTypeById(type);
+    public Promise<ContextualCommand> createCommand(String commandTypeId, ApplicableContext applicableContext) {
+        final CommandType commandType = commandTypeRegistry.getCommandTypeById(commandTypeId);
 
         if (commandType == null) {
-            return promiseProvider.reject(JsPromiseError.create("Can't create command. Unknown command type: " + type));
+            return promiseProvider.reject(create("Can't create command. Unknown command type: " + commandTypeId));
         }
 
-        return createCommand(new ContextualCommand(getUniqueCommandName(type, "name"),
+        return createCommand(new ContextualCommand(getUniqueCommandName(commandTypeId, null),
                                                    commandType.getCommandLineTemplate(),
-                                                   type,
+                                                   commandTypeId,
                                                    applicableContext));
     }
 
     @Override
     public Promise<ContextualCommand> createCommand(ContextualCommand command) {
-        final String type = command.getType();
         final ApplicableContext applicableContext = command.getApplicableContext();
 
-        final CommandType commandType = commandTypeRegistry.getCommandTypeById(type);
+        final CommandType commandType = commandTypeRegistry.getCommandTypeById(command.getType());
 
         if (commandType == null) {
-            return promiseProvider.reject(JsPromiseError.create("Can't create command. Unknown command type: " + type));
+            return promiseProvider.reject(create("Can't create command. Unknown command type: " + command.getType()));
         }
 
-        final ContextualCommand newCommand = new ContextualCommand(getUniqueCommandName(type, command.getName()),
+        final ContextualCommand newCommand = new ContextualCommand(getUniqueCommandName(command.getType(), command.getName()),
                                                                    command.getCommandLine(),
-                                                                   type,
+                                                                   command.getType(),
                                                                    command.getAttributes(),
                                                                    command.getApplicableContext());
 
         newCommand.getAttributes().put(COMMAND_PREVIEW_URL_ATTRIBUTE_NAME, commandType.getPreviewUrlTemplate());
 
-        final List<Promise<CommandImpl>> commandPromises = new ArrayList<>();
+        final ArrayOf<Promise<?>> commandPromises = Collections.arrayOf();
 
         if (applicableContext.isWorkspaceApplicable()) {
             Promise<CommandImpl> p = workspaceCommandManagerDelegate.createCommand(newCommand).then(new Operation<CommandImpl>() {
@@ -174,11 +178,15 @@ public class CommandManagerImpl3 implements CommandManager3, WsAgentComponent, W
                 }
             });
 
-            commandPromises.add(p);
+            commandPromises.push(p);
         }
 
         for (final String projectPath : applicableContext.getApplicableProjects()) {
             final Project project = getProjectByPath(projectPath);
+
+            if (project == null) {
+                continue;
+            }
 
             Promise<CommandImpl> p = projectCommandManagerDelegate.createCommand(project, newCommand).then(new Operation<CommandImpl>() {
                 @Override
@@ -187,15 +195,10 @@ public class CommandManagerImpl3 implements CommandManager3, WsAgentComponent, W
                 }
             });
 
-            commandPromises.add(p);
+            commandPromises.push(p);
         }
 
-        Promise[] promisesArray = new Promise[commandPromises.size()];
-        for (Promise<CommandImpl> commandPromise : commandPromises) {
-            promisesArray[commandPromises.indexOf(commandPromise)] = commandPromise;
-        }
-
-        return promiseProvider.all2(promisesArray).then(new Function<ArrayOf<?>, ContextualCommand>() {
+        return promiseProvider.all2(commandPromises).then(new Function<ArrayOf<?>, ContextualCommand>() {
             @Override
             public ContextualCommand apply(ArrayOf<?> ignore) throws FunctionException {
                 commands.put(newCommand.getName(), newCommand);
@@ -207,23 +210,12 @@ public class CommandManagerImpl3 implements CommandManager3, WsAgentComponent, W
         });
     }
 
-    @Nullable
-    private Project getProjectByPath(String path) {
-        for (Project project : appContext.getProjects()) {
-            if (path.equals(project.getPath())) {
-                return project;
-            }
-        }
-
-        return null;
-    }
-
     @Override
-    public Promise<ContextualCommand> updateCommand(String commandName, final ContextualCommand commandToUpdate) {
+    public Promise<ContextualCommand> updateCommand(String commandName, ContextualCommand commandToUpdate) {
         final ContextualCommand existedCommand = commands.get(commandName);
 
         if (existedCommand == null) {
-            return promiseProvider.reject(JsPromiseError.create("Can't update command. Command " + commandName + " not found."));
+            return promiseProvider.reject(create("Can't update command. Command " + commandName + " not found."));
         }
 
 
@@ -255,85 +247,101 @@ public class CommandManagerImpl3 implements CommandManager3, WsAgentComponent, W
         });
     }
 
-    private Promise<ContextualCommand> updateCommand(ContextualCommand command) {
-        final ContextualCommand cmdWithCntx = commands.get(command.getName());
+    private Promise<ContextualCommand> updateCommand(ContextualCommand commandToUpdate) {
+        final ContextualCommand existedCommand = commands.get(commandToUpdate.getName());
 
-        if (cmdWithCntx == null) {
-            return promiseProvider.reject(JsPromiseError.create("Can't update command. Command " + command.getName() + " not found."));
+        if (existedCommand == null) {
+            return promiseProvider.reject(create("Can't update command. Command " + commandToUpdate.getName() + " not found."));
         }
 
-        final ApplicableContext applicableContext = cmdWithCntx.getApplicableContext();
+        final ApplicableContext applicableContext = existedCommand.getApplicableContext();
 
-        List<Promise<CommandImpl>> commandPromises = new ArrayList<>();
+        final ArrayOf<Promise<?>> commandPromises = Collections.arrayOf();
 
         if (applicableContext.isWorkspaceApplicable()) {
-            commandPromises.add(workspaceCommandManagerDelegate.updateCommand(command));
+            commandPromises.push(workspaceCommandManagerDelegate.updateCommand(commandToUpdate));
         }
 
         for (final String projectPath : applicableContext.getApplicableProjects()) {
             final Project project = getProjectByPath(projectPath);
 
             if (project != null) {
-                commandPromises.add(projectCommandManagerDelegate.updateCommand(project, command));
+                commandPromises.push(projectCommandManagerDelegate.updateCommand(project, commandToUpdate));
             }
         }
 
-        Promise[] projectPromisesArray = new Promise[commandPromises.size()];
-        for (Promise<CommandImpl> commandPromise : commandPromises) {
-            projectPromisesArray[commandPromises.indexOf(commandPromise)] = commandPromise;
-        }
-
-        return promiseProvider.all2(projectPromisesArray).then(new Function<ArrayOf<?>, ContextualCommand>() {
+        return promiseProvider.all2(commandPromises).then(new Function<ArrayOf<?>, ContextualCommand>() {
             @Override
             public ContextualCommand apply(ArrayOf<?> ignore) throws FunctionException {
-//                commands.put(cmdWithCntx.getName(), cmdWithCntx);
+                notifyCommandUpdated(existedCommand);
 
-                notifyCommandUpdated(cmdWithCntx);
-
-                return cmdWithCntx;
+                return existedCommand;
             }
         });
     }
 
     @Override
     public Promise<Void> removeCommand(final String commandName) {
-        final ContextualCommand cmdWithCntx = commands.get(commandName);
+        final ContextualCommand command = commands.get(commandName);
 
-        if (cmdWithCntx == null) {
-            return promiseProvider.reject(JsPromiseError.create("Can't remove command. Command " + commandName + " not found."));
+        if (command == null) {
+            return promiseProvider.reject(create("Can't remove command. Command " + commandName + " not found."));
         }
 
-        final ApplicableContext applicableContext = cmdWithCntx.getApplicableContext();
+        final ApplicableContext applicableContext = command.getApplicableContext();
 
-        List<Promise<Void>> commandPromises = new ArrayList<>();
+        final ArrayOf<Promise<?>> commandPromises = Collections.arrayOf();
 
         if (applicableContext.isWorkspaceApplicable()) {
-            commandPromises.add(workspaceCommandManagerDelegate.removeCommand(commandName));
+            final Promise<Void> p = workspaceCommandManagerDelegate.removeCommand(commandName).then(new Operation<Void>() {
+                @Override
+                public void apply(Void arg) throws OperationException {
+                    command.getApplicableContext().setWorkspaceApplicable(false);
+                }
+            });
+
+            commandPromises.push(p);
         }
 
         for (final String projectPath : applicableContext.getApplicableProjects()) {
             final Project project = getProjectByPath(projectPath);
 
-            if (project != null) {
-                commandPromises.add(projectCommandManagerDelegate.removeCommand(project, commandName));
+            if (project == null) {
+                continue;
             }
+
+            final Promise<Void> p = projectCommandManagerDelegate.removeCommand(project, commandName).then(new Operation<Void>() {
+                @Override
+                public void apply(Void arg) throws OperationException {
+                    command.getApplicableContext().removeApplicableProject(projectPath);
+                }
+            });
+
+            commandPromises.push(p);
         }
 
-        Promise[] projectPromisesArray = new Promise[commandPromises.size()];
-        for (Promise<Void> commandPromise : commandPromises) {
-            projectPromisesArray[commandPromises.indexOf(commandPromise)] = commandPromise;
-        }
-
-        return promiseProvider.all2(projectPromisesArray).then(new Function<ArrayOf<?>, Void>() {
+        return promiseProvider.all2(commandPromises).then(new Function<ArrayOf<?>, Void>() {
             @Override
-            public Void apply(ArrayOf<?> ignore) throws FunctionException {
-                commands.remove(cmdWithCntx.getName());
+            public Void apply(ArrayOf<?> arg) throws FunctionException {
+                commands.remove(command.getName());
 
-                notifyCommandRemoved(cmdWithCntx);
+                notifyCommandRemoved(command);
 
                 return null;
             }
         });
+    }
+
+    @Nullable
+    private Project getProjectByPath(String path) {
+        // TODO: should return all sub-projects (modules) also but not only root projects
+        for (Project project : appContext.getProjects()) {
+            if (path.equals(project.getPath())) {
+                return project;
+            }
+        }
+
+        return null;
     }
 
     @Override
@@ -368,7 +376,7 @@ public class CommandManagerImpl3 implements CommandManager3, WsAgentComponent, W
      * Returns {@code customName} if it's unique within the given {@code customType}
      * or newly generated name if it isn't unique within the given {@code customType}.
      */
-    private String getUniqueCommandName(String customType, String customName) {
+    private String getUniqueCommandName(String customType, @Nullable String customName) {
         final CommandType commandType = commandTypeRegistry.getCommandTypeById(customType);
         final Set<String> commandNames = commands.keySet();
 
@@ -394,11 +402,5 @@ public class CommandManagerImpl3 implements CommandManager3, WsAgentComponent, W
         }
 
         return newCommandName;
-    }
-
-    // TODO: just for eager instantiating
-    @Override
-    public void start(Callback<WsAgentComponent, Exception> callback) {
-        callback.onSuccess(this);
     }
 }

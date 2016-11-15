@@ -55,6 +55,7 @@ public class ApplicableContext {
         this.fileApplicable = applicable;
     }
 
+    /** Returns <b>immutable</b> list of the paths of the projects's to which command may be applied. */
     public List<String> getApplicableProjects() {
         return unmodifiableList(applicableProjects);
     }
