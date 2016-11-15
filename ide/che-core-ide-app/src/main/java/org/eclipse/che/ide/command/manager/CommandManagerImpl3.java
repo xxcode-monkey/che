@@ -28,7 +28,6 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.command.ApplicableContext;
 import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.command.CommandManager3;
-import org.eclipse.che.ide.api.command.CommandPage;
 import org.eclipse.che.ide.api.command.CommandType;
 import org.eclipse.che.ide.api.command.CommandTypeRegistry;
 import org.eclipse.che.ide.api.command.CommandWithContext;
@@ -37,7 +36,6 @@ import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.workspace.WorkspaceReadyEvent;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -127,7 +125,7 @@ public class CommandManagerImpl3 implements CommandManager3, WsAgentComponent, W
         // return copy of the commands in order to prevent it modification directly
         List<CommandWithContext> list = new ArrayList<>(commands.size());
         for (CommandWithContext command : commands.values()) {
-            list.add(command);
+            list.add(new CommandWithContext(command));
         }
 
         return list;
@@ -135,7 +133,17 @@ public class CommandManagerImpl3 implements CommandManager3, WsAgentComponent, W
 
     @Override
     public Promise<CommandWithContext> createCommand(final String type, final ApplicableContext applicableContext) {
-        return createCommand(new CommandWithContext(getUniqueCommandName(type, "name"), "cmd", type));
+        final CommandType commandType = commandTypeRegistry.getCommandTypeById(type);
+
+        // should not happen, but let's play safe
+        if (commandType == null) {
+            return promiseProvider.reject(JsPromiseError.create("Can't create command. Unknown command type: " + type));
+        }
+
+        return createCommand(new CommandWithContext(getUniqueCommandName(type, "name"),
+                                                    commandType.getCommandLineTemplate(),
+                                                    type,
+                                                    applicableContext));
     }
 
     @Override
@@ -150,17 +158,21 @@ public class CommandManagerImpl3 implements CommandManager3, WsAgentComponent, W
             return promiseProvider.reject(JsPromiseError.create("Can't create command. Unknown command type: " + type));
         }
 
-        final CommandWithContext cmdWithCntx = new CommandWithContext(getUniqueCommandName(type, "name"), "cmd", type);
+        final CommandWithContext newCommand = new CommandWithContext(getUniqueCommandName(type, command.getName()),
+                                                                     command.getCommandLine(),
+                                                                     type,
+                                                                     command.getAttributes(),
+                                                                     command.getApplicableContext());
 
-        cmdWithCntx.getAttributes().put(COMMAND_PREVIEW_URL_ATTRIBUTE_NAME, commandType.getPreviewUrlTemplate());
+        newCommand.getAttributes().put(COMMAND_PREVIEW_URL_ATTRIBUTE_NAME, commandType.getPreviewUrlTemplate());
 
         final List<Promise<CommandImpl>> commandPromises = new ArrayList<>();
 
         if (applicableContext.isWorkspaceApplicable()) {
-            Promise<CommandImpl> p = workspaceCommandManagerDelegate.createCommand(cmdWithCntx).then(new Operation<CommandImpl>() {
+            Promise<CommandImpl> p = workspaceCommandManagerDelegate.createCommand(newCommand).then(new Operation<CommandImpl>() {
                 @Override
                 public void apply(CommandImpl arg) throws OperationException {
-                    cmdWithCntx.getApplicableContext().setWorkspaceApplicable(true);
+                    newCommand.getApplicableContext().setWorkspaceApplicable(true);
                 }
             });
 
@@ -170,10 +182,10 @@ public class CommandManagerImpl3 implements CommandManager3, WsAgentComponent, W
         for (final String projectPath : applicableContext.getApplicableProjects()) {
             final Project project = getProjectByPath(projectPath);
 
-            Promise<CommandImpl> p = projectCommandManagerDelegate.createCommand(project, cmdWithCntx).then(new Operation<CommandImpl>() {
+            Promise<CommandImpl> p = projectCommandManagerDelegate.createCommand(project, newCommand).then(new Operation<CommandImpl>() {
                 @Override
                 public void apply(CommandImpl arg) throws OperationException {
-                    cmdWithCntx.getApplicableContext().addApplicableProject(projectPath);
+                    newCommand.getApplicableContext().addApplicableProject(projectPath);
                 }
             });
 
@@ -188,11 +200,11 @@ public class CommandManagerImpl3 implements CommandManager3, WsAgentComponent, W
         return promiseProvider.all2(promisesArray).then(new Function<ArrayOf<?>, CommandWithContext>() {
             @Override
             public CommandWithContext apply(ArrayOf<?> ignore) throws FunctionException {
-                commands.put(cmdWithCntx.getName(), cmdWithCntx);
+                commands.put(newCommand.getName(), newCommand);
 
-                notifyCommandAdded(cmdWithCntx);
+                notifyCommandAdded(newCommand);
 
-                return cmdWithCntx;
+                return newCommand;
             }
         });
     }
@@ -209,31 +221,35 @@ public class CommandManagerImpl3 implements CommandManager3, WsAgentComponent, W
     }
 
     @Override
-    public Promise<CommandWithContext> updateCommand(String commandName, final CommandWithContext command) {
+    public Promise<CommandWithContext> updateCommand(String commandName, final CommandWithContext commandToUpdate) {
+        final CommandWithContext existedCommand = commands.get(commandName);
 
-        final CommandWithContext cmdWithCntx = commands.get(commandName);
-
-        if (cmdWithCntx == null) {
+        if (existedCommand == null) {
             return promiseProvider.reject(JsPromiseError.create("Can't update command. Command " + commandName + " not found."));
         }
 
 
         // if renamed - remove/create
-        if (!commandName.equals(command.getName())) {
-            return removeCommand(commandName).then(createCommand(command)).then(new Operation<CommandWithContext>() {
-                @Override
-                public void apply(CommandWithContext arg) throws OperationException {
-                    notifyCommandUpdated(arg);
-                }
-            });
+        if (!commandName.equals(commandToUpdate.getName())) {
+            return removeCommand(commandName).then(createCommand(commandToUpdate));
         }
 
 
         // if applicable context changed - remove/create
+        final ApplicableContext oldApplicableContext = existedCommand.getApplicableContext();
+        final ApplicableContext newApplicableContext = commandToUpdate.getApplicableContext();
+        if (!oldApplicableContext.isWorkspaceApplicable() && newApplicableContext.isWorkspaceApplicable()) {
+            // create workspace command
+        } else if (oldApplicableContext.isWorkspaceApplicable() && !newApplicableContext.isWorkspaceApplicable()) {
+            // remove workspace command
+        }
+
+        // check projects in applicable context
+        // create/remove project commands
 
 
         // in other cases - just update
-        return updateCommand(command).then(new Operation<CommandWithContext>() {
+        return updateCommand(commandToUpdate).then(new Operation<CommandWithContext>() {
             @Override
             public void apply(CommandWithContext arg) throws OperationException {
                 notifyCommandUpdated(arg);
@@ -320,12 +336,6 @@ public class CommandManagerImpl3 implements CommandManager3, WsAgentComponent, W
                 return null;
             }
         });
-    }
-
-    @Override
-    public List<CommandPage> getPages(String type) {
-        CommandType commandType = commandTypeRegistry.getCommandTypeById(type);
-        return commandType != null ? commandType.getPages() : Collections.<CommandPage>emptyList();
     }
 
     @Override

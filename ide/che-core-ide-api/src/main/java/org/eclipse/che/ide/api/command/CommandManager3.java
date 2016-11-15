@@ -32,9 +32,9 @@ public interface CommandManager3 {
     Promise<CommandWithContext> createCommand(String type, ApplicableContext applicableContext);
 
     /**
-     * Creates new command with the specified arguments.
+     * Creates copy of the given command.
      * <p><b>Note</b> that name of the created command may differ from
-     * the specified {@code desirableName} in order to prevent name duplication.
+     * the given {@code command}'s name in order to prevent name duplication.
      */
     Promise<CommandWithContext> createCommand(CommandWithContext command);
 
@@ -47,9 +47,6 @@ public interface CommandManager3 {
 
     /** Removes command with the specified {@code commandName}. */
     Promise<Void> removeCommand(String commandName);
-
-    /** Returns the pages for editing command of the specified {@code type}. */
-    List<CommandPage> getPages(String type);
 
     void addCommandChangedListener(CommandChangedListener listener);
 

@@ -17,6 +17,8 @@ import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
 
 import org.eclipse.che.ide.api.data.tree.Node;
+import org.eclipse.che.ide.command.explorer.node.CommandNode;
+import org.eclipse.che.ide.command.explorer.node.CommandTypeNode;
 import org.eclipse.che.ide.ui.smartTree.Tree;
 import org.eclipse.che.ide.ui.smartTree.TreeStyles;
 import org.eclipse.che.ide.ui.smartTree.presentation.DefaultPresentationRenderer;

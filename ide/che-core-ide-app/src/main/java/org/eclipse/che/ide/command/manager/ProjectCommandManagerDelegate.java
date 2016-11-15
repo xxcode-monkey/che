@@ -120,18 +120,6 @@ class ProjectCommandManagerDelegate {
     }
 
     /**
-     * Creates new command with the specified arguments.
-     * <p><b>Note</b> that name of the created command may differ from
-     * the specified {@code desirableName} in order to prevent name duplication.
-     */
-    Promise<CommandImpl> createCommand(String desirableName,
-                                       String commandLine,
-                                       String type,
-                                       Map<String, String> attributes) {
-        return null;
-    }
-
-    /**
      * Updates the command with the specified {@code name} by replacing it with the given {@code command}.
      * <p><b>Note</b> that name of the updated command may differ from the name provided by the given {@code command}
      * in order to prevent name duplication.

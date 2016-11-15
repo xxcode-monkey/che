@@ -64,6 +64,9 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
 
     private final List<CommandsExplorerPage> pages;
 
+    // stores initial name of the currently edited command
+    private String editedCommandNameInitial;
+
     @Inject
     public CommandsExplorerPresenter(CommandsExplorerView view,
                                      WorkspaceAgent workspaceAgent,
@@ -144,6 +147,10 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
 
     @Override
     public void onCommandSelected(CommandWithContext command) {
+        // save initial value of the edited command name
+        // in order to be able to detect whether the command was renamed during editing or not
+        editedCommandNameInitial = command.getName();
+
         // initialize all pages with the selected command
         for (CommandsExplorerPage page : pages) {
             page.setDirtyStateListener(this);
@@ -159,8 +166,7 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
 
     @Override
     public void onCommandSave(CommandWithContext command) {
-        // TODO
-        commandManager.updateCommand(/*"previous name"*/command.getName(), command).catchError(new Operation<PromiseError>() {
+        commandManager.updateCommand(editedCommandNameInitial, command).catchError(new Operation<PromiseError>() {
             @Override
             public void apply(PromiseError arg) throws OperationException {
                 // TODO: replace it with notification

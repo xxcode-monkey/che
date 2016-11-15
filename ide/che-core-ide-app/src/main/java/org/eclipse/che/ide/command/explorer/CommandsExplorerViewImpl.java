@@ -29,6 +29,9 @@ import org.eclipse.che.ide.api.command.CommandType;
 import org.eclipse.che.ide.api.command.CommandWithContext;
 import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.api.parts.base.BaseView;
+import org.eclipse.che.ide.command.explorer.node.CommandNode;
+import org.eclipse.che.ide.command.explorer.node.CommandNodeFactory;
+import org.eclipse.che.ide.command.explorer.node.CommandTypeNode;
 import org.eclipse.che.ide.ui.radiobuttongroup.RadioButtonGroup;
 import org.eclipse.che.ide.ui.smartTree.NodeLoader;
 import org.eclipse.che.ide.ui.smartTree.NodeStorage;
@@ -49,6 +52,7 @@ public class CommandsExplorerViewImpl extends BaseView<CommandsExplorerView.Acti
 
     private static final CommandsExplorerViewImplUiBinder UI_BINDER = GWT.create(CommandsExplorerViewImplUiBinder.class);
     private final CommandsTreeRenderer treeRenderer;
+    private final CommandNodeFactory   commandNodeFactory;
 
     @UiField(provided = true)
     Tree commandsTree;
@@ -69,8 +73,11 @@ public class CommandsExplorerViewImpl extends BaseView<CommandsExplorerView.Acti
 
     @Inject
     public CommandsExplorerViewImpl(org.eclipse.che.ide.Resources coreResources,
-                                    CommandsExplorerResources resources) {
+                                    CommandsExplorerResources resources,
+                                    CommandNodeFactory commandNodeFactory) {
         super(coreResources);
+
+        this.commandNodeFactory = commandNodeFactory;
 
         resources.styles().ensureInjected();
 
@@ -138,7 +145,7 @@ public class CommandsExplorerViewImpl extends BaseView<CommandsExplorerView.Acti
         for (Map.Entry<CommandType, List<CommandWithContext>> entry : workspaceCommands.entrySet()) {
             List<CommandNode> commandNodes = new ArrayList<>(entry.getValue().size());
             for (CommandWithContext command : entry.getValue()) {
-                commandNodes.add(new CommandNode(command));
+                commandNodes.add(commandNodeFactory.newCommandNode(command));
             }
 
             CommandTypeNode commandTypeNode = new CommandTypeNode(entry.getKey(), commandNodes);

@@ -23,8 +23,9 @@ import com.google.inject.Singleton;
 import org.eclipse.che.ide.api.command.CommandType;
 import org.eclipse.che.ide.api.command.CommandTypeRegistry;
 import org.eclipse.che.ide.api.command.CommandWithContext;
-import org.eclipse.che.ide.command.explorer.CommandNode;
-import org.eclipse.che.ide.command.explorer.CommandTypeNode;
+import org.eclipse.che.ide.command.explorer.node.CommandNode;
+import org.eclipse.che.ide.command.explorer.node.CommandNodeFactory;
+import org.eclipse.che.ide.command.explorer.node.CommandTypeNode;
 import org.eclipse.che.ide.ui.smartTree.NodeLoader;
 import org.eclipse.che.ide.ui.smartTree.NodeStorage;
 import org.eclipse.che.ide.ui.smartTree.Tree;
@@ -45,6 +46,7 @@ public class CommandsPaletteViewImpl extends Window implements CommandsPaletteVi
 
     private static final CommandsPaletteViewImplUiBinder UI_BINDER = GWT.create(CommandsPaletteViewImplUiBinder.class);
     private final CommandTypeRegistry commandTypeRegistry;
+    private final CommandNodeFactory  commandNodeFactory;
 
     @UiField
     TextBox filterField;
@@ -55,8 +57,9 @@ public class CommandsPaletteViewImpl extends Window implements CommandsPaletteVi
     private ActionDelegate delegate;
 
     @Inject
-    public CommandsPaletteViewImpl(CommandTypeRegistry commandTypeRegistry) {
+    public CommandsPaletteViewImpl(CommandTypeRegistry commandTypeRegistry, CommandNodeFactory commandNodeFactory) {
         this.commandTypeRegistry = commandTypeRegistry;
+        this.commandNodeFactory = commandNodeFactory;
 
         commandsTree = new Tree(new NodeStorage(), new NodeLoader());
 
@@ -102,7 +105,7 @@ public class CommandsPaletteViewImpl extends Window implements CommandsPaletteVi
         for (Map.Entry<CommandType, List<CommandWithContext>> entry : workspaceCommands.entrySet()) {
             List<CommandNode> commandNodes = new ArrayList<>(entry.getValue().size());
             for (CommandWithContext command : entry.getValue()) {
-                commandNodes.add(new CommandNode(command));
+                commandNodes.add(commandNodeFactory.newCommandNode(command));
             }
 
             CommandTypeNode commandTypeNode = new CommandTypeNode(entry.getKey(), commandNodes);

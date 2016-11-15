@@ -8,11 +8,17 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.command.explorer;
+package org.eclipse.che.ide.command.explorer.node;
+
+import com.google.inject.Inject;
+import com.google.inject.assistedinject.Assisted;
 
 import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.command.CommandManager;
 import org.eclipse.che.ide.api.command.CommandWithContext;
 import org.eclipse.che.ide.api.data.tree.AbstractTreeNode;
+import org.eclipse.che.ide.api.data.tree.HasAction;
 import org.eclipse.che.ide.api.data.tree.Node;
 
 import java.util.List;
@@ -22,11 +28,16 @@ import java.util.List;
  *
  * @author Artem Zatsarynnyi
  */
-public class CommandNode extends AbstractTreeNode {
+public class CommandNode extends AbstractTreeNode implements HasAction {
 
+    private final CommandManager     commandManager;
+    private final AppContext         appContext;
     private final CommandWithContext command;
 
-    public CommandNode(CommandWithContext command) {
+    @Inject
+    public CommandNode(CommandManager commandManager, AppContext appContext, @Assisted CommandWithContext command) {
+        this.commandManager = commandManager;
+        this.appContext = appContext;
         this.command = command;
     }
 
@@ -47,5 +58,10 @@ public class CommandNode extends AbstractTreeNode {
 
     public CommandWithContext getCommand() {
         return command;
+    }
+
+    @Override
+    public void actionPerformed() {
+        commandManager.executeCommand(command, appContext.getDevMachine());
     }
 }

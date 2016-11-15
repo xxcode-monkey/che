@@ -24,19 +24,32 @@ public class CommandWithContext extends CommandImpl {
 
     private final ApplicableContext applicableContext;
 
-    public CommandWithContext(String name, String commandLine, String type) {
+    public CommandWithContext(String name, String commandLine, String type, ApplicableContext applicableContext) {
         super(name, commandLine, type);
-        applicableContext = new ApplicableContext();
+
+        this.applicableContext = applicableContext;
     }
 
-    public CommandWithContext(String name, String commandLine, String type, Map<String, String> attributes) {
+    public CommandWithContext(String name,
+                              String commandLine,
+                              String type,
+                              Map<String, String> attributes,
+                              ApplicableContext applicableContext) {
         super(name, commandLine, type, attributes);
-        applicableContext = new ApplicableContext();
+
+        this.applicableContext = applicableContext;
     }
 
     public CommandWithContext(Command command) {
         super(command);
+
         applicableContext = new ApplicableContext();
+    }
+
+    public CommandWithContext(CommandWithContext command) {
+        super(command);
+
+        this.applicableContext = command.getApplicableContext();
     }
 
     /** Returns command's applicable context. */
