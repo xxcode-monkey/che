@@ -21,7 +21,7 @@
             <g:TextBox width="100%" ui:field="filterField"/>
         </g:north>
         <g:center>
-            <che:smartTree.Tree ui:field="workspaceCommandsTree"/>
+            <che:smartTree.Tree ui:field="commandsTree"/>
         </g:center>
     </g:DockLayoutPanel>
 </ui:UiBinder>

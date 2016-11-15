@@ -57,10 +57,11 @@ public interface CommandManager3 {
 
     /** Listener that will be called when command has been changed. */
     interface CommandChangedListener {
-        void onCommandAdded(CommandImpl command);
 
-        void onCommandUpdated(CommandImpl command);
+        void onCommandAdded(CommandWithContext command);
 
-        void onCommandRemoved(CommandImpl command);
+        void onCommandUpdated(CommandWithContext command);
+
+        void onCommandRemoved(CommandWithContext command);
     }
 }

@@ -95,14 +95,14 @@ class WorkspaceCommandManagerDelegate {
      * <p><b>Note</b> that name of the updated command may differ from the name provided by the given {@code command}
      * in order to prevent name duplication.
      */
-    Promise<CommandImpl> updateCommand(String name, final CommandImpl command) {
+    Promise<CommandImpl> updateCommand(final CommandImpl command) {
         final CommandDto commandDto = dtoFactory.createDto(CommandDto.class)
                                                 .withName(command.getName())
                                                 .withCommandLine(command.getCommandLine())
                                                 .withType(command.getType())
                                                 .withAttributes(command.getAttributes());
 
-        return workspaceServiceClient.updateCommand(appContext.getWorkspaceId(), name, commandDto)
+        return workspaceServiceClient.updateCommand(appContext.getWorkspaceId(), command.getName(), commandDto)
                                      .then(new Function<WorkspaceDto, CommandImpl>() {
                                          @Override
                                          public CommandImpl apply(WorkspaceDto arg) throws FunctionException {

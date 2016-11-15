@@ -136,16 +136,18 @@ class ProjectCommandManagerDelegate {
      * <p><b>Note</b> that name of the updated command may differ from the name provided by the given {@code command}
      * in order to prevent name duplication.
      */
-    Promise<CommandImpl> updateCommand(Project project, String name, final CommandImpl command) {
+    Promise<CommandImpl> updateCommand(Project project, final CommandImpl command) {
         final List<CommandImpl> projectCommands = getCommands(project);
 
         if (projectCommands.isEmpty()) {
-            return Promises.reject(JsPromiseError.create("Command " + name + " isn't associated with the project " + project.getName()));
+            return Promises.reject(JsPromiseError.create("Command " + command.getName() + " isn't associated with the project " +
+                                                         project.getName()));
         }
 
         final List<CommandImpl> commandsToUpdate = new ArrayList<>();
         for (CommandImpl projectCommand : projectCommands) {
-            if (!name.equals(projectCommand.getName())) {
+            // skip existed command with the same name
+            if (!command.getName().equals(projectCommand.getName())) {
                 commandsToUpdate.add(projectCommand);
             }
         }

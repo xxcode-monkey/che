@@ -22,7 +22,6 @@ import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.command.ApplicableContext;
-import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.command.CommandManager3;
 import org.eclipse.che.ide.api.command.CommandType;
 import org.eclipse.che.ide.api.command.CommandTypeRegistry;
@@ -161,7 +160,7 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
     @Override
     public void onCommandSave(CommandWithContext command) {
         // TODO
-        commandManager.updateCommand("previous name", command).catchError(new Operation<PromiseError>() {
+        commandManager.updateCommand(/*"previous name"*/command.getName(), command).catchError(new Operation<PromiseError>() {
             @Override
             public void apply(PromiseError arg) throws OperationException {
                 // TODO: replace it with notification
@@ -236,17 +235,17 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
     }
 
     @Override
-    public void onCommandAdded(CommandImpl command) {
+    public void onCommandAdded(CommandWithContext command) {
         refreshView();
     }
 
     @Override
-    public void onCommandUpdated(CommandImpl command) {
+    public void onCommandUpdated(CommandWithContext command) {
         refreshView();
     }
 
     @Override
-    public void onCommandRemoved(CommandImpl command) {
+    public void onCommandRemoved(CommandWithContext command) {
         refreshView();
     }
 

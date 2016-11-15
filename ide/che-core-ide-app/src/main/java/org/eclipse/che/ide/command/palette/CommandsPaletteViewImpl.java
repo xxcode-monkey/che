@@ -20,7 +20,6 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.command.CommandType;
 import org.eclipse.che.ide.api.command.CommandTypeRegistry;
 import org.eclipse.che.ide.api.command.CommandWithContext;
@@ -51,7 +50,7 @@ public class CommandsPaletteViewImpl extends Window implements CommandsPaletteVi
     TextBox filterField;
 
     @UiField(provided = true)
-    Tree workspaceCommandsTree;
+    Tree commandsTree;
 
     private ActionDelegate delegate;
 
@@ -59,7 +58,7 @@ public class CommandsPaletteViewImpl extends Window implements CommandsPaletteVi
     public CommandsPaletteViewImpl(CommandTypeRegistry commandTypeRegistry) {
         this.commandTypeRegistry = commandTypeRegistry;
 
-        workspaceCommandsTree = new Tree(new NodeStorage(), new NodeLoader());
+        commandsTree = new Tree(new NodeStorage(), new NodeLoader());
 
         setWidget(UI_BINDER.createAndBindUi(this));
 
@@ -98,7 +97,7 @@ public class CommandsPaletteViewImpl extends Window implements CommandsPaletteVi
     }
 
     private void renderWorkspaceCommands(Map<CommandType, List<CommandWithContext>> workspaceCommands) {
-        workspaceCommandsTree.getNodeStorage().clear();
+        commandsTree.getNodeStorage().clear();
 
         for (Map.Entry<CommandType, List<CommandWithContext>> entry : workspaceCommands.entrySet()) {
             List<CommandNode> commandNodes = new ArrayList<>(entry.getValue().size());
@@ -107,10 +106,10 @@ public class CommandsPaletteViewImpl extends Window implements CommandsPaletteVi
             }
 
             CommandTypeNode commandTypeNode = new CommandTypeNode(entry.getKey(), commandNodes);
-            workspaceCommandsTree.getNodeStorage().add(commandTypeNode);
+            commandsTree.getNodeStorage().add(commandTypeNode);
         }
 
-        workspaceCommandsTree.expandAll();
+        commandsTree.expandAll();
     }
 
     @Override

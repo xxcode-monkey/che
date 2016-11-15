@@ -108,6 +108,11 @@ public class CommandManagerImpl3 implements CommandManager3, WsAgentComponent, W
                             commandWithContext = new CommandWithContext(projectCommand);
 
                             commands.put(commandWithContext.getName(), commandWithContext);
+                        } else {
+                            // TODO: if workspace contains command with the same name
+                            // need to check commands equality
+//                            if (projectCommand.equals(commandWithContext)) {
+//                            }
                         }
 
                         commandWithContext.getApplicableContext().addApplicableProject(project.getPath());
@@ -206,15 +211,41 @@ public class CommandManagerImpl3 implements CommandManager3, WsAgentComponent, W
     @Override
     public Promise<CommandWithContext> updateCommand(String commandName, final CommandWithContext command) {
 
-        // TODO
-        // if renamed - remove/create
-        // if applicable context changed - remove/create
-        // in other cases - just update
-
         final CommandWithContext cmdWithCntx = commands.get(commandName);
 
         if (cmdWithCntx == null) {
             return promiseProvider.reject(JsPromiseError.create("Can't update command. Command " + commandName + " not found."));
+        }
+
+
+        // if renamed - remove/create
+        if (!commandName.equals(command.getName())) {
+            return removeCommand(commandName).then(createCommand(command)).then(new Operation<CommandWithContext>() {
+                @Override
+                public void apply(CommandWithContext arg) throws OperationException {
+                    notifyCommandUpdated(arg);
+                }
+            });
+        }
+
+
+        // if applicable context changed - remove/create
+
+
+        // in other cases - just update
+        return updateCommand(command).then(new Operation<CommandWithContext>() {
+            @Override
+            public void apply(CommandWithContext arg) throws OperationException {
+                notifyCommandUpdated(arg);
+            }
+        });
+    }
+
+    private Promise<CommandWithContext> updateCommand(CommandWithContext command) {
+        final CommandWithContext cmdWithCntx = commands.get(command.getName());
+
+        if (cmdWithCntx == null) {
+            return promiseProvider.reject(JsPromiseError.create("Can't update command. Command " + command.getName() + " not found."));
         }
 
         final ApplicableContext applicableContext = cmdWithCntx.getApplicableContext();
@@ -222,29 +253,14 @@ public class CommandManagerImpl3 implements CommandManager3, WsAgentComponent, W
         List<Promise<CommandImpl>> commandPromises = new ArrayList<>();
 
         if (applicableContext.isWorkspaceApplicable()) {
-            Promise<CommandImpl> p = workspaceCommandManagerDelegate.updateCommand(commandName, command).then(new Operation<CommandImpl>() {
-                @Override
-                public void apply(CommandImpl arg) throws OperationException {
-                    // TODO
-                }
-            });
-
-            commandPromises.add(p);
+            commandPromises.add(workspaceCommandManagerDelegate.updateCommand(command));
         }
 
         for (final String projectPath : applicableContext.getApplicableProjects()) {
             final Project project = getProjectByPath(projectPath);
 
             if (project != null) {
-                Promise<CommandImpl> p =
-                        projectCommandManagerDelegate.updateCommand(project, commandName, command).then(new Operation<CommandImpl>() {
-                            @Override
-                            public void apply(CommandImpl arg) throws OperationException {
-                                // TODO
-                            }
-                        });
-
-                commandPromises.add(p);
+                commandPromises.add(projectCommandManagerDelegate.updateCommand(project, command));
             }
         }
 
@@ -256,9 +272,7 @@ public class CommandManagerImpl3 implements CommandManager3, WsAgentComponent, W
         return promiseProvider.all2(projectPromisesArray).then(new Function<ArrayOf<?>, CommandWithContext>() {
             @Override
             public CommandWithContext apply(ArrayOf<?> ignore) throws FunctionException {
-
-                // TODO
-//                commands.remove(cmdWithCntx.getName());
+//                commands.put(cmdWithCntx.getName(), cmdWithCntx);
 
                 notifyCommandUpdated(cmdWithCntx);
 
@@ -324,19 +338,19 @@ public class CommandManagerImpl3 implements CommandManager3, WsAgentComponent, W
         commandChangedListeners.remove(listener);
     }
 
-    private void notifyCommandAdded(CommandImpl command) {
+    private void notifyCommandAdded(CommandWithContext command) {
         for (CommandChangedListener listener : commandChangedListeners) {
             listener.onCommandAdded(command);
         }
     }
 
-    private void notifyCommandRemoved(CommandImpl command) {
+    private void notifyCommandRemoved(CommandWithContext command) {
         for (CommandChangedListener listener : commandChangedListeners) {
             listener.onCommandRemoved(command);
         }
     }
 
-    private void notifyCommandUpdated(CommandImpl command) {
+    private void notifyCommandUpdated(CommandWithContext command) {
         for (CommandChangedListener listener : commandChangedListeners) {
             listener.onCommandUpdated(command);
         }
