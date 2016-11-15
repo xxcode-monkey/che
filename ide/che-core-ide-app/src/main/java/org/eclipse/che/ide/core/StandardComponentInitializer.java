@@ -663,6 +663,18 @@ public class StandardComponentInitializer {
         DefaultActionGroup runGroup = (DefaultActionGroup)actionManager.getAction(IdeActions.GROUP_RUN);
         runGroup.add(showCommandsPaletteAction);
 
+        DefaultActionGroup editorContextMenuGroup = new DefaultActionGroup(actionManager);
+        actionManager.registerAction(IdeActions.GROUP_EDITOR_CONTEXT_MENU, editorContextMenuGroup);
+
+        editorContextMenuGroup.add(undoAction);
+        editorContextMenuGroup.add(redoAction);
+        editorContextMenuGroup.addSeparator();
+        editorContextMenuGroup.add(formatterAction);
+
+        editorContextMenuGroup.addSeparator();
+        editorContextMenuGroup.add(fullTextSearchAction);
+        editorContextMenuGroup.add(closeActiveEditorAction);
+
         // Define hot-keys
         keyBinding.getGlobal().addKey(new KeyBuilder().action().alt().charCode('n').build(), "navigateToFile");
         keyBinding.getGlobal().addKey(new KeyBuilder().action().charCode('F').build(), "fullTextSearch");
