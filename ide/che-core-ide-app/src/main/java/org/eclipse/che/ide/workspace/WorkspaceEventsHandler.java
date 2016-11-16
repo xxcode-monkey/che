@@ -215,7 +215,8 @@ public class WorkspaceEventsHandler {
      */
     private void restoreDevMachineLogs(final Machine devMachine) {
         if (devMachine != null) {
-            execAgentCommandManager.getProcesses(false).then(new Operation<List<GetProcessesResponseDto>>() {
+            final String devMachineId = devMachine.getId();
+            execAgentCommandManager.getProcesses(devMachineId, false).then(new Operation<List<GetProcessesResponseDto>>() {
                 @Override
                 public void apply(List<GetProcessesResponseDto> processes) throws OperationException {
                     for (GetProcessesResponseDto process : processes) {
@@ -230,7 +231,7 @@ public class WorkspaceEventsHandler {
                             int skip = 0;
                             ProcessLogsOperation operation = new ProcessLogsOperation(devMachine);
 
-                            execAgentCommandManager.getProcessLogs(pid, from, till, limit, skip).then(operation);
+                            execAgentCommandManager.getProcessLogs(devMachineId, pid, from, till, limit, skip).then(operation);
                         }
                     }
                 }

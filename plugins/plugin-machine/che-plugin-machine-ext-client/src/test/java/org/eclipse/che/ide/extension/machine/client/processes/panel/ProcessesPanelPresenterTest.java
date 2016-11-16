@@ -612,7 +612,7 @@ public class ProcessesPanelPresenterTest {
         when(commandConsoleFactory.create(anyObject(),
                                           any(org.eclipse.che.api.core.model.machine.Machine.class))).thenReturn(outputConsole);
 
-        when(execAgentCommandManager.getProcesses(anyBoolean())).thenReturn(promise);
+        when(execAgentCommandManager.getProcesses(anyString(), anyBoolean())).thenReturn(promise);
         presenter.onWsAgentStarted(event);
     }
 }

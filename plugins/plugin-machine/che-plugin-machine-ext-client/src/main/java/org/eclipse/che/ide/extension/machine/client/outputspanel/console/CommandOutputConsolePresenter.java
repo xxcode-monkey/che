@@ -206,7 +206,7 @@ public class CommandOutputConsolePresenter implements CommandOutputConsole, Outp
 
     @Override
     public void stop() {
-        execAgentCommandManager.killProcess(pid);
+        execAgentCommandManager.killProcess(machine.getId(), pid);
     }
 
     @Override
@@ -224,7 +224,7 @@ public class CommandOutputConsolePresenter implements CommandOutputConsole, Outp
         if (isFinished()) {
             commandManager.executeCommand(command, machine);
         } else {
-            execAgentCommandManager.killProcess(pid).then(new Operation<ProcessKillResponseDto>() {
+            execAgentCommandManager.killProcess(machine.getId(), pid).then(new Operation<ProcessKillResponseDto>() {
                 @Override
                 public void apply(ProcessKillResponseDto arg) throws OperationException {
                     commandManager.executeCommand(command, machine);

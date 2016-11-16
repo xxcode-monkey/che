@@ -95,7 +95,7 @@ public class JsonRpcExecAgentCommandManagerTest {
         when(processStartRequestDto.withCommandLine(anyString())).thenReturn(processStartRequestDto);
         when(processStartRequestDto.withType(anyString())).thenReturn(processStartRequestDto);
 
-        commandManager.startProcess("endpointId", new CommandImpl("name", "command", "type"));
+        commandManager.startProcess(ID, new CommandImpl("name", "command", "type"));
 
         verify(dtoFactory).createDto(ProcessStartRequestDto.class);
         verify(processStartRequestDto).withName("name");
@@ -110,7 +110,7 @@ public class JsonRpcExecAgentCommandManagerTest {
         when(dtoFactory.createDto(ProcessKillRequestDto.class)).thenReturn(processKillRequestDto);
         when(processKillRequestDto.withPid(anyInt())).thenReturn(processKillRequestDto);
 
-        commandManager.killProcess("endpointId", 0);
+        commandManager.killProcess(ID, 0);
 
         verify(dtoFactory).createDto(ProcessKillRequestDto.class);
         verify(processKillRequestDto).withPid(0);
@@ -127,7 +127,7 @@ public class JsonRpcExecAgentCommandManagerTest {
         when(processSubscribeRequestDto.withAfter(anyString())).thenReturn(processSubscribeRequestDto);
         when(processSubscribeRequestDto.withEventTypes(anyString())).thenReturn(processSubscribeRequestDto);
 
-        commandManager.subscribe("endpointId", 0, singletonList("type"), "after");
+        commandManager.subscribe(ID, 0, singletonList("type"), "after");
 
         verify(dtoFactory).createDto(ProcessSubscribeRequestDto.class);
         verify(processSubscribeRequestDto).withPid(0);
@@ -143,7 +143,7 @@ public class JsonRpcExecAgentCommandManagerTest {
         when(processUnSubscribeRequestDto.withAfter(anyString())).thenReturn(processUnSubscribeRequestDto);
         when(processUnSubscribeRequestDto.withEventTypes(anyString())).thenReturn(processUnSubscribeRequestDto);
 
-        commandManager.unsubscribe("endpointId", 0, singletonList("type"), "after");
+        commandManager.unsubscribe(ID, 0, singletonList("type"), "after");
 
         verify(dtoFactory).createDto(ProcessUnSubscribeRequestDto.class);
         verify(processUnSubscribeRequestDto).withPid(0);
@@ -158,7 +158,7 @@ public class JsonRpcExecAgentCommandManagerTest {
         when(updateSubscriptionRequestDto.withPid(anyInt())).thenReturn(updateSubscriptionRequestDto);
         when(updateSubscriptionRequestDto.withEventTypes(anyString())).thenReturn(updateSubscriptionRequestDto);
 
-        commandManager.updateSubscription("endpointId", 0, singletonList("type"));
+        commandManager.updateSubscription(ID, 0, singletonList("type"));
 
         verify(dtoFactory).createDto(UpdateSubscriptionRequestDto.class);
         verify(updateSubscriptionRequestDto).withPid(0);
@@ -175,7 +175,7 @@ public class JsonRpcExecAgentCommandManagerTest {
         when(getProcessLogsRequestDto.withFrom(anyString())).thenReturn(getProcessLogsRequestDto);
         when(getProcessLogsRequestDto.withTill(anyString())).thenReturn(getProcessLogsRequestDto);
 
-        commandManager.getProcessLogs("endpointId", 0, "from", "till", 0, 0);
+        commandManager.getProcessLogs(ID, 0, "from", "till", 0, 0);
 
         verify(dtoFactory).createDto(GetProcessLogsRequestDto.class);
         verify(getProcessLogsRequestDto).withPid(0);
@@ -191,7 +191,7 @@ public class JsonRpcExecAgentCommandManagerTest {
         when(dtoFactory.createDto(GetProcessRequestDto.class)).thenReturn(getProcessRequestDto);
         when(getProcessRequestDto.withPid(anyInt())).thenReturn(getProcessRequestDto);
 
-        commandManager.getProcess("endpointId", 0);
+        commandManager.getProcess(ID, 0);
 
         verify(dtoFactory).createDto(GetProcessRequestDto.class);
         verify(getProcessRequestDto).withPid(0);
@@ -203,7 +203,7 @@ public class JsonRpcExecAgentCommandManagerTest {
         when(dtoFactory.createDto(GetProcessesRequestDto.class)).thenReturn(getProcessesRequestDto);
         when(getProcessesRequestDto.withAll(anyBoolean())).thenReturn(getProcessesRequestDto);
 
-        commandManager.getProcesses("endpointId", true);
+        commandManager.getProcesses(ID, true);
 
         verify(dtoFactory).createDto(GetProcessesRequestDto.class);
         verify(getProcessesRequestDto).withAll(true);

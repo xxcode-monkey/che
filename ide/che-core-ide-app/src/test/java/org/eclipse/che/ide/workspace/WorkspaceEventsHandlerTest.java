@@ -249,7 +249,7 @@ public class WorkspaceEventsHandlerTest {
         when(workspaceConfig.getEnvironments()).thenReturn(environments);
         MachineConfigDto devMachineConfig = mock(MachineConfigDto.class);
         when(devMachineConfig.getName()).thenReturn(MACHINE_NAME);
-        when(execAgentCommandManager.getProcesses(anyBoolean())).thenReturn(mock(Promise.class));
+        when(execAgentCommandManager.getProcesses(anyString(), anyBoolean())).thenReturn(mock(Promise.class));
 
         workspaceEventsHandler.trackWorkspaceEvents(workspace, callback);
 
@@ -398,7 +398,7 @@ public class WorkspaceEventsHandlerTest {
         MachineConfigDto devMachineConfig = mock(MachineConfigDto.class);
         when(devMachineConfig.getName()).thenReturn(MACHINE_NAME);
 
-        when(execAgentCommandManager.getProcesses(anyBoolean())).thenReturn(processPromise);
+        when(execAgentCommandManager.getProcesses(anyString(), anyBoolean())).thenReturn(processPromise);
 
         workspaceEventsHandler.trackWorkspaceEvents(workspace, callback);
         workspaceEventsHandler.wsAgentLogSubscriptionHandler.onMessageReceived("");

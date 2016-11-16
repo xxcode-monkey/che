@@ -920,7 +920,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
     }
 
     private void restoreState(final MachineEntity machine) {
-        execAgentCommandManager.getProcesses(false).then(new Operation<List<GetProcessesResponseDto>>() {
+        execAgentCommandManager.getProcesses(machine.getId(), false).then(new Operation<List<GetProcessesResponseDto>>() {
             @Override
             public void apply(List<GetProcessesResponseDto> processes) throws OperationException {
                 for (GetProcessesResponseDto process : processes) {
@@ -956,7 +956,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
                 String till = null;
                 int limit = 50;
                 int skip = 0;
-                execAgentCommandManager.getProcessLogs(pid, from, till, limit, skip)
+                execAgentCommandManager.getProcessLogs(machine.getId(), pid, from, till, limit, skip)
                                        .then(new Operation<List<GetProcessLogsResponseDto>>() {
                                            @Override
                                            public void apply(List<GetProcessLogsResponseDto> logs) throws OperationException {
@@ -979,7 +979,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
                 String stderr = "stderr";
                 String stdout = "stdout";
                 String after = null;
-                execAgentCommandManager.subscribe(pid, asList(stderr, stdout), after)
+                execAgentCommandManager.subscribe(machine.getId(), pid, asList(stderr, stdout), after)
                                        .thenIfProcessStartedEvent(console.getProcessStartedOperation())
                                        .thenIfProcessDiedEvent(console.getProcessDiedOperation())
                                        .thenIfProcessStdOutEvent(console.getStdOutOperation())

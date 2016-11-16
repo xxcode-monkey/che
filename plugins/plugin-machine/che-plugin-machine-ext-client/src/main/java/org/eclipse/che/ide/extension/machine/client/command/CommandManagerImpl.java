@@ -224,7 +224,7 @@ public class CommandManagerImpl implements CommandManager {
             public void apply(String expandedCommandLine) throws OperationException {
                 Command expandedCommand = new CommandImpl(name, expandedCommandLine, type);
 
-                execAgentCommandManager.startProcess(expandedCommand)
+                execAgentCommandManager.startProcess(machineId, expandedCommand)
                                        .thenIfProcessStartedEvent(console.getProcessStartedOperation())
                                        .thenIfProcessDiedEvent(console.getProcessDiedOperation())
                                        .thenIfProcessStdOutEvent(console.getStdOutOperation())

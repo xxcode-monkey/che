@@ -30,6 +30,7 @@ import java.util.List;
 import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -71,7 +72,7 @@ public class ProcessesPresenterTest {
 
     @Test
     public void processesShouldBeGot() throws Exception {
-        when(execAgentCommandManager.getProcesses(anyBoolean())).thenReturn(promise);
+        when(execAgentCommandManager.getProcesses(anyString(), anyBoolean())).thenReturn(promise);
 
         presenter.showProcesses(WORKSPACE_ID, MACHINE_ID);
 

@@ -57,7 +57,7 @@ public class ProcessesPresenter implements TabPresenter, ProcessesView.ActionDel
      *         machine identifier for which need get processes
      */
     public void showProcesses(@NotNull String workspaceId, @NotNull String machineId) {
-        execAgentCommandManager.getProcesses(false).then(new Operation<List<GetProcessesResponseDto>>() {
+        execAgentCommandManager.getProcesses(machineId, false).then(new Operation<List<GetProcessesResponseDto>>() {
             @Override
             public void apply(List<GetProcessesResponseDto> processes) throws OperationException {
                 final ArrayList<MachineProcessDto> machineProcesses = new ArrayList<>(processes.size());
