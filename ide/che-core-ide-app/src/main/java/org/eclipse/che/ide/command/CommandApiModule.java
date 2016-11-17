@@ -15,8 +15,12 @@ import com.google.gwt.inject.client.assistedinject.GinFactoryModuleBuilder;
 import com.google.gwt.inject.client.multibindings.GinMapBinder;
 import com.google.inject.Singleton;
 
+import org.eclipse.che.ide.api.command.CommandManager3;
 import org.eclipse.che.ide.api.command.CommandTypeRegistry;
 import org.eclipse.che.ide.api.component.Component;
+import org.eclipse.che.ide.api.component.WsAgentComponent;
+import org.eclipse.che.ide.command.explorer.node.CommandNodeFactory;
+import org.eclipse.che.ide.command.manager.CommandManagerImpl3;
 
 /**
  * GIN module for configuring Command API components.
@@ -28,10 +32,18 @@ public class CommandApiModule extends AbstractGinModule {
     @Override
     protected void configure() {
         bind(CommandTypeRegistry.class).to(CommandTypeRegistryImpl.class).in(Singleton.class);
+        bind(CommandManager3.class).to(CommandManagerImpl3.class).in(Singleton.class);
+
+        GinMapBinder.newMapBinder(binder(), String.class, WsAgentComponent.class)
+                    .addBinding("Command Manager")
+                    .to(CommandManagerImpl3.class);
+
+        GinMapBinder.newMapBinder(binder(), String.class, Component.class)
+                    .addBinding("CommandProducerActionManager")
+                    .to(CommandProducerActionManager.class);
+
+        install(new GinFactoryModuleBuilder().build(CommandNodeFactory.class));
 
         install(new GinFactoryModuleBuilder().build(CommandProducerActionFactory.class));
-
-        GinMapBinder<String, Component> componentsBinder = GinMapBinder.newMapBinder(binder(), String.class, Component.class);
-        componentsBinder.addBinding("CommandProducerActionManager").to(CommandProducerActionManager.class);
     }
 }
