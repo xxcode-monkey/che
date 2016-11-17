@@ -42,6 +42,7 @@ import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode;
 import org.eclipse.che.ide.api.outputconsole.OutputConsole;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
+import org.eclipse.che.ide.api.ssh.SshServiceClient;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
 import org.eclipse.che.ide.extension.machine.client.MachineResources;
 import org.eclipse.che.ide.extension.machine.client.inject.factories.EntityFactory;
@@ -99,31 +100,33 @@ public class ProcessesPanelPresenterTest {
     @Mock
     private DialogFactory                 dialogFactory;
     @Mock
-    private WorkspaceAgent                workspaceAgent;
+    private WorkspaceAgent              workspaceAgent;
     @Mock
-    private NotificationManager           notificationManager;
+    private NotificationManager         notificationManager;
     @Mock
-    private MachineLocalizationConstant   localizationConstant;
+    private MachineLocalizationConstant localizationConstant;
     @Mock
-    private TerminalFactory               terminalFactory;
+    private TerminalFactory             terminalFactory;
     @Mock
-    private ProcessesPanelView            view;
+    private ProcessesPanelView          view;
     @Mock
-    private MachineResources              resources;
+    private MachineResources            resources;
     @Mock
-    private AppContext                    appContext;
+    private AppContext                  appContext;
     @Mock
-    private MachineServiceClient          machineService;
+    private MachineServiceClient        machineService;
     @Mock
-    private EventBus                      eventBus;
+    private SshServiceClient            sshService;
     @Mock
-    private WorkspaceDto                  workspace;
+    private EventBus                    eventBus;
     @Mock
-    private OutputConsole                 outputConsole;
+    private WorkspaceDto                workspace;
     @Mock
-    private MachineManager                machineManager;
+    private OutputConsole               outputConsole;
     @Mock
-    private EntityFactory                 entityFactory;
+    private MachineManager              machineManager;
+    @Mock
+    private EntityFactory               entityFactory;
     @Mock
     private WorkspaceRuntimeDto           workspaceRuntime;
     @Mock
@@ -173,6 +176,7 @@ public class ProcessesPanelPresenterTest {
                                                 dialogFactory,
                                                 consoleTreeContextMenuFactory,
                                                 commandTypeRegistry,
+                                                sshService,
                                                 execAgentCommandManager);
     }
 
