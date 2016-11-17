@@ -13,6 +13,7 @@ import (
 	"net/http"
 	"os"
 	"time"
+	"strings"
 )
 
 var (
@@ -28,12 +29,14 @@ var (
 
 	serverAddress string
 	staticFlag    string
+	pathFlag      string
 )
 
 func init() {
 	// Server configuration
 	flag.StringVar(&serverAddress, "addr", ":9000", "IP:PORT or :PORT the address to start the server on")
 	flag.StringVar(&staticFlag, "static", "./static/", "path to static content")
+	flag.StringVar(&pathFlag, "path", "", "Path of the pty server. Go regexp syntax is suported.")
 
 	// Auth configuration
 	flag.BoolVar(&auth.Enabled, "enable-auth", false, "Whether authenticate on workspace master or not")
@@ -56,22 +59,47 @@ func init() {
 func main() {
 	flag.Parse()
 
+	// print configuration
+	fmt.Println("Exec-agent configuration")
+	fmt.Printf("- Server address: %s\n", serverAddress)
+	fmt.Printf("- Static content: %s\n", staticFlag)
+	fmt.Printf("- Base path: '%s'\n", pathFlag)
+	fmt.Printf("- Auth enabled: %t\n", auth.Enabled)
+	fmt.Printf("- Auth endpoint: %s\n", auth.ApiEndpoint)
+	fmt.Printf("- Process cleanup job period: %dm\n", process.CleanupPeriodInMinutes)
+	fmt.Printf("- Not used & dead processes stay for: %dm\n", process.CleanupThresholdInMinutes)
+	fmt.Printf("- Process logs dir: %s\n", process.LogsDir)
+	fmt.Println()
+
 	// cleanup logs dir
 	if err := os.RemoveAll(process.LogsDir); err != nil {
 		log.Fatal(err)
 	}
 
+	basePath := pathFlag
+	if basePath != "" {
+		if strings.HasSuffix(basePath, "/") {
+			basePath = basePath[:len(basePath) - 1]
+		}
+		if strings.HasPrefix(basePath, "/") {
+			basePath = basePath[1:]
+		}
+		basePath = "/{path:" + basePath + "}"
+	}
+
 	router := mux.NewRouter().StrictSlash(true)
+
 	fmt.Print("⇩ Registered HttpRoutes:\n\n")
 	for _, routesGroup := range AppHttpRoutes {
 		fmt.Printf("%s:\n", routesGroup.Name)
 		for _, route := range routesGroup.Items {
-			fmt.Printf("✓ %s\n", &route)
+			route.Path = basePath + route.Path
 			router.
 				Methods(route.Method).
 				Path(route.Path).
 				Name(route.Name).
 				HandlerFunc(rest.ToHttpHandlerFunc(route.HandleFunc))
+			fmt.Printf("✓ %s\n", &route)
 		}
 		fmt.Println()
 	}
