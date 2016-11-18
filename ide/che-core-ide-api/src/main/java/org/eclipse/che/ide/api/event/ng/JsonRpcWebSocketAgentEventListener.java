@@ -65,7 +65,7 @@ public class JsonRpcWebSocketAgentEventListener implements WsAgentStateHandler {
         String devMachineId = devMachine.getId();
         String wsAgentWebSocketUrl = devMachine.getWsAgentWebSocketUrl();
 
-        String wsAgentUrl = wsAgentWebSocketUrl.replaceFirst("(ext)(/)(ws)", "websocket" + "$2" + ENDPOINT_ID);
+        String wsAgentUrl = wsAgentWebSocketUrl.replaceFirst("(api)(/)(ws)", "websocket" + "$2" + ENDPOINT_ID);
         String execAgentUrl = devMachine.getExecAgentUrl();
 
 
