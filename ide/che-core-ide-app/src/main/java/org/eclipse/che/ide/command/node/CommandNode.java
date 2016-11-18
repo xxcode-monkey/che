@@ -8,50 +8,45 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.command.explorer.node;
+package org.eclipse.che.ide.command.node;
 
 import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.api.promises.client.js.Promises;
-import org.eclipse.che.ide.api.command.CommandType;
-import org.eclipse.che.ide.api.data.tree.AbstractTreeNode;
+import org.eclipse.che.ide.api.command.ContextualCommand;
 import org.eclipse.che.ide.api.data.tree.Node;
+import org.eclipse.che.ide.api.data.tree.settings.NodeSettings;
+import org.eclipse.che.ide.project.node.SyntheticNode;
+import org.eclipse.che.ide.ui.smartTree.presentation.NodePresentation;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Tree node which represents command type.
+ * Tree node that represents {@link ContextualCommand}.
  *
  * @author Artem Zatsarynnyi
  */
-public class CommandTypeNode extends AbstractTreeNode {
+public class CommandNode extends SyntheticNode<ContextualCommand> {
 
-    private final CommandType       commandType;
-    private final List<CommandNode> commands;
+    public CommandNode(ContextualCommand data, NodeSettings nodeSettings) {
+        super(data, nodeSettings);
+    }
 
-    public CommandTypeNode(CommandType commandType, List<CommandNode> commands) {
-        this.commandType = commandType;
-        this.commands = commands;
+    @Override
+    public void updatePresentation(NodePresentation presentation) {
+        presentation.setPresentableText(getName());
     }
 
     @Override
     public String getName() {
-        return commandType.getDisplayName();
+        return getData().getName();
     }
 
     @Override
     public boolean isLeaf() {
-        return commands.isEmpty();
+        return true;
     }
 
     @Override
     protected Promise<List<Node>> getChildrenImpl() {
-        List<Node> l = new ArrayList<>();
-        l.addAll(commands);
-        return Promises.resolve(l);
-    }
-
-    public CommandType getCommandType() {
-        return commandType;
+        return null;
     }
 }

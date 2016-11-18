@@ -8,22 +8,21 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.command.explorer.page.arguments;
+package org.eclipse.che.ide.command.editor.page.arguments;
 
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.api.command.ContextualCommand;
-import org.eclipse.che.ide.command.explorer.page.AbstractCommandsExplorerPage;
+import org.eclipse.che.ide.command.editor.page.AbstractCommandEditorPage;
+import org.eclipse.che.ide.command.editor.page.CommandEditorPage;
 
 /**
- * Presenter for Arguments page.
+ * {@link CommandEditorPage} which allows to edit command's command line.
  *
  * @author Artem Zatsarynnyi
  */
-@Singleton
-public class ArgumentsPage extends AbstractCommandsExplorerPage implements ArgumentsPageView.ActionDelegate {
+public class ArgumentsPage extends AbstractCommandEditorPage implements ArgumentsPageView.ActionDelegate {
 
     private final ArgumentsPageView view;
 

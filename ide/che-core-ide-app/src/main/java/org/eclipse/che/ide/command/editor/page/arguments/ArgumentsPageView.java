@@ -8,35 +8,35 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.command.explorer.page.previewurl;
+package org.eclipse.che.ide.command.editor.page.arguments;
 
 import com.google.inject.ImplementedBy;
 
 import org.eclipse.che.ide.api.mvp.View;
 
 /**
- * The view of Preview URL page.
+ * The view of {@link ArgumentsPage}.
  *
  * @author Artem Zatsarynnyi
  */
-@ImplementedBy(PreviewUrlPageViewImpl.class)
-public interface PreviewUrlPageView extends View<PreviewUrlPageView.ActionDelegate> {
+@ImplementedBy(ArgumentsPageViewImpl.class)
+public interface ArgumentsPageView extends View<ArgumentsPageView.ActionDelegate> {
 
-    /** Returns the command preview URL value. */
-    String getPreviewUrl();
+    /** Returns the command line value. */
+    String getCommandLine();
 
-    /** Sets the command preview URL value. */
-    void setPreviewUrl(String previewUrl);
+    /**
+     * Sets the command line value.
+     *
+     * @param commandLine
+     *         command line value to set
+     */
+    void setCommandLine(String commandLine);
 
     /** The action delegate for this view. */
     interface ActionDelegate {
 
-        /**
-         * Called when command preview URL has been changed.
-         *
-         * @param previewUrl
-         *         changed value of the command preview URL
-         */
-        void onPreviewUrlChanged(String previewUrl);
+        /** Called when command line value has been changed. */
+        void onCommandLineChanged(String commandLine);
     }
 }

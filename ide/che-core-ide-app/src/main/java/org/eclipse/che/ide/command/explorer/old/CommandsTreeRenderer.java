@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.command.explorer;
+package org.eclipse.che.ide.command.explorer.old;
 
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
@@ -17,6 +17,7 @@ import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
 
 import org.eclipse.che.ide.api.data.tree.Node;
+import org.eclipse.che.ide.command.explorer.CommandsExplorerResources;
 import org.eclipse.che.ide.command.node.CommandFileNode;
 import org.eclipse.che.ide.command.node.CommandTypeNode;
 import org.eclipse.che.ide.ui.smartTree.Tree;
@@ -32,9 +33,8 @@ import static com.google.gwt.user.client.Event.ONCLICK;
  */
 class CommandsTreeRenderer extends DefaultPresentationRenderer<Node> {
 
-    private final CommandsExplorerResources resources;
-
-    private CommandsExplorerView.ActionDelegate delegate;
+    private final CommandsExplorerResources           resources;
+    private       CommandsExplorerView.ActionDelegate delegate;
 
     CommandsTreeRenderer(TreeStyles treeStyles, CommandsExplorerResources resources, CommandsExplorerView.ActionDelegate delegate) {
         super(treeStyles);

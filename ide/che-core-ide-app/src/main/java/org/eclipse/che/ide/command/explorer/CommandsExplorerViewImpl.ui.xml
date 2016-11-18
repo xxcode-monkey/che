@@ -13,28 +13,7 @@
 -->
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
-             xmlns:g='urn:import:com.google.gwt.user.client.ui'
              xmlns:che='urn:import:org.eclipse.che.ide.ui'>
 
-    <!--<ui:with field="datasourceUiResources" type="org.eclipse.che.ide.ext.datasource.client.DatasourceUiResources"/>-->
-
-    <g:DockLayoutPanel unit="PX">
-        <g:west size="250">
-            <che:smartTree.Tree ui:field="commandsTree"/>
-        </g:west>
-        <g:center>
-            <g:DockLayoutPanel>
-                <g:north size="30">
-                    <g:FlowPanel>
-                        <che:radiobuttongroup.RadioButtonGroup ui:field="pagesSwitcher"/>
-                        <g:Button ui:field="cancelButton" text="Cancel"/>
-                        <g:Button ui:field="saveButton" text="Save"/>
-                    </g:FlowPanel>
-                </g:north>
-                <g:center>
-                    <g:DeckPanel ui:field="pagesPanel"/>
-                </g:center>
-            </g:DockLayoutPanel>
-        </g:center>
-    </g:DockLayoutPanel>
+    <che:smartTree.Tree ui:field="commandsTree"/>
 </ui:UiBinder>

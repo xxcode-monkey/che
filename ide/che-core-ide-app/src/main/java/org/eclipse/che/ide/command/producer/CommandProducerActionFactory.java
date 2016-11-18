@@ -8,16 +8,18 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.command.explorer.node;
+package org.eclipse.che.ide.command.producer;
 
-import org.eclipse.che.ide.api.command.ContextualCommand;
+import org.eclipse.che.api.core.model.machine.Machine;
+import org.eclipse.che.ide.api.command.CommandProducer;
 
 /**
- * Factory for {@link CommandNode} instances.
+ * Factory for creating {@link CommandProducerAction} instances.
  *
  * @author Artem Zatsarynnyi
  */
-public interface CommandNodeFactory {
+public interface CommandProducerActionFactory {
 
-    CommandNode newCommandNode(ContextualCommand command);
+    /** Creates action for executing command produced by the specified {@code commandProducer}. */
+    CommandProducerAction create(String name, CommandProducer commandProducer, Machine machine);
 }

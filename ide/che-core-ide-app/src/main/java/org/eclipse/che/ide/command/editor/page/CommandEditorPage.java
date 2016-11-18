@@ -8,19 +8,18 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.command.explorer.page;
+package org.eclipse.che.ide.command.editor.page;
 
 import com.google.gwt.user.client.ui.IsWidget;
 
 import org.eclipse.che.ide.api.command.ContextualCommand;
 
 /**
- * Page for editing command.
+ * Defines the requirements for the page for editing command.
  *
  * @author Artem Zatsarynnyi
  */
-// TODO: consider to extending org.eclipse.che.ide.api.command.CommandPage
-public interface CommandsExplorerPage {
+public interface CommandEditorPage {
 
     /** Returns page's title. */
     String getTitle();

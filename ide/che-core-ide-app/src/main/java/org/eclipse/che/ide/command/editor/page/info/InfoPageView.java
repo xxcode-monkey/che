@@ -8,14 +8,14 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.command.explorer.page.info;
+package org.eclipse.che.ide.command.editor.page.info;
 
 import com.google.inject.ImplementedBy;
 
 import org.eclipse.che.ide.api.mvp.View;
 
 /**
- * The view of Info page.
+ * The view of {@link InfoPage}.
  *
  * @author Artem Zatsarynnyi
  */
