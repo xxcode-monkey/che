@@ -63,6 +63,7 @@ import org.eclipse.che.ide.api.icon.Icon;
 import org.eclipse.che.ide.api.icon.IconRegistry;
 import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
 import org.eclipse.che.ide.api.keybinding.KeyBuilder;
+import org.eclipse.che.ide.command.editor.CommandEditorProvider;
 import org.eclipse.che.ide.command.palette.ShowCommandsPaletteAction;
 import org.eclipse.che.ide.connection.WsConnectionListener;
 import org.eclipse.che.ide.imageviewer.ImageViewerProvider;
@@ -365,6 +366,13 @@ public class StandardComponentInitializer {
     private FileType jpgFile;
 
     @Inject
+    private CommandEditorProvider commandEditorProvider;
+
+    @Inject
+    @Named("CommandFileType")
+    private FileType commandFileType;
+
+    @Inject
     private WsConnectionListener wsConnectionListener;
 
     @Inject
@@ -427,6 +435,9 @@ public class StandardComponentInitializer {
 
         fileTypeRegistry.registerFileType(jpgFile);
         editorRegistry.registerDefaultEditor(jpgFile, imageViewerProvider);
+
+        fileTypeRegistry.registerFileType(commandFileType);
+        editorRegistry.registerDefaultEditor(commandFileType, commandEditorProvider);
 
         // Workspace (New Menu)
         DefaultActionGroup workspaceGroup = (DefaultActionGroup)actionManager.getAction(IdeActions.GROUP_WORKSPACE);

@@ -17,7 +17,7 @@ import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.EditorProvider;
 
 /**
- * //
+ * Provider of the {@link CommandEditor}.
  *
  * @author Artem Zatsarynnyi
  */
@@ -37,7 +37,7 @@ public class CommandEditorProvider implements EditorProvider {
 
     @Override
     public String getDescription() {
-        return "Che command editor";
+        return "Che Command Editor";
     }
 
     @Override

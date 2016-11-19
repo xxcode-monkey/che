@@ -8,8 +8,9 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.command.explorer;
+package org.eclipse.che.ide.command.explorer.old;
 
+import com.google.gwt.user.client.ui.IsWidget;
 import com.google.inject.ImplementedBy;
 
 import org.eclipse.che.commons.annotation.Nullable;
@@ -30,6 +31,18 @@ import java.util.Map;
 public interface CommandsExplorerView extends View<CommandsExplorerView.ActionDelegate> {
 
     /**
+     * Adds page for editing command. The pages will be shown in order of adding.
+     *
+     * @param page
+     *         page to add
+     * @param title
+     *         text that should be used as page's title
+     * @param tooltip
+     *         text that should be used as page's tooltip
+     */
+    void addPage(IsWidget page, String title, String tooltip);
+
+    /**
      * Sets the commands to show in the view.
      *
      * @param workspaceCommands
@@ -47,6 +60,14 @@ public interface CommandsExplorerView extends View<CommandsExplorerView.ActionDe
 
     /** Select the given {@code command}. */
     void selectCommand(ContextualCommand command);
+
+    /**
+     * Set whether saving command is enabled or not.
+     *
+     * @param enable
+     *         {@code true} if command saving is enabled and {@code false} otherwise
+     */
+    void setSaveEnabled(boolean enable);
 
     /** The action delegate for this view. */
     interface ActionDelegate extends BaseActionDelegate {
@@ -66,6 +87,22 @@ public interface CommandsExplorerView extends View<CommandsExplorerView.ActionDe
          *         selected command
          */
         void onCommandSelected(ContextualCommand command);
+
+        /**
+         * Called when reverting command is requested.
+         *
+         * @param command
+         *         command reverting of which is requested
+         */
+        void onCommandRevert(ContextualCommand command);
+
+        /**
+         * Called when saving command is requested.
+         *
+         * @param command
+         *         command saving of which is requested
+         */
+        void onCommandSave(ContextualCommand command);
 
         /** Called when adding new command is requested. */
         void onCommandAdd();

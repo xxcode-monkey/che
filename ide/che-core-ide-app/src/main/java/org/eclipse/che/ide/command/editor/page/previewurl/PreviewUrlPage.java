@@ -8,24 +8,23 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.command.explorer.page.previewurl;
+package org.eclipse.che.ide.command.editor.page.previewurl;
 
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.api.command.ContextualCommand;
-import org.eclipse.che.ide.command.explorer.page.AbstractCommandsExplorerPage;
+import org.eclipse.che.ide.command.editor.page.AbstractCommandEditorPage;
+import org.eclipse.che.ide.command.editor.page.CommandEditorPage;
 
 import static org.eclipse.che.api.workspace.shared.Constants.COMMAND_PREVIEW_URL_ATTRIBUTE_NAME;
 
 /**
- * Presenter for the Preview URL page.
+ * {@link CommandEditorPage} which allows to edit command's preview URL.
  *
  * @author Artem Zatsarynnyi
  */
-@Singleton
-public class PreviewUrlPage extends AbstractCommandsExplorerPage implements PreviewUrlPageView.ActionDelegate {
+public class PreviewUrlPage extends AbstractCommandEditorPage implements PreviewUrlPageView.ActionDelegate {
 
     private final PreviewUrlPageView view;
 

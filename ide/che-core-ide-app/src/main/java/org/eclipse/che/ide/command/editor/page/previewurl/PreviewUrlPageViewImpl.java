@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.command.explorer.page.previewurl;
+package org.eclipse.che.ide.command.editor.page.previewurl;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.KeyUpEvent;
@@ -19,14 +19,12 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
 /**
  * Implementation of {@link PreviewUrlPageView}.
  *
  * @author Artem Zatsarynnyi
  */
-@Singleton
 public class PreviewUrlPageViewImpl extends Composite implements PreviewUrlPageView {
 
     private static final PreviewUrlPageViewImplUiBinder UI_BINDER = GWT.create(PreviewUrlPageViewImplUiBinder.class);

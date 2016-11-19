@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.command.explorer.page.info;
+package org.eclipse.che.ide.command.editor.page.info;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.KeyUpEvent;
@@ -21,14 +21,12 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
 /**
  * Implementation of {@link InfoPageView}.
  *
  * @author Artem Zatsarynnyi
  */
-@Singleton
 public class InfoPageViewImpl extends Composite implements InfoPageView {
 
     private static final InfoPageViewImplUiBinder UI_BINDER = GWT.create(InfoPageViewImplUiBinder.class);

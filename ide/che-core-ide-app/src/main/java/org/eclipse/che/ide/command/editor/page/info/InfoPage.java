@@ -8,23 +8,26 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.command.explorer.page.info;
+package org.eclipse.che.ide.command.editor.page.info;
 
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.api.command.ApplicableContext;
 import org.eclipse.che.ide.api.command.ContextualCommand;
-import org.eclipse.che.ide.command.explorer.page.AbstractCommandsExplorerPage;
+import org.eclipse.che.ide.command.editor.page.AbstractCommandEditorPage;
+import org.eclipse.che.ide.command.editor.page.CommandEditorPage;
 
 /**
- * Presenter for the Info page.
+ * {@link CommandEditorPage} which allows to edit basic command's information, like:
+ * <ul>
+ * <li>name;</li>
+ * <li>applicable context.</li>
+ * </ul>
  *
  * @author Artem Zatsarynnyi
  */
-@Singleton
-public class InfoPage extends AbstractCommandsExplorerPage implements InfoPageView.ActionDelegate {
+public class InfoPage extends AbstractCommandEditorPage implements InfoPageView.ActionDelegate {
 
     private final InfoPageView view;
 

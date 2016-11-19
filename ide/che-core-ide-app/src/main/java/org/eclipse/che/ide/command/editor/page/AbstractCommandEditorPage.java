@@ -8,16 +8,16 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.command.explorer.page;
+package org.eclipse.che.ide.command.editor.page;
 
 import org.eclipse.che.ide.api.command.ContextualCommand;
 
 /**
- * Abstract {@link CommandsExplorerPage} that provides basic functionality.
+ * Abstract {@link CommandEditorPage} that provides basic functionality.
  *
  * @author Artem Zatsarynnyi
  */
-public abstract class AbstractCommandsExplorerPage implements CommandsExplorerPage {
+public abstract class AbstractCommandEditorPage implements CommandEditorPage {
 
     private final String title;
     private final String tooltip;
@@ -26,7 +26,7 @@ public abstract class AbstractCommandsExplorerPage implements CommandsExplorerPa
 
     private DirtyStateListener listener;
 
-    protected AbstractCommandsExplorerPage(String title, String tooltip) {
+    protected AbstractCommandEditorPage(String title, String tooltip) {
         this.title = title;
         this.tooltip = tooltip;
     }

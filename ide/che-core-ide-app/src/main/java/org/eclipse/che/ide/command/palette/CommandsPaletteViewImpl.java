@@ -23,9 +23,9 @@ import com.google.inject.Singleton;
 import org.eclipse.che.ide.api.command.CommandType;
 import org.eclipse.che.ide.api.command.CommandTypeRegistry;
 import org.eclipse.che.ide.api.command.ContextualCommand;
-import org.eclipse.che.ide.command.explorer.node.CommandNode;
-import org.eclipse.che.ide.command.explorer.node.CommandNodeFactory;
-import org.eclipse.che.ide.command.explorer.node.CommandTypeNode;
+import org.eclipse.che.ide.command.node.CommandTypeNode;
+import org.eclipse.che.ide.command.node.ExecutableCommandNode;
+import org.eclipse.che.ide.command.node.NodeFactory;
 import org.eclipse.che.ide.ui.smartTree.NodeLoader;
 import org.eclipse.che.ide.ui.smartTree.NodeStorage;
 import org.eclipse.che.ide.ui.smartTree.Tree;
@@ -46,7 +46,7 @@ public class CommandsPaletteViewImpl extends Window implements CommandsPaletteVi
 
     private static final CommandsPaletteViewImplUiBinder UI_BINDER = GWT.create(CommandsPaletteViewImplUiBinder.class);
     private final CommandTypeRegistry commandTypeRegistry;
-    private final CommandNodeFactory  commandNodeFactory;
+    private final NodeFactory         nodeFactory;
 
     @UiField
     TextBox filterField;
@@ -57,9 +57,9 @@ public class CommandsPaletteViewImpl extends Window implements CommandsPaletteVi
     private ActionDelegate delegate;
 
     @Inject
-    public CommandsPaletteViewImpl(CommandTypeRegistry commandTypeRegistry, CommandNodeFactory commandNodeFactory) {
+    public CommandsPaletteViewImpl(CommandTypeRegistry commandTypeRegistry, NodeFactory nodeFactory) {
         this.commandTypeRegistry = commandTypeRegistry;
-        this.commandNodeFactory = commandNodeFactory;
+        this.nodeFactory = nodeFactory;
 
         commandsTree = new Tree(new NodeStorage(), new NodeLoader());
 
@@ -103,12 +103,12 @@ public class CommandsPaletteViewImpl extends Window implements CommandsPaletteVi
         commandsTree.getNodeStorage().clear();
 
         for (Map.Entry<CommandType, List<ContextualCommand>> entry : workspaceCommands.entrySet()) {
-            List<CommandNode> commandNodes = new ArrayList<>(entry.getValue().size());
+            List<ExecutableCommandNode> executableCommandNodes = new ArrayList<>(entry.getValue().size());
             for (ContextualCommand command : entry.getValue()) {
-                commandNodes.add(commandNodeFactory.newCommandNode(command));
+                executableCommandNodes.add(nodeFactory.newExecutableCommandNode(command, null));
             }
 
-            CommandTypeNode commandTypeNode = new CommandTypeNode(entry.getKey(), commandNodes);
+            final CommandTypeNode commandTypeNode = nodeFactory.newCommandTypeNode(entry.getKey(), null, executableCommandNodes);
             commandsTree.getNodeStorage().add(commandTypeNode);
         }
 

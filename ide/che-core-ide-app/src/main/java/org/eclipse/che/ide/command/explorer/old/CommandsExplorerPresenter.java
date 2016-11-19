@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.command.explorer;
+package org.eclipse.che.ide.command.explorer.old;
 
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
@@ -30,6 +30,10 @@ import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.parts.base.BasePresenter;
+import org.eclipse.che.ide.command.editor.page.CommandEditorPage;
+import org.eclipse.che.ide.command.editor.page.arguments.ArgumentsPage;
+import org.eclipse.che.ide.command.editor.page.info.InfoPage;
+import org.eclipse.che.ide.command.editor.page.previewurl.PreviewUrlPage;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 import java.util.ArrayList;
@@ -40,14 +44,15 @@ import java.util.Map;
 import static org.eclipse.che.ide.api.parts.PartStackType.NAVIGATION;
 
 /**
- * Presenter for Commands Explorer.
+ * Presenter for managing commands.
  *
  * @author Artem Zatsarynnyi
  */
 @Singleton
 public class CommandsExplorerPresenter extends BasePresenter implements CommandsExplorerView.ActionDelegate,
                                                                         WsAgentStateHandler,
-                                                                        CommandManager3.CommandChangedListener {
+                                                                        CommandManager3.CommandChangedListener,
+                                                                        CommandEditorPage.DirtyStateListener {
 
     private static final String TITLE   = "Commands";
     private static final String TOOLTIP = "Manage commands";
@@ -57,12 +62,20 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
     private final CommandManager3      commandManager;
     private final CommandTypeRegistry  commandTypeRegistry;
 
+    private final List<CommandEditorPage> pages;
+
+    // stores initial name of the currently edited command
+    private String editedCommandNameInitial;
+
     @Inject
     public CommandsExplorerPresenter(CommandsExplorerView view,
                                      WorkspaceAgent workspaceAgent,
                                      EventBus eventBus,
                                      CommandManager3 commandManager,
-                                     CommandTypeRegistry commandTypeRegistry) {
+                                     CommandTypeRegistry commandTypeRegistry,
+                                     InfoPage infoPage,
+                                     ArgumentsPage argumentsPage,
+                                     PreviewUrlPage previewUrlPage) {
         this.view = view;
         this.workspaceAgent = workspaceAgent;
         this.commandManager = commandManager;
@@ -73,6 +86,11 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
         eventBus.addHandler(WsAgentStateEvent.TYPE, this);
 
         commandManager.addCommandChangedListener(this);
+
+        pages = new ArrayList<>();
+        pages.add(infoPage);
+        pages.add(argumentsPage);
+        pages.add(previewUrlPage);
     }
 
     @Override
@@ -83,7 +101,15 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
     }
 
     @Override
+    public int getSize() {
+        return 900;
+    }
+
+    @Override
     public void go(AcceptsOneWidget container) {
+        for (CommandEditorPage page : pages) {
+            view.addPage(page.getView(), page.getTitle(), page.getTooltip());
+        }
 
         container.setWidget(getView());
     }
@@ -121,6 +147,32 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
 
     @Override
     public void onCommandSelected(ContextualCommand command) {
+        // save initial value of the edited command name
+        // in order to be able to detect whether the command was renamed during editing or not
+        editedCommandNameInitial = command.getName();
+
+        // initialize all pages with the selected command
+        for (CommandEditorPage page : pages) {
+            page.setDirtyStateListener(this);
+            page.resetFrom(command);
+        }
+
+        onDirtyStateChanged();
+    }
+
+    @Override
+    public void onCommandRevert(ContextualCommand command) {
+    }
+
+    @Override
+    public void onCommandSave(ContextualCommand command) {
+        commandManager.updateCommand(editedCommandNameInitial, command).catchError(new Operation<PromiseError>() {
+            @Override
+            public void apply(PromiseError arg) throws OperationException {
+                // TODO: replace it with notification
+                Window.alert(arg.getMessage());
+            }
+        });
     }
 
     @Override
@@ -204,7 +256,7 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
     }
 
     private void refreshView() {
-        final Map<CommandType, List<ContextualCommand>> commands = new HashMap<>();
+        Map<CommandType, List<ContextualCommand>> commands = new HashMap<>();
 
         // all registered command types need to be shown in view
         // so populate map by all registered command types
@@ -225,5 +277,18 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
         }
 
         view.setCommands(commands);
+    }
+
+    @Override
+    public void onDirtyStateChanged() {
+        for (CommandEditorPage page : pages) {
+            // if at least one page is modified
+            if (page.isDirty()) {
+                view.setSaveEnabled(true);
+                return;
+            }
+        }
+
+        view.setSaveEnabled(false);
     }
 }
