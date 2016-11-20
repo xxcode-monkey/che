@@ -17,11 +17,11 @@ import org.eclipse.che.api.environment.server.model.CheServiceImpl;
 import org.eclipse.che.api.environment.server.model.CheServicesEnvironmentImpl;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import static java.lang.String.format;
@@ -58,7 +58,7 @@ public class DefaultServicesStartStrategy {
         HashMap<String, Integer> weights = new HashMap<>();
 
         // create machines dependency graph
-        Map<String, Set<String>> dependencies = new ConcurrentHashMap<>(services.size());
+        Map<String, Set<String>> dependencies = new HashMap<>(services.size());
         for (Map.Entry<String, CheServiceImpl> serviceEntry : services.entrySet()) {
             CheServiceImpl service = serviceEntry.getValue();
 
@@ -91,13 +91,13 @@ public class DefaultServicesStartStrategy {
         // Nodes with no dependencies gets weight 0
         while (!dependencies.isEmpty()) {
             int previousSize = dependencies.size();
-            for (String service : dependencies.keySet()) {
+            for (Iterator<String> it = dependencies.keySet().iterator(); it.hasNext();) {
                 // process not yet processed machines only
-
+                String service = it.next();
                 if (dependencies.get(service).isEmpty()) {
                     // no links - smallest weight 0
                     weights.put(service, 0);
-                    dependencies.remove(service);
+                    it.remove();
                 } else {
                     // machine has dependencies - check if it has not weighted dependencies
                     if (weights.keySet().containsAll(dependencies.get(service))) {
@@ -108,7 +108,7 @@ public class DefaultServicesStartStrategy {
                         // optional can't be empty because size of the list is checked above
                         //noinspection OptionalGetWithoutIsPresent
                         weights.put(service, weights.get(maxWeight.get()) + 1);
-                        dependencies.remove(service);
+                        it.remove();
                     }
                 }
             }
