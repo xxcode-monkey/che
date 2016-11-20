@@ -91,23 +91,23 @@ public class DefaultServicesStartStrategy {
         // Nodes with no dependencies gets weight 0
         while (!dependencies.isEmpty()) {
             int previousSize = dependencies.size();
-            for (Iterator<String> it = dependencies.keySet().iterator(); it.hasNext();) {
+            for (Iterator<Map.Entry<String, Set<String>>> it = dependencies.entrySet().iterator(); it.hasNext();) {
                 // process not yet processed machines only
-                String service = it.next();
-                if (dependencies.get(service).isEmpty()) {
+                Map.Entry<String, Set<String>> serviceEntry = it.next();
+                if (serviceEntry.getValue().isEmpty()) {
                     // no links - smallest weight 0
-                    weights.put(service, 0);
+                    weights.put(serviceEntry.getKey(), 0);
                     it.remove();
                 } else {
                     // machine has dependencies - check if it has not weighted dependencies
-                    if (weights.keySet().containsAll(dependencies.get(service))) {
+                    if (weights.keySet().containsAll(serviceEntry.getValue())) {
                         // all connections are weighted - lets evaluate current machine
-                        Optional<String> maxWeight = dependencies.get(service)
+                        Optional<String> maxWeight = serviceEntry.getValue()
                                                                  .stream()
                                                                  .max((o1, o2) -> weights.get(o1).compareTo(weights.get(o2)));
                         // optional can't be empty because size of the list is checked above
                         //noinspection OptionalGetWithoutIsPresent
-                        weights.put(service, weights.get(maxWeight.get()) + 1);
+                        weights.put(serviceEntry.getKey(), weights.get(maxWeight.get()) + 1);
                         it.remove();
                     }
                 }
