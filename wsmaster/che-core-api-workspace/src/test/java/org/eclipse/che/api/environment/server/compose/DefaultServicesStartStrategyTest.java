@@ -88,7 +88,7 @@ public class DefaultServicesStartStrategyTest {
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,
-          expectedExceptionsMessageRegExp = "Launch order of machines '.*, .*' can't be evaluated.")
+          expectedExceptionsMessageRegExp = "Launch order of machines '.*, .*' can't be evaluated. Circular dependency")
     public void shouldFailIfCircularDependencyFound() throws Exception {
         // given
         CheServicesEnvironmentImpl composeEnvironment = new CheServicesEnvironmentImpl();

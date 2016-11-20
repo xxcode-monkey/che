@@ -67,20 +67,20 @@ public class DefaultServicesStartStrategy {
                                                                               service.getVolumesFrom().size());
 
             for (String dependsOn : service.getDependsOn()) {
-                checkDependOnValue(dependsOn, serviceEntry.getKey(), services);
+                checkDependency(dependsOn, serviceEntry.getKey(), services, "A service can not depend on itself");
                 machineDependencies.add(dependsOn);
             }
 
             // links also counts as dependencies
             for (String link : service.getLinks()) {
                 String dependency = getServiceFromLink(link);
-                checkFromLinkValue(dependency, serviceEntry.getKey(), services);
+                checkDependency(dependency, serviceEntry.getKey(), services, "A service can not link to itself");
                 machineDependencies.add(dependency);
             }
             // volumesFrom also counts as dependencies
             for (String volumesFrom : service.getVolumesFrom()) {
                 String dependency = getServiceFromVolumesFrom(volumesFrom);
-                checkFromVolumesValue(dependency, serviceEntry.getKey(), services);
+                checkDependency(dependency, serviceEntry.getKey(), services, "A service can not contains 'volumes_from' to itself");
                 machineDependencies.add(dependency);
             }
             dependencies.put(serviceEntry.getKey(), machineDependencies);
@@ -89,15 +89,12 @@ public class DefaultServicesStartStrategy {
         // Find weight of each machine in graph.
         // Weight of machine is calculated as sum of all weights of machines it depends on.
         // Nodes with no dependencies gets weight 0
-
-        // If this flag is not set during cycle of machine evaluation loop
-        // then no more weight of machine can be evaluated
-        while (dependencies.size() > 0 && weights.size() != dependencies.size()) {
+        while (!dependencies.isEmpty()) {
             int previousSize = dependencies.size();
             for (String service : dependencies.keySet()) {
                 // process not yet processed machines only
 
-                if (dependencies.get(service).size() == 0) {
+                if (dependencies.get(service).isEmpty()) {
                     // no links - smallest weight 0
                     weights.put(service, 0);
                     dependencies.remove(service);
@@ -115,12 +112,10 @@ public class DefaultServicesStartStrategy {
                     }
                 }
             }
-            // Not evaluated weights of machines left.
-            // Probably because of circular dependency.
             if (dependencies.size() == previousSize) {
                 throw new IllegalArgumentException("Launch order of machines '" +
                                                    Joiner.on(", ").join(dependencies.keySet()) +
-                                                   "' can't be evaluated.");
+                                                   "' can't be evaluated. Circular dependency");
             }
         }
 
@@ -165,28 +160,10 @@ public class DefaultServicesStartStrategy {
                       .collect(Collectors.toList());
     }
 
-    private void checkDependOnValue(String dependency, String serviceName, Map<String, CheServiceImpl> services) {
+    private void checkDependency(String dependency, String serviceName, Map<String, CheServiceImpl> services, String errorMessage) {
         if (serviceName.equals(dependency)) {
-            throw new IllegalArgumentException("A service can not depend on itself: " + serviceName);
+            throw new IllegalArgumentException(errorMessage + ": " + serviceName);
         }
-        checkDependency(dependency, serviceName, services);
-    }
-
-    private void checkFromLinkValue(String value, String serviceName, Map<String, CheServiceImpl> services) {
-        if (serviceName.equals(value)) {
-            throw new IllegalArgumentException("A service can not link to itself: " + serviceName);
-        }
-        checkDependency(value, serviceName, services);
-    }
-
-    private void checkFromVolumesValue(String value, String serviceName, Map<String, CheServiceImpl> services) {
-        if (serviceName.equals(value)) {
-            throw new IllegalArgumentException("A service can not contains 'volumes_from' to itself:" + serviceName);
-        }
-        checkDependency(value, serviceName, services);
-    }
-
-    private void checkDependency(String dependency, String serviceName, Map<String, CheServiceImpl> services) {
         if (!services.containsKey(dependency)) {
             throw new IllegalArgumentException(
                     format("Dependency '%s' in machine '%s' points to not known machine.",
