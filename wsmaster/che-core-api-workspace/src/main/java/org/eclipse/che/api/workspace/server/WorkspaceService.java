@@ -557,12 +557,10 @@ public class WorkspaceService extends Service {
                                                                     ForbiddenException {
         requiredNotNull(update, "Environment description");
         relativizeRecipeLinks(update);
-
+        workspaceManager.updateEnvironment(id, envName, update);
         if (newEnvName != null && !newEnvName.equals(envName)) {
             workspaceManager.renameEnvironment(id, envName, newEnvName);
-            envName = newEnvName;
         }
-        workspaceManager.updateEnvironment(id, envName, update);
         return linksInjector.injectLinks(asDto(workspaceManager.getWorkspace(id)), getServiceContext());
     }
 

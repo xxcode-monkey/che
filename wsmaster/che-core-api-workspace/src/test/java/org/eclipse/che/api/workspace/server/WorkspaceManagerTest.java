@@ -133,7 +133,8 @@ public class WorkspaceManagerTest {
                                                     accountManager,
                                                     false,
                                                     false,
-                                                    snapshotDao));
+                                                    snapshotDao,
+                                                    null));
         when(accountManager.getByName(NAMESPACE)).thenReturn(new AccountImpl("accountId", NAMESPACE, "test"));
         when(accountManager.getByName(NAMESPACE_2)).thenReturn(new AccountImpl("accountId2", NAMESPACE_2, "test"));
         when(workspaceDao.create(any(WorkspaceImpl.class))).thenAnswer(invocation -> invocation.getArguments()[0]);
@@ -742,7 +743,8 @@ public class WorkspaceManagerTest {
                                                     accountManager,
                                                     true,
                                                     false,
-                                                    snapshotDao));
+                                                    snapshotDao,
+                                                    null));
         final WorkspaceImpl workspace = workspaceManager.createWorkspace(createConfig(), NAMESPACE);
         when(workspaceDao.get(workspace.getId())).thenReturn(workspace);
         final RuntimeDescriptor descriptor = createDescriptor(workspace, RUNNING);
@@ -771,7 +773,8 @@ public class WorkspaceManagerTest {
                                                     accountManager,
                                                     false,
                                                     true,
-                                                    snapshotDao));
+                                                    snapshotDao,
+                                                    null));
         final WorkspaceImpl workspace = workspaceManager.createWorkspace(createConfig(), NAMESPACE);
         when(workspaceDao.get(workspace.getId())).thenReturn(workspace);
         when(runtimes.get(any())).thenThrow(new NotFoundException(""));
