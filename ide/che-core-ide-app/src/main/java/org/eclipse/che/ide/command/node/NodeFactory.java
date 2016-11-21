@@ -25,7 +25,7 @@ public interface NodeFactory {
 
     CommandTypeNode newCommandTypeNode(CommandType data,
                                        NodeSettings nodeSettings,
-                                       List<? extends CommandNode> commands);
+                                       List<? extends AbstractCommandNode> commands);
 
     ExecutableCommandNode newExecutableCommandNode(ContextualCommand command,
                                                    NodeSettings settings);

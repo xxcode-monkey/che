@@ -18,7 +18,7 @@ import org.eclipse.che.ide.api.mvp.View;
 import java.util.List;
 
 /**
- * The view of Commands Palette.
+ * The view of {@link CommandsPalettePresenter}.
  *
  * @author Artem Zatsarynnyi
  */
@@ -27,6 +27,9 @@ public interface CommandsPaletteView extends View<CommandsPaletteView.ActionDele
 
     /** Show the view. */
     void show();
+
+    /** Close the view. */
+    void close();
 
     /** Sets the commands to display in the view. */
     void setCommands(List<ContextualCommand> commands);

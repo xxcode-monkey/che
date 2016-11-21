@@ -13,7 +13,6 @@ package org.eclipse.che.ide.command.editor.page.arguments;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.inject.Inject;
 
-import org.eclipse.che.ide.api.command.ContextualCommand;
 import org.eclipse.che.ide.command.editor.page.AbstractCommandEditorPage;
 import org.eclipse.che.ide.command.editor.page.CommandEditorPage;
 
@@ -44,17 +43,19 @@ public class ArgumentsPage extends AbstractCommandEditorPage implements Argument
     }
 
     @Override
-    public void resetFrom(ContextualCommand command) {
-        super.resetFrom(command);
+    protected void initialize() {
+        commandLineInitial = editedCommand.getCommandLine();
 
-        commandLineInitial = command.getCommandLine();
-
-        view.setCommandLine(command.getCommandLine());
+        view.setCommandLine(commandLineInitial);
     }
 
     @Override
     public boolean isDirty() {
-        return !(commandLineInitial.equals(editedCommand.getCommandLine()));
+        if (editedCommand == null) {
+            return false;
+        }
+
+        return !commandLineInitial.equals(editedCommand.getCommandLine());
     }
 
     @Override

@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * The view of Commands Explorer.
+ * The view for {@link CommandsExplorerPresenter}.
  *
  * @author Artem Zatsarynnyi
  */

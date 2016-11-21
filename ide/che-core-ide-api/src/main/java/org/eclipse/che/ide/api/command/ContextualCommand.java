@@ -67,9 +67,13 @@ public class ContextualCommand extends CommandImpl {
             return false;
         }
 
+        if (!super.equals(o)) {
+            return false;
+        }
+
         ContextualCommand other = (ContextualCommand)o;
 
-        return Objects.equals(getApplicableContext(), other.getApplicableContext());
+        return super.equals(other) && Objects.equals(getApplicableContext(), other.getApplicableContext());
     }
 
     @Override

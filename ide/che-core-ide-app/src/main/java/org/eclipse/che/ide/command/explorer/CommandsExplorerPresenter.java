@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.command.explorer;
 
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.inject.Inject;
@@ -28,6 +27,7 @@ import org.eclipse.che.ide.api.command.CommandTypeRegistry;
 import org.eclipse.che.ide.api.command.ContextualCommand;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
+import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.parts.base.BasePresenter;
 import org.vectomatic.dom.svg.ui.SVGResource;
@@ -37,6 +37,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.parts.PartStackType.NAVIGATION;
 
 /**
@@ -52,21 +54,27 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
     private static final String TITLE   = "Commands";
     private static final String TOOLTIP = "Manage commands";
 
-    private final CommandsExplorerView view;
-    private final WorkspaceAgent       workspaceAgent;
-    private final CommandManager3      commandManager;
-    private final CommandTypeRegistry  commandTypeRegistry;
+    private final CommandsExplorerView      view;
+    private final CommandsExplorerResources resources;
+    private final WorkspaceAgent            workspaceAgent;
+    private final CommandManager3           commandManager;
+    private final CommandTypeRegistry       commandTypeRegistry;
+    private final NotificationManager       notificationManager;
 
     @Inject
     public CommandsExplorerPresenter(CommandsExplorerView view,
+                                     CommandsExplorerResources commandsExplorerResources,
                                      WorkspaceAgent workspaceAgent,
                                      EventBus eventBus,
                                      CommandManager3 commandManager,
-                                     CommandTypeRegistry commandTypeRegistry) {
+                                     CommandTypeRegistry commandTypeRegistry,
+                                     NotificationManager notificationManager) {
         this.view = view;
+        resources = commandsExplorerResources;
         this.workspaceAgent = workspaceAgent;
         this.commandManager = commandManager;
         this.commandTypeRegistry = commandTypeRegistry;
+        this.notificationManager = notificationManager;
 
         view.setDelegate(this);
 
@@ -84,7 +92,6 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
 
     @Override
     public void go(AcceptsOneWidget container) {
-
         container.setWidget(getView());
     }
 
@@ -111,12 +118,11 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
     @Nullable
     @Override
     public SVGResource getTitleImage() {
-        return null;
+        return resources.explorerPart();
     }
 
     @Override
     public void onCommandTypeSelected(CommandType commandType) {
-        // TODO: should we hide pages?
     }
 
     @Override
@@ -125,13 +131,13 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
 
     @Override
     public void onCommandAdd() {
-        final ApplicableContext applicableContext = new ApplicableContext();
+        final ApplicableContext defaultApplicableContext = new ApplicableContext();
         // by default, command should be applicable to the workspace only
-        applicableContext.setWorkspaceApplicable(true);
+        defaultApplicableContext.setWorkspaceApplicable(true);
 
         final CommandType selectedCommandType = view.getSelectedCommandType();
         if (selectedCommandType != null) {
-            commandManager.createCommand(selectedCommandType.getId(), applicableContext).then(new Operation<ContextualCommand>() {
+            commandManager.createCommand(selectedCommandType.getId(), defaultApplicableContext).then(new Operation<ContextualCommand>() {
                 @Override
                 public void apply(ContextualCommand arg) throws OperationException {
                     view.selectCommand(arg);
@@ -139,15 +145,14 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
             }).catchError(new Operation<PromiseError>() {
                 @Override
                 public void apply(PromiseError arg) throws OperationException {
-                    // TODO: replace it with notification
-                    Window.alert(arg.getMessage());
+                    notificationManager.notify("New command", "Unable to create command: " + arg.getMessage(), FAIL, EMERGE_MODE);
                 }
             });
         }
     }
 
     @Override
-    public void onCommandDuplicate(ContextualCommand command) {
+    public void onCommandDuplicate(final ContextualCommand command) {
         commandManager.createCommand(command).then(new Operation<ContextualCommand>() {
             @Override
             public void apply(ContextualCommand arg) throws OperationException {
@@ -156,14 +161,13 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
         }).catchError(new Operation<PromiseError>() {
             @Override
             public void apply(PromiseError arg) throws OperationException {
-                // TODO: replace it with notification
-                Window.alert(arg.getMessage());
+                notificationManager.notify(command.getName(), "Unable to create command: " + arg.getMessage(), FAIL, EMERGE_MODE);
             }
         });
     }
 
     @Override
-    public void onCommandRemove(ContextualCommand command) {
+    public void onCommandRemove(final ContextualCommand command) {
         commandManager.removeCommand(command.getName()).then(new Operation<Void>() {
             @Override
             public void apply(Void arg) throws OperationException {
@@ -172,14 +176,14 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
         }).catchError(new Operation<PromiseError>() {
             @Override
             public void apply(PromiseError arg) throws OperationException {
-                // TODO: replace it with notification
-                Window.alert(arg.getMessage());
+                notificationManager.notify(command.getName(), "Unable to remove command: " + arg.getMessage(), FAIL, EMERGE_MODE);
             }
         });
     }
 
     @Override
     public void onWsAgentStarted(WsAgentStateEvent event) {
+        // TODO: chose a better time to open Commands Explorer
         workspaceAgent.openPart(this, NAVIGATION);
         workspaceAgent.setActivePart(this);
     }

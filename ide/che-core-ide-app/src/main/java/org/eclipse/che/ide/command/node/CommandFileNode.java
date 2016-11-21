@@ -12,36 +12,35 @@ package org.eclipse.che.ide.command.node;
 
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
-import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.command.ContextualCommand;
 import org.eclipse.che.ide.api.data.tree.HasAction;
 import org.eclipse.che.ide.api.data.tree.settings.NodeSettings;
-import org.eclipse.che.ide.api.event.FileEvent;
+import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.ui.smartTree.presentation.NodePresentation;
 
 /**
- * Extension of {@link CommandNode} that also acts as a {@link VirtualFile} for using in editor.
+ * Extension of {@link AbstractCommandNode} that also acts as a {@link VirtualFile} for using it in editor.
  *
  * @author Artem Zatsarynnyi
  */
-public class CommandFileNode extends CommandNode implements HasAction, VirtualFile {
+public class CommandFileNode extends AbstractCommandNode implements HasAction, VirtualFile {
 
     /** Extension for the file type that represents a command. */
     public static final String FILE_TYPE_EXT = "che_command_internal";
 
-    private final EventBus eventBus;
+    private final EditorAgent editorAgent;
 
     @Inject
     public CommandFileNode(@Assisted ContextualCommand data,
                            @Assisted NodeSettings nodeSettings,
-                           EventBus eventBus) {
+                           EditorAgent editorAgent) {
         super(data, nodeSettings);
 
-        this.eventBus = eventBus;
+        this.editorAgent = editorAgent;
     }
 
     @Override
@@ -51,7 +50,7 @@ public class CommandFileNode extends CommandNode implements HasAction, VirtualFi
 
     @Override
     public void actionPerformed() {
-        eventBus.fireEvent(FileEvent.createOpenFileEvent(this));
+        editorAgent.openEditor(this);
     }
 
     @Override

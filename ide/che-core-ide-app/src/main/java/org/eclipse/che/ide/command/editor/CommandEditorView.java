@@ -17,7 +17,7 @@ import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.api.parts.base.BaseActionDelegate;
 
 /**
- * The view of command editor.
+ * The view for {@link CommandEditor}.
  *
  * @author Artem Zatsarynnyi
  */
@@ -25,7 +25,7 @@ import org.eclipse.che.ide.api.parts.base.BaseActionDelegate;
 public interface CommandEditorView extends View<CommandEditorView.ActionDelegate> {
 
     /**
-     * Adds page for editing command. The pages will be shown in order of adding.
+     * Add page for editing command.
      *
      * @param page
      *         page to add
@@ -47,7 +47,7 @@ public interface CommandEditorView extends View<CommandEditorView.ActionDelegate
     /** The action delegate for this view. */
     interface ActionDelegate extends BaseActionDelegate {
 
-        /** Called when reverting command is requested. */
+        /** Called when reverting command modifications is requested. */
         void onCommandRevert();
 
         /** Called when saving command is requested. */

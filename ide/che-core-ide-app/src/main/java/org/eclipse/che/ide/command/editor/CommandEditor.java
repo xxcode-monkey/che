@@ -15,14 +15,22 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.inject.Inject;
 
+import org.eclipse.che.api.promises.client.Operation;
+import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.command.CommandManager3;
 import org.eclipse.che.ide.api.command.ContextualCommand;
+import org.eclipse.che.ide.api.dialogs.CancelCallback;
+import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
+import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.editor.AbstractEditorPresenter;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorInput;
 import org.eclipse.che.ide.api.icon.Icon;
 import org.eclipse.che.ide.api.icon.IconRegistry;
+import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.command.editor.page.CommandEditorPage;
@@ -30,12 +38,14 @@ import org.eclipse.che.ide.command.editor.page.arguments.ArgumentsPage;
 import org.eclipse.che.ide.command.editor.page.info.InfoPage;
 import org.eclipse.che.ide.command.editor.page.previewurl.PreviewUrlPage;
 import org.eclipse.che.ide.command.node.CommandFileNode;
-import org.eclipse.che.ide.util.loging.Log;
 import org.vectomatic.dom.svg.ui.SVGImage;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 
 /**
  * Presenter for editing commands.
@@ -43,14 +53,23 @@ import java.util.List;
  * @author Artem Zatsarynnyi
  */
 public class CommandEditor extends AbstractEditorPresenter implements CommandEditorView.ActionDelegate,
-                                                                      CommandEditorPage.DirtyStateListener {
+                                                                      CommandManager3.CommandChangedListener {
 
-    private final CommandEditorView view;
-    private final WorkspaceAgent    workspaceAgent;
-    private final IconRegistry      iconRegistry;
-    private final CommandManager3   commandManager;
+    private final CommandEditorView        view;
+    private final WorkspaceAgent           workspaceAgent;
+    private final IconRegistry             iconRegistry;
+    private final CommandManager3          commandManager;
+    private final NotificationManager      notificationManager;
+    private final DialogFactory            dialogFactory;
+    private final EditorAgent              editorAgent;
+    private final CoreLocalizationConstant localizationConstants;
 
     private final List<CommandEditorPage> pages;
+
+    /** Edited command. */
+    private ContextualCommand editedCommand;
+    /** Initial (before any modification) name of the edited command. */
+    private String            commandNameInitial;
 
     @Inject
     public CommandEditor(CommandEditorView view,
@@ -59,13 +78,23 @@ public class CommandEditor extends AbstractEditorPresenter implements CommandEdi
                          CommandManager3 commandManager,
                          InfoPage infoPage,
                          ArgumentsPage argumentsPage,
-                         PreviewUrlPage previewUrlPage) {
+                         PreviewUrlPage previewUrlPage,
+                         NotificationManager notificationManager,
+                         DialogFactory dialogFactory,
+                         EditorAgent editorAgent,
+                         CoreLocalizationConstant localizationConstants) {
         this.view = view;
         this.workspaceAgent = workspaceAgent;
         this.iconRegistry = iconRegistry;
         this.commandManager = commandManager;
+        this.notificationManager = notificationManager;
+        this.dialogFactory = dialogFactory;
+        this.editorAgent = editorAgent;
+        this.localizationConstants = localizationConstants;
 
         view.setDelegate(this);
+
+        commandManager.addCommandChangedListener(this);
 
         pages = new ArrayList<>();
         pages.add(infoPage);
@@ -75,10 +104,6 @@ public class CommandEditor extends AbstractEditorPresenter implements CommandEdi
 
     @Override
     public void go(AcceptsOneWidget container) {
-        for (CommandEditorPage page : pages) {
-            view.addPage(page.getView(), page.getTitle(), page.getTooltip());
-        }
-
         container.setWidget(getView());
     }
 
@@ -87,12 +112,35 @@ public class CommandEditor extends AbstractEditorPresenter implements CommandEdi
         final VirtualFile file = getEditorInput().getFile();
 
         if (file instanceof CommandFileNode) {
-            final ContextualCommand command = ((CommandFileNode)file).getData();
+            editedCommand = ((CommandFileNode)file).getData();
+
+            initializePages();
 
             for (CommandEditorPage page : pages) {
-                page.setDirtyStateListener(this);
-                page.resetFrom(command);
+                view.addPage(page.getView(), page.getTitle(), page.getTooltip());
             }
+        } else {
+            callback.onInitializationFailed();
+        }
+    }
+
+    /** Initialize editor's pages with the edit command. */
+    private void initializePages() {
+        // save initial value of the edited command's name
+        // in order to be able to detect whether the command was renamed during editing or not
+        commandNameInitial = editedCommand.getName();
+
+        for (final CommandEditorPage page : pages) {
+            page.setDirtyStateListener(new CommandEditorPage.DirtyStateListener() {
+                @Override
+                public void onDirtyStateChanged() {
+                    updateDirtyState(page.isDirty());
+
+                    view.setSaveEnabled(page.isDirty());
+                }
+            });
+
+            page.setCommand(editedCommand);
         }
     }
 
@@ -106,9 +154,9 @@ public class CommandEditor extends AbstractEditorPresenter implements CommandEdi
             final Icon icon = iconRegistry.getIconIfExist(command.getType() + ".commands.category.icon");
 
             if (icon != null) {
-                final SVGImage svgIcon = icon.getSVGImage();
+                final SVGImage svgImage = icon.getSVGImage();
 
-                if (svgIcon != null) {
+                if (svgImage != null) {
                     return icon.getSVGResource();
                 }
             }
@@ -135,11 +183,35 @@ public class CommandEditor extends AbstractEditorPresenter implements CommandEdi
 
     @Override
     public void doSave() {
-        Log.info(CommandEditor.class, "saving...");
+        doSave(new AsyncCallback<EditorInput>() {
+            @Override
+            public void onFailure(Throwable caught) {
+            }
+
+            @Override
+            public void onSuccess(EditorInput result) {
+            }
+        });
     }
 
     @Override
-    public void doSave(AsyncCallback<EditorInput> callback) {
+    public void doSave(final AsyncCallback<EditorInput> callback) {
+        commandManager.updateCommand(commandNameInitial, editedCommand).then(new Operation<ContextualCommand>() {
+            @Override
+            public void apply(ContextualCommand arg) throws OperationException {
+                updateDirtyState(false);
+                initializePages();
+
+                callback.onSuccess(getEditorInput());
+            }
+        }).catchError(new Operation<PromiseError>() {
+            @Override
+            public void apply(PromiseError arg) throws OperationException {
+                notificationManager.notify(commandNameInitial, "Unable to save command: " + arg.getMessage(), FAIL, EMERGE_MODE);
+
+                callback.onFailure(arg.getCause());
+            }
+        });
     }
 
     @Override
@@ -153,6 +225,34 @@ public class CommandEditor extends AbstractEditorPresenter implements CommandEdi
     @Override
     public void close(boolean save) {
         workspaceAgent.removePart(this);
+    }
+
+    @Override
+    public void onClose(final AsyncCallback<Void> callback) {
+        // TODO: find the right place for this code since #onClose is never called
+        if (!isDirty()) {
+            handleClose();
+            callback.onSuccess(null);
+        } else {
+            dialogFactory.createConfirmDialog(
+                    localizationConstants.askWindowCloseTitle(),
+                    localizationConstants.messagesSaveChanges(getEditorInput().getName()),
+                    new ConfirmCallback() {
+                        @Override
+                        public void accepted() {
+                            doSave();
+                            handleClose();
+                            callback.onSuccess(null);
+                        }
+                    },
+                    new CancelCallback() {
+                        @Override
+                        public void cancelled() {
+                            handleClose();
+                            callback.onSuccess(null);
+                        }
+                    }).show();
+        }
     }
 
     @Override
@@ -173,20 +273,17 @@ public class CommandEditor extends AbstractEditorPresenter implements CommandEdi
     }
 
     @Override
-    public void onDirtyStateChanged() {
-        for (CommandEditorPage page : pages) {
-            // if at least one page is modified
-            if (page.isDirty()) {
-                updateDirtyState(true);
+    public void onCommandAdded(ContextualCommand command) {
+    }
 
-                view.setSaveEnabled(true);
+    @Override
+    public void onCommandUpdated(ContextualCommand command) {
+    }
 
-                return;
-            }
+    @Override
+    public void onCommandRemoved(ContextualCommand command) {
+        if (command.equals(editedCommand)) {
+            editorAgent.closeEditor(this);
         }
-
-        updateDirtyState(false);
-
-        view.setSaveEnabled(false);
     }
 }

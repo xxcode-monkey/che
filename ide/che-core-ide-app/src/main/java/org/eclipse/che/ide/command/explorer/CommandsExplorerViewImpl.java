@@ -51,7 +51,7 @@ public class CommandsExplorerViewImpl extends BaseView<CommandsExplorerView.Acti
     private final NodeFactory          nodeFactory;
 
     @UiField(provided = true)
-    Tree commandsTree;
+    Tree tree;
 
     @Inject
     public CommandsExplorerViewImpl(org.eclipse.che.ide.Resources coreResources,
@@ -61,20 +61,18 @@ public class CommandsExplorerViewImpl extends BaseView<CommandsExplorerView.Acti
 
         this.nodeFactory = nodeFactory;
 
-        resources.styles().ensureInjected();
+        resources.commandsExplorerCss().ensureInjected();
 
         setTitle("Commands Explorer");
 
-        commandsTree = new Tree(new NodeStorage(), new NodeLoader());
+        tree = new Tree(new NodeStorage(), new NodeLoader());
 
+        treeRenderer = new CommandsTreeRenderer(tree.getTreeStyles(), resources, delegate);
 
-        treeRenderer = new CommandsTreeRenderer(commandsTree.getTreeStyles(), resources, delegate);
+        tree.setPresentationRenderer(treeRenderer);
+        tree.getSelectionModel().setSelectionMode(SINGLE);
 
-
-        commandsTree.setPresentationRenderer(treeRenderer);
-        commandsTree.getSelectionModel().setSelectionMode(SINGLE);
-
-        commandsTree.getSelectionModel().addSelectionHandler(new SelectionHandler<Node>() {
+        tree.getSelectionModel().addSelectionHandler(new SelectionHandler<Node>() {
             @Override
             public void onSelection(SelectionEvent<Node> event) {
                 Node selectedNode = event.getSelectedItem();
@@ -91,33 +89,33 @@ public class CommandsExplorerViewImpl extends BaseView<CommandsExplorerView.Acti
 
 
     @Override
-    public void setCommands(Map<CommandType, List<ContextualCommand>> workspaceCommands) {
+    public void setCommands(Map<CommandType, List<ContextualCommand>> commands) {
         // TODO: rework this delegating
         treeRenderer.setDelegate(delegate);
 
-        renderCommands(workspaceCommands);
+        renderCommands(commands);
     }
 
-    private void renderCommands(Map<CommandType, List<ContextualCommand>> workspaceCommands) {
-        commandsTree.getNodeStorage().clear();
+    private void renderCommands(Map<CommandType, List<ContextualCommand>> commands) {
+        tree.getNodeStorage().clear();
 
-        for (Map.Entry<CommandType, List<ContextualCommand>> entry : workspaceCommands.entrySet()) {
+        for (Map.Entry<CommandType, List<ContextualCommand>> entry : commands.entrySet()) {
             List<CommandFileNode> commandNodes = new ArrayList<>(entry.getValue().size());
             for (ContextualCommand command : entry.getValue()) {
                 commandNodes.add(nodeFactory.newCommandFileNode(command, null));
             }
 
             final CommandTypeNode commandTypeNode = nodeFactory.newCommandTypeNode(entry.getKey(), null, commandNodes);
-            commandsTree.getNodeStorage().add(commandTypeNode);
+            tree.getNodeStorage().add(commandTypeNode);
         }
 
-        commandsTree.expandAll();
+        tree.expandAll();
     }
 
     @Nullable
     @Override
     public CommandType getSelectedCommandType() {
-        final List<Node> selectedNodes = commandsTree.getSelectionModel().getSelectedNodes();
+        final List<Node> selectedNodes = tree.getSelectionModel().getSelectedNodes();
 
         if (!selectedNodes.isEmpty()) {
             final Node selectedNode = selectedNodes.get(0);
@@ -132,7 +130,7 @@ public class CommandsExplorerViewImpl extends BaseView<CommandsExplorerView.Acti
     @Nullable
     @Override
     public ContextualCommand getSelectedCommand() {
-        final List<Node> selectedNodes = commandsTree.getSelectionModel().getSelectedNodes();
+        final List<Node> selectedNodes = tree.getSelectionModel().getSelectedNodes();
 
         if (!selectedNodes.isEmpty()) {
             final Node selectedNode = selectedNodes.get(0);

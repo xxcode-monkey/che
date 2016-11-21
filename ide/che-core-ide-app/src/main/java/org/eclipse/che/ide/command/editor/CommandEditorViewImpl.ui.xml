@@ -16,9 +16,7 @@
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
              xmlns:che='urn:import:org.eclipse.che.ide.ui'>
 
-    <!--<ui:with field="datasourceUiResources" type="org.eclipse.che.ide.ext.datasource.client.DatasourceUiResources"/>-->
-
-    <g:DockLayoutPanel ui:field="centerPanel">
+    <g:DockLayoutPanel>
         <g:north size="30">
             <g:FlowPanel>
                 <che:radiobuttongroup.RadioButtonGroup ui:field="pagesSwitcher"/>

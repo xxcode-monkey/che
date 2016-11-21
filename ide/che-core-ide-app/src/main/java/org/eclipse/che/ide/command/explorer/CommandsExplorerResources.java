@@ -23,7 +23,10 @@ import org.vectomatic.dom.svg.ui.SVGResource;
 public interface CommandsExplorerResources extends ClientBundle {
 
     @Source({"styles.css", "org/eclipse/che/ide/api/ui/style.css"})
-    CSS styles();
+    CSS commandsExplorerCss();
+
+    @Source("explorer-part.svg")
+    SVGResource explorerPart();
 
     @Source("add-command-button.svg")
     SVGResource addCommandButton();

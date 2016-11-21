@@ -48,7 +48,7 @@ class CommandsTreeRenderer extends DefaultPresentationRenderer<Node> {
         Element element = super.render(node, domID, joint, depth);
 
         if (node instanceof CommandFileNode) {
-            element.addClassName(resources.styles().categorySubElementHeader());
+            element.addClassName(resources.commandsExplorerCss().categorySubElementHeader());
 
             // create 'Remove Command' button
             final SpanElement removeCommandButton = Document.get().createSpanElement();
@@ -79,14 +79,14 @@ class CommandsTreeRenderer extends DefaultPresentationRenderer<Node> {
             });
 
             final SpanElement buttonsPanel = Document.get().createSpanElement();
-            buttonsPanel.setClassName(resources.styles().buttonArea());
+            buttonsPanel.setClassName(resources.commandsExplorerCss().buttonArea());
 
             buttonsPanel.appendChild(removeCommandButton);
             buttonsPanel.appendChild(duplicateCommandButton);
 
             element.getFirstChildElement().appendChild(buttonsPanel);
         } else if (node instanceof CommandTypeNode) {
-            element.getFirstChildElement().addClassName(resources.styles().categoryHeader());
+            element.getFirstChildElement().addClassName(resources.commandsExplorerCss().categoryHeader());
 
             // create 'Add Command' button
             final SpanElement addCommandButton = Document.get().createSpanElement();

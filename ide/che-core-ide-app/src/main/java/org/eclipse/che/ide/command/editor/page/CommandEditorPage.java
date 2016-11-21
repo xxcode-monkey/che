@@ -31,12 +31,11 @@ public interface CommandEditorPage {
     IsWidget getView();
 
     /**
-     * Resets the page with the given {@code command}.
+     * <p>This method is called every time when command is opening in the editor.
      * <p>Typically, implementor should hold the given {@code command}
      * instance for subsequent modifying it directly and show the page's view.
-     * <p>This method is called every time when page should be initialized by an edited command.
      */
-    void resetFrom(ContextualCommand command);
+    void setCommand(ContextualCommand command);
 
     /**
      * Whether the page has been modified or not?

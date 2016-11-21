@@ -84,7 +84,7 @@ public class CommandsExplorerViewImpl extends BaseView<CommandsExplorerView.Acti
         this.nodeFactory = nodeFactory;
         this.commandEditorView = commandEditorView;
 
-        resources.styles().ensureInjected();
+        resources.commandsExplorerCss().ensureInjected();
 
         setTitle("Commands Explorer");
 

@@ -154,7 +154,7 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
         // initialize all pages with the selected command
         for (CommandEditorPage page : pages) {
             page.setDirtyStateListener(this);
-            page.resetFrom(command);
+            page.setCommand(command);
         }
 
         onDirtyStateChanged();

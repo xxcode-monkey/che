@@ -14,7 +14,6 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.google.inject.Inject;
 
 import org.eclipse.che.ide.api.command.ApplicableContext;
-import org.eclipse.che.ide.api.command.ContextualCommand;
 import org.eclipse.che.ide.command.editor.page.AbstractCommandEditorPage;
 import org.eclipse.che.ide.command.editor.page.CommandEditorPage;
 
@@ -52,16 +51,14 @@ public class InfoPage extends AbstractCommandEditorPage implements InfoPageView.
     }
 
     @Override
-    public void resetFrom(ContextualCommand command) {
-        super.resetFrom(command);
+    protected void initialize() {
+        final ApplicableContext applicableContext = editedCommand.getApplicableContext();
 
-        final ApplicableContext applicableContext = command.getApplicableContext();
-
-        commandNameInitial = command.getName();
+        commandNameInitial = editedCommand.getName();
         workspaceInitial = applicableContext.isWorkspaceApplicable();
 
-        view.setCommandName(command.getName());
-        view.setWorkspace(command.getApplicableContext().isWorkspaceApplicable());
+        view.setCommandName(editedCommand.getName());
+        view.setWorkspace(editedCommand.getApplicableContext().isWorkspaceApplicable());
 
         view.setPlay(false);
         view.setSwift(false);
@@ -78,6 +75,10 @@ public class InfoPage extends AbstractCommandEditorPage implements InfoPageView.
 
     @Override
     public boolean isDirty() {
+        if (editedCommand == null) {
+            return false;
+        }
+
         return !(commandNameInitial.equals(editedCommand.getName()) &&
                  workspaceInitial == editedCommand.getApplicableContext().isWorkspaceApplicable());
     }

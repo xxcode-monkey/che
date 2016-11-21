@@ -20,30 +20,30 @@ import org.eclipse.che.ide.api.data.tree.HasAction;
 import org.eclipse.che.ide.api.data.tree.settings.NodeSettings;
 
 /**
- * Extension of {@link CommandNode} that can execute
+ * Extension of {@link AbstractCommandNode} that can execute
  * a command when performing an action is requested.
  *
  * @author Artem Zatsarynnyi
  * @see #actionPerformed()
  */
-public class ExecutableCommandNode extends CommandNode implements HasAction {
+public class ExecutableCommandNode extends AbstractCommandNode implements HasAction {
 
-    private final CommandManager commandManager;
+    private final CommandManager commandExecutor;
     private final AppContext     appContext;
 
     @Inject
     public ExecutableCommandNode(@Assisted ContextualCommand data,
                                  @Assisted NodeSettings nodeSettings,
-                                 CommandManager commandManager,
+                                 CommandManager commandExecutor,
                                  AppContext appContext) {
         super(data, nodeSettings);
 
-        this.commandManager = commandManager;
+        this.commandExecutor = commandExecutor;
         this.appContext = appContext;
     }
 
     @Override
     public void actionPerformed() {
-        commandManager.executeCommand(getData(), appContext.getDevMachine());
+        commandExecutor.executeCommand(getData(), appContext.getDevMachine());
     }
 }

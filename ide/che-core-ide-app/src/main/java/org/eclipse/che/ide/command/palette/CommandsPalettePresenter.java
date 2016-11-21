@@ -27,8 +27,7 @@ public class CommandsPalettePresenter implements CommandsPaletteView.ActionDeleg
     private final CommandManager3     commandManager;
 
     @Inject
-    public CommandsPalettePresenter(CommandsPaletteView view,
-                                    CommandManager3 commandManager) {
+    public CommandsPalettePresenter(CommandsPaletteView view, CommandManager3 commandManager) {
         this.view = view;
         this.commandManager = commandManager;
 

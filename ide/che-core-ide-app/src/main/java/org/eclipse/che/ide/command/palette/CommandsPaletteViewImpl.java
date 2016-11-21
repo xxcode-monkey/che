@@ -45,6 +45,7 @@ import java.util.Map;
 public class CommandsPaletteViewImpl extends Window implements CommandsPaletteView {
 
     private static final CommandsPaletteViewImplUiBinder UI_BINDER = GWT.create(CommandsPaletteViewImplUiBinder.class);
+
     private final CommandTypeRegistry commandTypeRegistry;
     private final NodeFactory         nodeFactory;
 
@@ -66,6 +67,8 @@ public class CommandsPaletteViewImpl extends Window implements CommandsPaletteVi
         setWidget(UI_BINDER.createAndBindUi(this));
 
         setTitle("Commands Palette");
+
+        filterField.getElement().setAttribute("placeholder", "Search command");
     }
 
     @Override
@@ -76,22 +79,27 @@ public class CommandsPaletteViewImpl extends Window implements CommandsPaletteVi
     }
 
     @Override
-    public void setCommands(List<ContextualCommand> workspaceCommands) {
-        // group of workspace commands in map
-        Map<CommandType, List<ContextualCommand>> workspaceCommandsByType = new HashMap<>();
-        for (ContextualCommand command : workspaceCommands) {
-            final CommandType commandType = commandTypeRegistry.getCommandTypeById(command.getType());
+    public void close() {
+        hide();
+    }
 
-            List<ContextualCommand> commands = workspaceCommandsByType.get(commandType);
-            if (commands == null) {
-                commands = new ArrayList<>();
-                workspaceCommandsByType.put(commandType, commands);
+    @Override
+    public void setCommands(List<ContextualCommand> commands) {
+        Map<CommandType, List<ContextualCommand>> commandsByType = new HashMap<>();
+
+        for (ContextualCommand command : commands) {
+            final CommandType commandType = commandTypeRegistry.getCommandTypeById(command.getType());
+            List<ContextualCommand> commandsOfType = commandsByType.get(commandType);
+
+            if (commandsOfType == null) {
+                commandsOfType = new ArrayList<>();
+                commandsByType.put(commandType, commandsOfType);
             }
 
-            commands.add(command);
+            commandsOfType.add(command);
         }
 
-        renderWorkspaceCommands(workspaceCommandsByType);
+        renderCommands(commandsByType);
     }
 
     @Override
@@ -99,16 +107,16 @@ public class CommandsPaletteViewImpl extends Window implements CommandsPaletteVi
         return filterField.getValue();
     }
 
-    private void renderWorkspaceCommands(Map<CommandType, List<ContextualCommand>> workspaceCommands) {
+    private void renderCommands(Map<CommandType, List<ContextualCommand>> commands) {
         commandsTree.getNodeStorage().clear();
 
-        for (Map.Entry<CommandType, List<ContextualCommand>> entry : workspaceCommands.entrySet()) {
-            List<ExecutableCommandNode> executableCommandNodes = new ArrayList<>(entry.getValue().size());
+        for (Map.Entry<CommandType, List<ContextualCommand>> entry : commands.entrySet()) {
+            List<ExecutableCommandNode> commandNodes = new ArrayList<>(entry.getValue().size());
             for (ContextualCommand command : entry.getValue()) {
-                executableCommandNodes.add(nodeFactory.newExecutableCommandNode(command, null));
+                commandNodes.add(nodeFactory.newExecutableCommandNode(command, null));
             }
 
-            final CommandTypeNode commandTypeNode = nodeFactory.newCommandTypeNode(entry.getKey(), null, executableCommandNodes);
+            final CommandTypeNode commandTypeNode = nodeFactory.newCommandTypeNode(entry.getKey(), null, commandNodes);
             commandsTree.getNodeStorage().add(commandTypeNode);
         }
 

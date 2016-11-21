@@ -31,13 +31,13 @@ import java.util.List;
  */
 public class CommandTypeNode extends SyntheticNode<CommandType> {
 
-    private final List<? extends CommandNode> commands;
-    private final PromiseProvider             promiseProvider;
+    private final List<? extends AbstractCommandNode> commands;
+    private final PromiseProvider                     promiseProvider;
 
     @Inject
     public CommandTypeNode(@Assisted CommandType data,
                            @Assisted NodeSettings nodeSettings,
-                           @Assisted List<? extends CommandNode> commands,
+                           @Assisted List<? extends AbstractCommandNode> commands,
                            PromiseProvider promiseProvider) {
         super(data, nodeSettings);
 

@@ -20,13 +20,13 @@ import org.eclipse.che.ide.ui.smartTree.presentation.NodePresentation;
 import java.util.List;
 
 /**
- * Tree node that represents {@link ContextualCommand}.
+ * Abstract tree node that represents {@link ContextualCommand}.
  *
  * @author Artem Zatsarynnyi
  */
-public class CommandNode extends SyntheticNode<ContextualCommand> {
+class AbstractCommandNode extends SyntheticNode<ContextualCommand> {
 
-    public CommandNode(ContextualCommand data, NodeSettings nodeSettings) {
+    AbstractCommandNode(ContextualCommand data, NodeSettings nodeSettings) {
         super(data, nodeSettings);
     }
 

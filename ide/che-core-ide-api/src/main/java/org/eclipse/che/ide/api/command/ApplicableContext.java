@@ -31,6 +31,23 @@ public class ApplicableContext {
         applicableProjects = new ArrayList<>();
     }
 
+    public ApplicableContext(boolean workspaceApplicable,
+                             boolean projectApplicable,
+                             boolean fileApplicable,
+                             List<String> applicableProjects) {
+        this.workspaceApplicable = workspaceApplicable;
+        this.projectApplicable = projectApplicable;
+        this.fileApplicable = fileApplicable;
+        this.applicableProjects = new ArrayList<>(applicableProjects);
+    }
+
+    public ApplicableContext(ApplicableContext applicableContext) {
+        this(applicableContext.isWorkspaceApplicable(),
+             applicableContext.isProjectApplicable(),
+             applicableContext.isFileApplicable(),
+             applicableContext.getApplicableProjects());
+    }
+
     public boolean isWorkspaceApplicable() {
         return workspaceApplicable;
     }

@@ -19,12 +19,10 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DeckPanel;
-import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 
-import org.eclipse.che.ide.command.explorer.CommandsExplorerResources;
 import org.eclipse.che.ide.ui.radiobuttongroup.RadioButtonGroup;
 
 /**
@@ -40,26 +38,20 @@ public class CommandEditorViewImpl extends Composite implements CommandEditorVie
     RadioButtonGroup pagesSwitcher;
 
     @UiField
-    DockLayoutPanel centerPanel;
-
-    @UiField
-    DeckPanel pagesPanel;
-
-    @UiField
     Button saveButton;
 
     @UiField
     Button cancelButton;
 
-    private int pageCounter;
+    @UiField
+    DeckPanel pagesPanel;
 
+    // The total count of added pages
+    private int            pagesCount;
     private ActionDelegate delegate;
 
     @Inject
-    public CommandEditorViewImpl(org.eclipse.che.ide.Resources coreResources,
-                                 CommandsExplorerResources resources) {
-        resources.styles().ensureInjected();
-
+    public CommandEditorViewImpl() {
         initWidget(UI_BINDER.createAndBindUi(this));
 
         setSaveEnabled(false);
@@ -67,7 +59,7 @@ public class CommandEditorViewImpl extends Composite implements CommandEditorVie
 
     @Override
     public void addPage(IsWidget page, String title, String tooltip) {
-        final int pageIndex = pageCounter;
+        final int pageIndex = pagesCount;
 
         pagesSwitcher.addButton(title, tooltip, null, new ClickHandler() {
             @Override
@@ -78,12 +70,12 @@ public class CommandEditorViewImpl extends Composite implements CommandEditorVie
 
         pagesPanel.add(page);
 
-        if (pageCounter == 0) {
+        if (pagesCount == 0) {
             pagesSwitcher.selectButton(0);
             pagesPanel.showWidget(0);
         }
 
-        pageCounter++;
+        pagesCount++;
     }
 
     @Override

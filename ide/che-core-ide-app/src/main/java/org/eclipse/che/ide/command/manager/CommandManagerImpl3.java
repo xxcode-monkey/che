@@ -163,8 +163,8 @@ public class CommandManagerImpl3 implements CommandManager3, WsAgentComponent, W
         final ContextualCommand newCommand = new ContextualCommand(getUniqueCommandName(command.getType(), command.getName()),
                                                                    command.getCommandLine(),
                                                                    command.getType(),
-                                                                   command.getAttributes(),
-                                                                   command.getApplicableContext());
+                                                                   new HashMap<>(command.getAttributes()),
+                                                                   new ApplicableContext(applicableContext));
 
         newCommand.getAttributes().put(COMMAND_PREVIEW_URL_ATTRIBUTE_NAME, commandType.getPreviewUrlTemplate());
 

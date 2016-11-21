@@ -26,6 +26,7 @@ public abstract class AbstractCommandEditorPage implements CommandEditorPage {
 
     private DirtyStateListener listener;
 
+    /** Creates new page with the given title and tooltip. */
     protected AbstractCommandEditorPage(String title, String tooltip) {
         this.title = title;
         this.tooltip = tooltip;
@@ -42,16 +43,25 @@ public abstract class AbstractCommandEditorPage implements CommandEditorPage {
     }
 
     @Override
-    public void resetFrom(ContextualCommand command) {
+    public void setCommand(ContextualCommand command) {
         editedCommand = command;
+
+        initialize();
+        notifyDirtyStateChanged();
+
     }
+
+    protected abstract void initialize();
 
     @Override
     public void setDirtyStateListener(DirtyStateListener listener) {
         this.listener = listener;
     }
 
-    /** Should be called by page every time when any command modifications on the page have been performed. */
+    /**
+     * Should be called by page every time when any command
+     * modifications on the page have been performed.
+     */
     protected void notifyDirtyStateChanged() {
         if (listener != null) {
             listener.onDirtyStateChanged();

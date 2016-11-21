@@ -15,5 +15,5 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
              xmlns:che='urn:import:org.eclipse.che.ide.ui'>
 
-    <che:smartTree.Tree ui:field="commandsTree"/>
+    <che:smartTree.Tree ui:field="tree"/>
 </ui:UiBinder>

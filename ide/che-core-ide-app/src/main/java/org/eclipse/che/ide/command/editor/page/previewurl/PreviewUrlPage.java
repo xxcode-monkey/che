@@ -46,16 +46,18 @@ public class PreviewUrlPage extends AbstractCommandEditorPage implements Preview
     }
 
     @Override
-    public void resetFrom(ContextualCommand command) {
-        super.resetFrom(command);
-
-        previewUrlInitial = getCommandPreviewUrl(command);
+    protected void initialize() {
+        previewUrlInitial = getCommandPreviewUrl(editedCommand);
 
         view.setPreviewUrl(previewUrlInitial);
     }
 
     @Override
     public boolean isDirty() {
+        if (editedCommand == null) {
+            return false;
+        }
+
         return !(previewUrlInitial.equals(getCommandPreviewUrl(editedCommand)));
     }
 
