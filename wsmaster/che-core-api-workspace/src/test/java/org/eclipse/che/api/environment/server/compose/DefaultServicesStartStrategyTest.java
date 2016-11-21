@@ -88,7 +88,7 @@ public class DefaultServicesStartStrategyTest {
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,
-          expectedExceptionsMessageRegExp = "Launch order of machines '.*, .*' can't be evaluated. Circular dependency")
+          expectedExceptionsMessageRegExp = "Launch order of machines '.*, .*' can't be evaluated. Circular dependency.")
     public void shouldFailIfCircularDependencyFound() throws Exception {
         // given
         CheServicesEnvironmentImpl composeEnvironment = new CheServicesEnvironmentImpl();
@@ -121,7 +121,7 @@ public class DefaultServicesStartStrategyTest {
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,
-          expectedExceptionsMessageRegExp = "A service can not contains 'volumes_from' to itself:.*")
+          expectedExceptionsMessageRegExp = "A service can not contain 'volumes_from' to itself:.*")
     public void shouldFailIfMachineContainsVolumesFromByItSelf() {
         // given
         CheServicesEnvironmentImpl composeEnvironment = new CheServicesEnvironmentImpl();
@@ -235,7 +235,7 @@ public class DefaultServicesStartStrategyTest {
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,
-          expectedExceptionsMessageRegExp = "Dependency 'fifth' in machine 'second' points to not known machine.")
+          expectedExceptionsMessageRegExp = "Dependency 'fifth' in machine 'second' points to unknown machine.")
     public void shouldFailIfDependsOnFieldContainsNonExistingService() throws Exception {
         // given
         CheServicesEnvironmentImpl composeEnvironment = new CheServicesEnvironmentImpl();
@@ -248,7 +248,7 @@ public class DefaultServicesStartStrategyTest {
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,
-          expectedExceptionsMessageRegExp = "Dependency 'fifth' in machine 'third' points to not known machine.")
+          expectedExceptionsMessageRegExp = "Dependency 'fifth' in machine 'third' points to unknown machine.")
     public void shouldFailIfVolumesFromFieldContainsNonExistingService() throws Exception {
         // given
         CheServicesEnvironmentImpl composeEnvironment = new CheServicesEnvironmentImpl();
@@ -276,7 +276,7 @@ public class DefaultServicesStartStrategyTest {
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,
-          expectedExceptionsMessageRegExp = "Dependency 'fifth' in machine 'second' points to not known machine.")
+          expectedExceptionsMessageRegExp = "Dependency 'fifth' in machine 'second' points to unknown machine.")
     public void shouldFailIfLinksFieldContainsNonExistingService() throws Exception {
         // given
         CheServicesEnvironmentImpl composeEnvironment = new CheServicesEnvironmentImpl();
