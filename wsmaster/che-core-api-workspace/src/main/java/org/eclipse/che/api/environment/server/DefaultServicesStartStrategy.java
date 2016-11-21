@@ -80,7 +80,7 @@ public class DefaultServicesStartStrategy {
             // volumesFrom also counts as dependencies
             for (String volumesFrom : service.getVolumesFrom()) {
                 String dependency = getServiceFromVolumesFrom(volumesFrom);
-                checkDependency(dependency, serviceEntry.getKey(), services, "A service can not contains 'volumes_from' to itself");
+                checkDependency(dependency, serviceEntry.getKey(), services, "A service can not contain 'volumes_from' to itself");
                 machineDependencies.add(dependency);
             }
             dependencies.put(serviceEntry.getKey(), machineDependencies);
@@ -115,7 +115,7 @@ public class DefaultServicesStartStrategy {
             if (dependencies.size() == previousSize) {
                 throw new IllegalArgumentException("Launch order of machines '" +
                                                    Joiner.on(", ").join(dependencies.keySet()) +
-                                                   "' can't be evaluated. Circular dependency");
+                                                   "' can't be evaluated. Circular dependency.");
             }
         }
 
@@ -166,7 +166,7 @@ public class DefaultServicesStartStrategy {
         }
         if (!services.containsKey(dependency)) {
             throw new IllegalArgumentException(
-                    format("Dependency '%s' in machine '%s' points to not known machine.",
+                    format("Dependency '%s' in machine '%s' points to unknown machine.",
                            dependency, serviceName));
         }
     }
