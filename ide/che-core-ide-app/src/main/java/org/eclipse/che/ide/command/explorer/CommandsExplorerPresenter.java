@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.command.explorer;
 
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.inject.Inject;
@@ -30,6 +31,8 @@ import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.parts.base.BasePresenter;
+import org.eclipse.che.ide.api.workspace.WorkspaceReadyEvent;
+import org.eclipse.che.ide.util.loging.Log;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 import java.util.ArrayList;
@@ -49,6 +52,7 @@ import static org.eclipse.che.ide.api.parts.PartStackType.NAVIGATION;
 @Singleton
 public class CommandsExplorerPresenter extends BasePresenter implements CommandsExplorerView.ActionDelegate,
                                                                         WsAgentStateHandler,
+                                                                        WorkspaceReadyEvent.WorkspaceReadyHandler,
                                                                         CommandManager3.CommandChangedListener {
 
     private static final String TITLE   = "Commands";
@@ -79,19 +83,22 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
         view.setDelegate(this);
 
         eventBus.addHandler(WsAgentStateEvent.TYPE, this);
+//        eventBus.addHandler(WorkspaceReadyEvent.getType(), this);
 
         commandManager.addCommandChangedListener(this);
     }
 
     @Override
-    public void onOpen() {
-        super.onOpen();
-
-        refreshView();
-    }
-
-    @Override
     public void go(AcceptsOneWidget container) {
+        Log.info(CommandsExplorerPresenter.class, "go");
+
+        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+            @Override
+            public void execute() {
+                refreshView();
+            }
+        });
+
         container.setWidget(getView());
     }
 
@@ -229,5 +236,11 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
         }
 
         view.setCommands(commands);
+    }
+
+    @Override
+    public void onWorkspaceReady(WorkspaceReadyEvent event) {
+        workspaceAgent.openPart(this, NAVIGATION);
+        workspaceAgent.setActivePart(this);
     }
 }
