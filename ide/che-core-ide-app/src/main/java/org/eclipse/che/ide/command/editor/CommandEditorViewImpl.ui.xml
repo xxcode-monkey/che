@@ -16,10 +16,19 @@
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
              xmlns:che='urn:import:org.eclipse.che.ide.ui'>
 
-    <g:DockLayoutPanel>
+    <ui:style>
+        @eval partBackground org.eclipse.che.ide.api.theme.Style.theme.partBackground();
+        .background {
+            background-color: partBackground;
+        }
+    </ui:style>
+
+    <g:DockLayoutPanel addStyleNames="{style.background}">
         <g:north size="30">
             <g:FlowPanel>
-                <che:radiobuttongroup.RadioButtonGroup ui:field="pagesSwitcher"/>
+                <g:SimplePanel debugId="ppp">
+                    <che:radiobuttongroup.RadioButtonGroup ui:field="pagesSwitcher"/>
+                </g:SimplePanel>
                 <g:Button ui:field="cancelButton" text="Cancel"/>
                 <g:Button ui:field="saveButton" text="Save"/>
             </g:FlowPanel>
