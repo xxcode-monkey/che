@@ -29,10 +29,7 @@
         <g:center>
             <g:FlowPanel>
                 <g:Label text="Projects"/>
-                <g:FlowPanel>
-                    <g:CheckBox ui:field="play" text="play"/>
-                    <g:CheckBox ui:field="swift" text="swift"/>
-                </g:FlowPanel>
+                <g:FlowPanel ui:field="projectsPanel"/>
             </g:FlowPanel>
         </g:center>
     </g:DockLayoutPanel>

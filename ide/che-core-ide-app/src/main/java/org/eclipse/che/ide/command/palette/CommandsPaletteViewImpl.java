@@ -129,7 +129,7 @@ public class CommandsPaletteViewImpl extends Window implements CommandsPaletteVi
     }
 
     @UiHandler({"filterField"})
-    void onFilterChanged(KeyUpEvent event) {
+    void onFilterChanged(@SuppressWarnings("UnusedParameters") KeyUpEvent event) {
         delegate.onFilterChanged(getFilterValue());
     }
 

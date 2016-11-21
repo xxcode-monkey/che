@@ -13,14 +13,20 @@ package org.eclipse.che.ide.command.editor.page.info;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
+
+import org.eclipse.che.ide.api.resources.Project;
+
+import java.util.Map;
 
 /**
  * Implementation of {@link InfoPageView}.
@@ -38,10 +44,7 @@ public class InfoPageViewImpl extends Composite implements InfoPageView {
     CheckBox workspace;
 
     @UiField
-    CheckBox play;
-
-    @UiField
-    CheckBox swift;
+    FlowPanel projectsPanel;
 
     private ActionDelegate delegate;
 
@@ -66,13 +69,25 @@ public class InfoPageViewImpl extends Composite implements InfoPageView {
     }
 
     @Override
-    public void setPlay(boolean value) {
-        play.setValue(value);
-    }
+    public void setProjectsState(Map<Project, Boolean> projects) {
+        projectsPanel.clear();
 
-    @Override
-    public void setSwift(boolean value) {
-        swift.setValue(value);
+        for (final Map.Entry<Project, Boolean> entry : projects.entrySet()) {
+            final Project project = entry.getKey();
+
+            final ProjectSwitcher switcher = new ProjectSwitcher(project.getName());
+
+            switcher.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+                @Override
+                public void onValueChange(ValueChangeEvent<Boolean> event) {
+                    delegate.onApplicableProjectChanged(project, event.getValue());
+                }
+            });
+
+            switcher.setValue(entry.getValue());
+
+            projectsPanel.add(switcher);
+        }
     }
 
     @Override
@@ -88,16 +103,6 @@ public class InfoPageViewImpl extends Composite implements InfoPageView {
     @UiHandler({"workspace"})
     void onWorkspaceChanged(ValueChangeEvent<Boolean> event) {
         delegate.onWorkspaceChanged(event.getValue());
-    }
-
-    @UiHandler({"play"})
-    void onPlayChanged(ValueChangeEvent<Boolean> event) {
-        delegate.onPlayChanged(event.getValue());
-    }
-
-    @UiHandler({"swift"})
-    void onSwiftChanged(ValueChangeEvent<Boolean> event) {
-        delegate.onSwiftChanged(event.getValue());
     }
 
     interface InfoPageViewImplUiBinder extends UiBinder<Widget, InfoPageViewImpl> {

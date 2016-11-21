@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.command.editor.page.arguments;
 
+import com.google.gwt.user.client.ui.SimpleLayoutPanel;
 import com.google.inject.ImplementedBy;
 
 import org.eclipse.che.ide.api.mvp.View;
@@ -22,21 +23,9 @@ import org.eclipse.che.ide.api.mvp.View;
 @ImplementedBy(ArgumentsPageViewImpl.class)
 public interface ArgumentsPageView extends View<ArgumentsPageView.ActionDelegate> {
 
-    /** Returns the command line value. */
-    String getCommandLine();
-
-    /**
-     * Sets the command line value.
-     *
-     * @param commandLine
-     *         command line value to set
-     */
-    void setCommandLine(String commandLine);
+    SimpleLayoutPanel getEditorContainer();
 
     /** The action delegate for this view. */
     interface ActionDelegate {
-
-        /** Called when command line value has been changed. */
-        void onCommandLineChanged(String commandLine);
     }
 }

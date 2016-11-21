@@ -13,6 +13,9 @@ package org.eclipse.che.ide.command.editor.page.info;
 import com.google.inject.ImplementedBy;
 
 import org.eclipse.che.ide.api.mvp.View;
+import org.eclipse.che.ide.api.resources.Project;
+
+import java.util.Map;
 
 /**
  * The view of {@link InfoPage}.
@@ -30,9 +33,7 @@ public interface InfoPageView extends View<InfoPageView.ActionDelegate> {
 
     void setWorkspace(boolean value);
 
-    void setPlay(boolean value);
-
-    void setSwift(boolean value);
+    void setProjectsState(Map<Project, Boolean> projects);
 
     /** The action delegate for this view. */
     interface ActionDelegate {
@@ -47,8 +48,8 @@ public interface InfoPageView extends View<InfoPageView.ActionDelegate> {
 
         void onWorkspaceChanged(boolean value);
 
-        void onPlayChanged(boolean value);
+        void onProjectChanged(boolean value);
 
-        void onSwiftChanged(boolean value);
+        void onApplicableProjectChanged(Project project, boolean value);
     }
 }

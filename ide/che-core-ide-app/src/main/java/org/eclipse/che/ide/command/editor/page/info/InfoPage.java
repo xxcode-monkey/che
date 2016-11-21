@@ -13,9 +13,16 @@ package org.eclipse.che.ide.command.editor.page.info;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.inject.Inject;
 
+import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.command.ApplicableContext;
+import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.command.editor.page.AbstractCommandEditorPage;
 import org.eclipse.che.ide.command.editor.page.CommandEditorPage;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * {@link CommandEditorPage} which allows to edit basic command's information, like:
@@ -28,19 +35,24 @@ import org.eclipse.che.ide.command.editor.page.CommandEditorPage;
  */
 public class InfoPage extends AbstractCommandEditorPage implements InfoPageView.ActionDelegate {
 
-    private final InfoPageView view;
+    private final InfoPageView          view;
+    private final AppContext            appContext;
+    private final Map<Project, Boolean> projectsState;
 
     // initial value of the command's name
-    private String commandNameInitial;
-
+    private String       commandNameInitial;
     // initial value of the workspace flag
-    private boolean workspaceInitial;
+    private boolean      workspaceInitial;
+    // initial value of the applicable projects list
+    private List<String> applicableProjectsInitial;
 
     @Inject
-    public InfoPage(InfoPageView view) {
+    public InfoPage(InfoPageView view, AppContext appContext) {
         super("Info", "Base command info");
 
         this.view = view;
+        this.appContext = appContext;
+        projectsState = new HashMap<>();
 
         view.setDelegate(this);
     }
@@ -56,21 +68,18 @@ public class InfoPage extends AbstractCommandEditorPage implements InfoPageView.
 
         commandNameInitial = editedCommand.getName();
         workspaceInitial = applicableContext.isWorkspaceApplicable();
+        applicableProjectsInitial = new ArrayList<>(applicableContext.getApplicableProjects());
 
         view.setCommandName(editedCommand.getName());
         view.setWorkspace(editedCommand.getApplicableContext().isWorkspaceApplicable());
 
-        view.setPlay(false);
-        view.setSwift(false);
-
-        // TODO: demo data
-        for (String projectPath : applicableContext.getApplicableProjects()) {
-            if (projectPath.equals("/play")) {
-                view.setPlay(true);
-            } else if (projectPath.equals("/swift")) {
-                view.setSwift(true);
-            }
+        // initialize projects
+        for (Project project : appContext.getProjects()) {
+            final boolean state = applicableContext.getApplicableProjects().contains(project.getPath());
+            projectsState.put(project, state);
         }
+
+        view.setProjectsState(projectsState);
     }
 
     @Override
@@ -79,8 +88,11 @@ public class InfoPage extends AbstractCommandEditorPage implements InfoPageView.
             return false;
         }
 
+        final ApplicableContext applicableContext = editedCommand.getApplicableContext();
+
         return !(commandNameInitial.equals(editedCommand.getName()) &&
-                 workspaceInitial == editedCommand.getApplicableContext().isWorkspaceApplicable());
+                 workspaceInitial == applicableContext.isWorkspaceApplicable() &&
+                 applicableProjectsInitial.equals(applicableContext.getApplicableProjects()));
     }
 
     @Override
@@ -98,17 +110,20 @@ public class InfoPage extends AbstractCommandEditorPage implements InfoPageView.
     }
 
     @Override
-    public void onPlayChanged(boolean value) {
-        final ApplicableContext applicableContext = editedCommand.getApplicableContext();
-        applicableContext.addApplicableProject("/play");
+    public void onProjectChanged(boolean value) {
 
-        notifyDirtyStateChanged();
     }
 
     @Override
-    public void onSwiftChanged(boolean value) {
+    public void onApplicableProjectChanged(Project project, boolean value) {
+        projectsState.put(project, value);
+
         final ApplicableContext applicableContext = editedCommand.getApplicableContext();
-        applicableContext.addApplicableProject("/swift");
+        if (value) {
+            applicableContext.addApplicableProject(project.getPath());
+        } else {
+            applicableContext.removeApplicableProject(project.getPath());
+        }
 
         notifyDirtyStateChanged();
     }

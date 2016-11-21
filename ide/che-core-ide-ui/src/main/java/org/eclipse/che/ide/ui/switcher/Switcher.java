@@ -61,15 +61,17 @@ public class Switcher extends Composite implements HasValue<Boolean> {
         FlowPanel mainPanel = new FlowPanel();
         mainPanel.setStyleName(resources.switcherCSS().onoffswitch());
 
+        final String elementId = DOM.createUniqueId();
+
         checkbox = new SimpleCheckBox();
-        checkbox.getElement().setId("switcher");
+        checkbox.getElement().setId(elementId);
         checkbox.setName("onoffswitch");
         checkbox.setStyleName(resources.switcherCSS().onoffswitchCheckbox());
         mainPanel.add(checkbox);
 
         Element label = DOM.createLabel();
         label.setClassName(resources.switcherCSS().onoffswitchLabel());
-        label.setAttribute("for", "switcher");
+        label.setAttribute("for", elementId);
 
         Element inner = DOM.createDiv();
         inner.setClassName(resources.switcherCSS().onoffswitchInner());

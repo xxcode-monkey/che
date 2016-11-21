@@ -247,7 +247,7 @@ public class CommandManagerImpl3 implements CommandManager3, WsAgentComponent, W
         });
     }
 
-    private Promise<ContextualCommand> updateCommand(ContextualCommand commandToUpdate) {
+    private Promise<ContextualCommand> updateCommand(final ContextualCommand commandToUpdate) {
         final ContextualCommand existedCommand = commands.get(commandToUpdate.getName());
 
         if (existedCommand == null) {
@@ -273,9 +273,11 @@ public class CommandManagerImpl3 implements CommandManager3, WsAgentComponent, W
         return promiseProvider.all2(commandPromises).then(new Function<ArrayOf<?>, ContextualCommand>() {
             @Override
             public ContextualCommand apply(ArrayOf<?> ignore) throws FunctionException {
-                notifyCommandUpdated(existedCommand);
+                commands.put(commandToUpdate.getName(), commandToUpdate);
 
-                return existedCommand;
+                notifyCommandUpdated(commandToUpdate);
+
+                return commandToUpdate;
             }
         });
     }

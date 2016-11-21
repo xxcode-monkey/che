@@ -15,6 +15,5 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
              xmlns:g='urn:import:com.google.gwt.user.client.ui'>
 
-    <!--<g:SimpleLayoutPanel ui:field="editorPanel"/>-->
-    <g:TextArea ui:field="editorPanel"/>
+    <g:SimpleLayoutPanel ui:field="editorPanel"/>
 </ui:UiBinder>

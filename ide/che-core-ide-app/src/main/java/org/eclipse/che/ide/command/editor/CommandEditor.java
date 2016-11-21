@@ -167,7 +167,7 @@ public class CommandEditor extends AbstractEditorPresenter implements CommandEdi
 
     @Override
     public String getTitle() {
-        return input.getName();
+        return (isDirty() ? "* " : "") + input.getName();
     }
 
     @Override
