@@ -29,7 +29,7 @@ import static java.lang.String.format;
 /**
  * Finds order of Che services to start that respects dependencies between services.
  *
- * author Alexander Garagatyi
+ * @author Alexander Garagatyi
  * @author Alexander Andrienko
  */
 public class DefaultServicesStartStrategy {
