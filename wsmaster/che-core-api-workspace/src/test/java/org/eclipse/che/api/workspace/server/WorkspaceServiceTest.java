@@ -25,6 +25,7 @@ import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.rest.ApiExceptionMapper;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
+import org.eclipse.che.api.environment.server.CheEnvironmentValidator;
 import org.eclipse.che.api.environment.server.MachineProcessManager;
 import org.eclipse.che.api.environment.server.MachineServiceLinksInjector;
 import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
@@ -44,6 +45,7 @@ import org.eclipse.che.api.workspace.server.model.impl.ExtendedMachineImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceRuntimeImpl;
+import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
@@ -627,6 +629,7 @@ public class WorkspaceServiceTest {
     @Test
     public void shouldUpdateEnvironment() throws Exception {
         final WorkspaceImpl workspace = createWorkspace(createConfigDto());
+        final String newEnvName = "newEnvName";
         when(wsManager.getWorkspace(workspace.getId())).thenReturn(workspace);
         when(wsManager.updateWorkspace(any(), any())).thenReturn(workspace);
         final EnvironmentDto envDto = createEnvDto();
@@ -635,20 +638,29 @@ public class WorkspaceServiceTest {
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
                                          .contentType("application/json")
                                          .body(envDto)
+                                         .queryParam("newName", newEnvName)
                                          .when()
                                          .put(SECURE_PATH + "/workspace/" + workspace.getId()
                                               + "/environment/" + workspace.getConfig().getDefaultEnv());
 
         assertEquals(response.getStatusCode(), 200);
         assertEquals(workspace.getConfig().getEnvironments().size(), 1);
-        verify(validator).validateConfig(workspace.getConfig());
-        verify(wsManager).updateWorkspace(any(), any());
+        verify(wsManager).updateEnvironment(eq(workspace.getId()), eq(workspace.getConfig().getDefaultEnv()), any());
+        verify(wsManager).renameEnvironment(eq(workspace.getId()), eq(workspace.getConfig().getDefaultEnv()), eq(newEnvName));
     }
 
     @Test
     public void shouldRespond404WhenUpdatingEnvironmentWhichDoesNotExist() throws Exception {
+        final WorkspaceDao wsDao = mock(WorkspaceDao.class);
+        final CheEnvironmentValidator envValidator = mock(CheEnvironmentValidator.class);
+        service = new WorkspaceService(API_ENDPOINT,
+                                       new WorkspaceManager(wsDao, null, null, null, false, false, null, envValidator),
+                                       validator,
+                                       wsAgentHealthChecker,
+                                       new WorkspaceServiceLinksInjector(new MachineServiceLinksInjector()));
         final WorkspaceImpl workspace = createWorkspace(createConfigDto());
         when(wsManager.getWorkspace(workspace.getId())).thenReturn(workspace);
+        when(wsDao.get(workspace.getId())).thenReturn(workspace);
 
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)

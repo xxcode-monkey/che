@@ -16,9 +16,11 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.machine.MachineStatus;
+import org.eclipse.che.api.core.model.workspace.Environment;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.environment.server.CheEnvironmentValidator;
 import org.eclipse.che.api.environment.server.MachineProcessManager;
 import org.eclipse.che.api.machine.server.exception.SnapshotException;
 import org.eclipse.che.api.machine.server.model.impl.MachineConfigImpl;
@@ -51,6 +53,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -78,6 +81,7 @@ import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
@@ -85,6 +89,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
@@ -118,6 +123,8 @@ public class WorkspaceManagerTest {
     private AccountManager                     accountManager;
     @Mock
     private SnapshotDao                        snapshotDao;
+    @Mock
+    private CheEnvironmentValidator            environmentValidator;
     @Captor
     private ArgumentCaptor<WorkspaceImpl>      workspaceCaptor;
     @Captor
@@ -134,7 +141,7 @@ public class WorkspaceManagerTest {
                                                     false,
                                                     false,
                                                     snapshotDao,
-                                                    null));
+                                                    environmentValidator));
         when(accountManager.getByName(NAMESPACE)).thenReturn(new AccountImpl("accountId", NAMESPACE, "test"));
         when(accountManager.getByName(NAMESPACE_2)).thenReturn(new AccountImpl("accountId2", NAMESPACE_2, "test"));
         when(workspaceDao.create(any(WorkspaceImpl.class))).thenAnswer(invocation -> invocation.getArguments()[0]);
@@ -1039,6 +1046,308 @@ public class WorkspaceManagerTest {
 
         // then
         verify(runtimes).getMachine(workspace.getId(), machine.getId());
+    }
+
+    @Test
+    public void shouldBeAbleToAddNewEnvironmentIntoWorkspace() throws Exception {
+        // given
+        final String newEnvName = "newEnvName";
+        final EnvironmentImpl newEnv = new EnvironmentImpl(new EnvironmentRecipeImpl("type",
+                                                                                     "contentType",
+                                                                                     "content",
+                                                                                     "location"),
+                                                           null);
+        final WorkspaceImpl workspace = workspaceManager.createWorkspace(createConfig(), NAMESPACE);
+
+        when(workspaceDao.get(workspace.getId())).thenReturn(workspace);
+        doNothing().when(environmentValidator).validate(newEnvName, newEnv);
+
+        // when
+        workspaceManager.addEnvironment(workspace.getId(), newEnvName, newEnv);
+
+        // then
+        assertEquals(workspace.getConfig().getEnvironments().get(newEnvName), newEnv);
+    }
+
+    @Test(expectedExceptions = ConflictException.class, expectedExceptionsMessageRegExp = "Environment with '.*' name already exists")
+    public void shouldThrowConflictExceptionWhenAddNewEnvironmentWithAlreadyExistedName() throws Exception {
+        // given
+        final WorkspaceImpl workspace = workspaceManager.createWorkspace(createConfig(), NAMESPACE);
+
+        when(workspaceDao.get(workspace.getId())).thenReturn(workspace);
+        doNothing().when(environmentValidator).validate(anyString(), any());
+
+        // when
+        workspaceManager.addEnvironment(workspace.getId(), workspace.getConfig().getDefaultEnv(), mock(Environment.class));
+    }
+
+    @Test
+    public void shouldBeAbleToUpdateEnvironmentOfWorkspace() throws Exception {
+        // given
+        final String envName = "envName";
+        final EnvironmentImpl env = new EnvironmentImpl(new EnvironmentRecipeImpl("type",
+                                                                                  "contentType",
+                                                                                  "content",
+                                                                                  "location"),
+                                                        null);
+        final EnvironmentImpl updatedEnv = new EnvironmentImpl(new EnvironmentRecipeImpl("new-type",
+                                                                                         "another-contentType",
+                                                                                         "new-content",
+                                                                                         "location"),
+                                                               new HashMap<>());
+        final WorkspaceImpl workspace = workspaceManager.createWorkspace(createConfig(), NAMESPACE);
+
+        when(workspaceDao.get(workspace.getId())).thenReturn(workspace);
+        doNothing().when(environmentValidator).validate(envName, env);
+
+        workspaceManager.addEnvironment(workspace.getId(), envName, env);
+
+        // when
+        workspaceManager.updateEnvironment(workspace.getId(), envName, updatedEnv);
+
+        // then
+        assertEquals(workspace.getConfig().getEnvironments().get(envName), updatedEnv);
+    }
+
+    @Test
+    public void shouldDeleteEnvironmentSnapshotsOnUpdateIfEnvironmentConfigurationIsChanged() throws Exception {
+        // given
+        final WorkspaceImpl workspace = workspaceManager.createWorkspace(createConfig(), NAMESPACE);
+        final String envName = workspace.getConfig().getDefaultEnv();
+        final EnvironmentImpl updatedEnv = new EnvironmentImpl(new EnvironmentRecipeImpl("updated-type",
+                                                                                         "another-contentType",
+                                                                                         "new-content",
+                                                                                         "location"),
+                                                               new HashMap<>());
+        when(workspaceDao.get(workspace.getId())).thenReturn(workspace);
+        doNothing().when(environmentValidator).validate(anyString(), any());
+
+        // when
+        workspaceManager.updateEnvironment(workspace.getId(), envName, updatedEnv);
+
+        // then
+        verify(workspaceManager).removeEnvironmentSnapshots(eq(workspace.getId()), eq(envName));
+    }
+
+    @Test(expectedExceptions = NotFoundException.class)
+    public void shouldThrowNotFoundExceptionWhenTryToUpdateNonExistedEnvironment() throws Exception {
+        // given
+        final WorkspaceImpl workspace = workspaceManager.createWorkspace(createConfig(), NAMESPACE);
+
+        when(workspaceDao.get(workspace.getId())).thenReturn(workspace);
+        doNothing().when(environmentValidator).validate(anyString(), any());
+
+        // when
+        workspaceManager.updateEnvironment(workspace.getId(), "non-existing-env", mock(Environment.class));
+    }
+
+    @Test(expectedExceptions = ConflictException.class)
+    public void shouldThrowConflictExceptionWhenTryToUpdateRunningEnvironment() throws Exception {
+        // given
+        final WorkspaceImpl workspace = workspaceManager.createWorkspace(createConfig(), NAMESPACE);
+        final WorkspaceRuntimeImpl runtime = mock(WorkspaceRuntimeImpl.class);
+
+        when(workspaceDao.get(workspace.getId())).thenReturn(workspace);
+        when(runtime.getActiveEnv()).thenReturn(workspace.getConfig().getDefaultEnv());
+        doNothing().when(environmentValidator).validate(anyString(), any());
+
+        workspace.setRuntime(runtime);
+
+        // when
+        workspaceManager.updateEnvironment(workspace.getId(), workspace.getConfig().getDefaultEnv(), mock(Environment.class));
+    }
+
+    @Test
+    public void shouldBeAbleToDeleteEnvironmentFromWorkspace() throws Exception {
+        // given
+        final String envName = "envName";
+        final EnvironmentImpl newEnv = new EnvironmentImpl(new EnvironmentRecipeImpl("type",
+                                                                                     "contentType",
+                                                                                     "content",
+                                                                                     "location"),
+                                                           null);
+        final WorkspaceImpl workspace = workspaceManager.createWorkspace(createConfig(), NAMESPACE);
+
+        when(workspaceDao.get(workspace.getId())).thenReturn(workspace);
+        doNothing().when(environmentValidator).validate(anyString(), any());
+
+        workspaceManager.addEnvironment(workspace.getId(), envName, newEnv);
+
+        // when
+        workspaceManager.deleteEnvironment(workspace.getId(), envName);
+
+        // then
+        verify(workspaceManager).removeEnvironmentSnapshots(eq(workspace.getId()), eq(envName));
+        assertEquals(workspace.getConfig().getEnvironments().get(envName), null);
+    }
+
+    @Test(expectedExceptions = ConflictException.class)
+    public void shouldThrowConflictExceptionWhenTryToDeleteDefaultEnvironment() throws Exception {
+        // given
+        final WorkspaceImpl workspace = workspaceManager.createWorkspace(createConfig(), NAMESPACE);
+
+        when(workspaceDao.get(workspace.getId())).thenReturn(workspace);
+
+        // when
+        workspaceManager.deleteEnvironment(workspace.getId(), workspace.getConfig().getDefaultEnv());
+    }
+
+    @Test(expectedExceptions = ConflictException.class)
+    public void shouldThrowConflictExceptionWhenTryToDeleteRunningEnvironment() throws Exception {
+        // given
+        final String envName = "envName";
+        final EnvironmentImpl env = new EnvironmentImpl(new EnvironmentRecipeImpl("type",
+                                                                                  "contentType",
+                                                                                  "content",
+                                                                                  "location"),
+                                                           null);
+        final WorkspaceImpl workspace = workspaceManager.createWorkspace(createConfig(), NAMESPACE);
+        final WorkspaceRuntimeImpl runtime = mock(WorkspaceRuntimeImpl.class);
+
+        when(workspaceDao.get(workspace.getId())).thenReturn(workspace);
+        when(runtime.getActiveEnv()).thenReturn(envName);
+        doNothing().when(environmentValidator).validate(anyString(), any());
+
+        workspaceManager.addEnvironment(workspace.getId(), envName, env);
+        workspace.setRuntime(runtime);
+
+        // when
+        workspaceManager.deleteEnvironment(workspace.getId(), envName);
+    }
+
+    @Test(expectedExceptions = NotFoundException.class)
+    public void shouldThrowNotFoundExceptionWhenTryToDeleteNonExistedEnvironment() throws Exception {
+        // given
+        final WorkspaceImpl workspace = workspaceManager.createWorkspace(createConfig(), NAMESPACE);
+
+        when(workspaceDao.get(workspace.getId())).thenReturn(workspace);
+
+        // when
+        workspaceManager.deleteEnvironment(workspace.getId(), "non-existing-env");
+    }
+
+    @Test
+    public void shouldBeAbleToRenameEnvironment() throws Exception {
+        // given
+        final String envName = "envName";
+        final String newEnvName = "newEnvName";
+        final EnvironmentImpl env = new EnvironmentImpl(new EnvironmentRecipeImpl("type",
+                                                                                  "contentType",
+                                                                                  "content",
+                                                                                  "location"),
+                                                        null);
+        final WorkspaceImpl workspace = workspaceManager.createWorkspace(createConfig(), NAMESPACE);
+
+        when(workspaceDao.get(workspace.getId())).thenReturn(workspace);
+        doNothing().when(environmentValidator).validate(envName, env);
+
+        workspaceManager.addEnvironment(workspace.getId(), envName, env);
+
+        // when
+        workspaceManager.renameEnvironment(workspace.getId(), envName, newEnvName);
+
+        // then
+        verify(workspaceManager).updateEnvironmentSnapshots(eq(workspace.getId()), eq(envName), eq(newEnvName));
+        assertEquals(workspace.getConfig().getEnvironments().get(newEnvName), env);
+    }
+
+    @Test(expectedExceptions = NotFoundException.class)
+    public void shouldThrowNotFoundExceptionWhenTryToRenameNonExistedEnvironment() throws Exception {
+        // given
+        final WorkspaceImpl workspace = workspaceManager.createWorkspace(createConfig(), NAMESPACE);
+
+        when(workspaceDao.get(workspace.getId())).thenReturn(workspace);
+
+        // when
+        workspaceManager.renameEnvironment(workspace.getId(), "non-existing-env", "newName");
+    }
+
+    @Test(expectedExceptions = ConflictException.class)
+    public void shouldThrowConflictExceptionWhenTryToRenameRunningEnvironment() throws Exception {
+        // given
+        final String envName = "envName";
+        final EnvironmentImpl env = new EnvironmentImpl(new EnvironmentRecipeImpl("type",
+                                                                                  "contentType",
+                                                                                  "content",
+                                                                                  "location"),
+                                                        null);
+        final WorkspaceImpl workspace = workspaceManager.createWorkspace(createConfig(), NAMESPACE);
+        final WorkspaceRuntimeImpl runtime = mock(WorkspaceRuntimeImpl.class);
+
+        when(workspaceDao.get(workspace.getId())).thenReturn(workspace);
+        when(runtime.getActiveEnv()).thenReturn(envName);
+        doNothing().when(environmentValidator).validate(anyString(), any());
+
+        workspaceManager.addEnvironment(workspace.getId(), envName, env);
+        workspace.setRuntime(runtime);
+
+        // when
+        workspaceManager.renameEnvironment(workspace.getId(), envName, "newEnvName");
+    }
+
+    @Test
+    public void shouldUpdateEnvironmentSnapshots() throws Exception {
+        // given
+        final WorkspaceImpl workspace = workspaceManager.createWorkspace(createConfig(), NAMESPACE);
+        final SnapshotImpl snapshot1 = new SnapshotImpl();
+        final SnapshotImpl snapshot2 = new SnapshotImpl();
+        final List<SnapshotImpl> snapshots = new ArrayList<>();
+        final String envName = "envName";
+        final String newEnvName = "newEnvName";
+
+        snapshot1.setEnvName(envName);
+        snapshot2.setEnvName(envName);
+
+        snapshots.add(snapshot1);
+        snapshots.add(snapshot2);
+
+        when(snapshotDao.findSnapshots(workspace.getId())).thenReturn(snapshots);
+
+        // when
+        workspaceManager.updateEnvironmentSnapshots(workspace.getId(), envName, newEnvName);
+
+        //then
+        ArgumentCaptor<SnapshotImpl> snapshotCaptor = ArgumentCaptor.forClass(SnapshotImpl.class);
+        verify(snapshotDao, times(2)).updateSnapshot(snapshotCaptor.capture());
+        List<SnapshotImpl> updatedSnapshots = snapshotCaptor.getAllValues();
+        assertEquals(updatedSnapshots.get(0).getEnvName(), newEnvName);
+        assertEquals(updatedSnapshots.get(1).getEnvName(), newEnvName);
+    }
+
+    @Test
+    public void shouldRemoveEnvironmentSnapshots() throws Exception {
+        // given
+        final WorkspaceImpl workspace = workspaceManager.createWorkspace(createConfig(), NAMESPACE);
+        final SnapshotImpl snapshot1 = mock(SnapshotImpl.class);
+        final SnapshotImpl snapshot2 = mock(SnapshotImpl.class);
+        final SnapshotImpl snapshot3 = mock(SnapshotImpl.class);
+        final String snapshot1Id = "sn1id";
+        final String snapshot2Id = "sn2id";
+        final String snapshot3Id = "sn3id";
+        final String anotherEnvName = "someEnv";
+        final List<SnapshotImpl> snapshots = new ArrayList<>();
+
+        snapshots.addAll(asList(snapshot1, snapshot2, snapshot3));
+        when(snapshot1.getEnvName()).thenReturn(workspace.getConfig().getDefaultEnv());
+        when(snapshot3.getEnvName()).thenReturn(workspace.getConfig().getDefaultEnv());
+        when(snapshot2.getEnvName()).thenReturn(anotherEnvName);
+        when(snapshot1.getId()).thenReturn(snapshot1Id);
+        when(snapshot2.getId()).thenReturn(snapshot2Id);
+        when(snapshot3.getId()).thenReturn(snapshot3Id);
+
+        when(snapshotDao.findSnapshots(workspace.getId())).thenReturn(snapshots);
+
+        // when
+        workspaceManager.removeEnvironmentSnapshots(workspace.getId(), workspace.getConfig().getDefaultEnv());
+
+        // then
+        verify(snapshotDao).removeSnapshot(snapshot1Id);
+        verify(snapshotDao).removeSnapshot(snapshot3Id);
+        verify(snapshotDao, never()).removeSnapshot(snapshot2Id);
+
+        verify(runtimes).removeSnapshot(snapshot1);
+        verify(runtimes).removeSnapshot(snapshot3);
+        verify(runtimes, never()).removeSnapshot(snapshot2);
     }
 
     private RuntimeDescriptor createDescriptor(WorkspaceImpl workspace, WorkspaceStatus status)

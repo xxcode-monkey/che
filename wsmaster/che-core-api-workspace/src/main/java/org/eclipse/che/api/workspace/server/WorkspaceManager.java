@@ -590,6 +590,9 @@ public class WorkspaceManager {
         if (oldEnvironment == null) {
             throw new NotFoundException(format("Workspace '%s' doesn't contain environment '%s'", workspaceId, envName));
         }
+        if (update.equals(oldEnvironment)) {
+            return oldEnvironment;
+        }
         if (workspace.getRuntime() != null && workspace.getRuntime().getActiveEnv().equals(envName)) {
             throw new ConflictException(format("Cannot update active environment: '%s'", envName));
         }
@@ -669,7 +672,8 @@ public class WorkspaceManager {
     }
 
     /** Updates environment snapshots in database */
-    private void updateEnvironmentSnapshots(String workspaceId, String oldEnvName, String newEnvName) throws SnapshotException {
+    @VisibleForTesting
+    void updateEnvironmentSnapshots(String workspaceId, String oldEnvName, String newEnvName) throws SnapshotException {
         for (SnapshotImpl snapshot : snapshotDao.findSnapshots(workspaceId)) {
             if (snapshot.getEnvName().equals(oldEnvName)) {
                 snapshot.setEnvName(newEnvName);
