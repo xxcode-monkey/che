@@ -9,6 +9,8 @@
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
 @eval primaryButtonBackground org.eclipse.che.ide.api.theme.Style.theme.getPrimaryButtonBackground();
+@eval buttonBackground org.eclipse.che.ide.api.theme.Style.theme.getButtonBackground();
+@eval partBackground org.eclipse.che.ide.api.theme.Style.theme.partBackground();
 
 .onoffswitch {
     position: relative;
@@ -66,11 +68,12 @@
 
 .onoffswitchSwitch {
     width: 21px;
+    height: 13px;
     margin: -0.5px;
     background: primaryButtonBackground;
-    border: 2px solid #5E5E5E;
+    border-top: 2px solid partBackground;
     position: absolute;
-    top: 0;
+    top: 2px;
     bottom: 0;
     right: 26px;
     transition: all 0.3s ease-in;
@@ -82,5 +85,5 @@
 
 .onoffswitchCheckbox:checked + .onoffswitchLabel .onoffswitchSwitch {
     right: 0px;
-    background: white;
+    background: buttonBackground;
 }

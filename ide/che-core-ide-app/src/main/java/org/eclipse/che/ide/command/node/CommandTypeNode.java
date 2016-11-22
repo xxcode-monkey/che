@@ -16,10 +16,14 @@ import com.google.inject.assistedinject.Assisted;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.ide.api.command.CommandType;
+import org.eclipse.che.ide.api.command.CommandTypeRegistry;
 import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.api.data.tree.settings.NodeSettings;
+import org.eclipse.che.ide.api.icon.Icon;
+import org.eclipse.che.ide.api.icon.IconRegistry;
 import org.eclipse.che.ide.project.node.SyntheticNode;
 import org.eclipse.che.ide.ui.smartTree.presentation.NodePresentation;
+import org.vectomatic.dom.svg.ui.SVGImage;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,21 +37,43 @@ public class CommandTypeNode extends SyntheticNode<CommandType> {
 
     private final List<? extends AbstractCommandNode> commands;
     private final PromiseProvider                     promiseProvider;
+    private final CommandTypeRegistry                 commandTypeRegistry;
+    private final IconRegistry                        iconRegistry;
 
     @Inject
     public CommandTypeNode(@Assisted CommandType data,
                            @Assisted NodeSettings nodeSettings,
                            @Assisted List<? extends AbstractCommandNode> commands,
-                           PromiseProvider promiseProvider) {
+                           PromiseProvider promiseProvider,
+                           CommandTypeRegistry commandTypeRegistry,
+                           IconRegistry iconRegistry) {
         super(data, nodeSettings);
 
         this.commands = commands;
         this.promiseProvider = promiseProvider;
+        this.commandTypeRegistry = commandTypeRegistry;
+        this.iconRegistry = iconRegistry;
     }
 
     @Override
     public void updatePresentation(NodePresentation presentation) {
         presentation.setPresentableText(getName());
+
+        // set icon
+        final String commandTypeId = getData().getId();
+        final CommandType commandType = commandTypeRegistry.getCommandTypeById(commandTypeId);
+
+        if (commandType != null) {
+            final Icon icon = iconRegistry.getIconIfExist(commandTypeId + ".commands.category.icon");
+
+            if (icon != null) {
+                final SVGImage svgImage = icon.getSVGImage();
+
+                if (svgImage != null) {
+                    presentation.setPresentableIcon(icon.getSVGResource());
+                }
+            }
+        }
     }
 
     @Override

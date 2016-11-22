@@ -14,10 +14,12 @@ import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
 import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.ide.api.command.CommandTypeRegistry;
 import org.eclipse.che.ide.api.command.ContextualCommand;
 import org.eclipse.che.ide.api.data.tree.HasAction;
 import org.eclipse.che.ide.api.data.tree.settings.NodeSettings;
 import org.eclipse.che.ide.api.editor.EditorAgent;
+import org.eclipse.che.ide.api.icon.IconRegistry;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.ui.smartTree.presentation.NodePresentation;
@@ -37,8 +39,10 @@ public class CommandFileNode extends AbstractCommandNode implements HasAction, V
     @Inject
     public CommandFileNode(@Assisted ContextualCommand data,
                            @Assisted NodeSettings nodeSettings,
+                           CommandTypeRegistry commandTypeRegistry,
+                           IconRegistry iconRegistry,
                            EditorAgent editorAgent) {
-        super(data, nodeSettings);
+        super(data, nodeSettings, commandTypeRegistry, iconRegistry);
 
         this.editorAgent = editorAgent;
     }

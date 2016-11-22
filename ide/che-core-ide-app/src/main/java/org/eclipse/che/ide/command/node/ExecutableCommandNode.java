@@ -15,9 +15,11 @@ import com.google.inject.assistedinject.Assisted;
 
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.command.CommandManager;
+import org.eclipse.che.ide.api.command.CommandTypeRegistry;
 import org.eclipse.che.ide.api.command.ContextualCommand;
 import org.eclipse.che.ide.api.data.tree.HasAction;
 import org.eclipse.che.ide.api.data.tree.settings.NodeSettings;
+import org.eclipse.che.ide.api.icon.IconRegistry;
 
 /**
  * Extension of {@link AbstractCommandNode} that can execute
@@ -34,9 +36,11 @@ public class ExecutableCommandNode extends AbstractCommandNode implements HasAct
     @Inject
     public ExecutableCommandNode(@Assisted ContextualCommand data,
                                  @Assisted NodeSettings nodeSettings,
+                                 CommandTypeRegistry commandTypeRegistry,
+                                 IconRegistry iconRegistry,
                                  CommandManager commandExecutor,
                                  AppContext appContext) {
-        super(data, nodeSettings);
+        super(data, nodeSettings, commandTypeRegistry, iconRegistry);
 
         this.commandExecutor = commandExecutor;
         this.appContext = appContext;
