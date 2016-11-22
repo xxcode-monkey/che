@@ -28,6 +28,7 @@ import org.eclipse.che.api.core.jdbc.jpa.event.CascadeRemovalEvent;
 import org.eclipse.che.api.core.jdbc.jpa.event.CascadeRemovalEventSubscriber;
 import org.eclipse.che.api.core.jdbc.jpa.guice.JpaInitializer;
 import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.environment.server.CheEnvironmentValidator;
 import org.eclipse.che.api.factory.server.jpa.FactoryJpaModule;
 import org.eclipse.che.api.factory.server.jpa.JpaFactoryDao.RemoveFactoriesBeforeUserRemovedEventSubscriber;
 import org.eclipse.che.api.factory.server.model.impl.FactoryImpl;
@@ -136,6 +137,7 @@ public class JpaEntitiesCascadeRemovalTest {
             protected void configure() {
                 bind(EventService.class).in(Singleton.class);
 
+                bind(CheEnvironmentValidator.class).toInstance(Mockito.mock(CheEnvironmentValidator.class));
                 bind(JpaInitializer.class).asEagerSingleton();
                 bind(EntityListenerInjectionManagerInitializer.class).asEagerSingleton();
                 install(new InitModule(PostConstruct.class));
