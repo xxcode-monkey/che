@@ -30,32 +30,10 @@ import com.google.gwt.user.client.ui.SimpleCheckBox;
  * @author Ann Shumilova
  */
 public class Switcher extends Composite implements HasValue<Boolean> {
+
     private static final Resources resources = GWT.create(Resources.class);
 
-    static {
-        resources.switcherCSS().ensureInjected();
-    }
-
     SimpleCheckBox checkbox;
-
-    public interface Resources extends ClientBundle {
-        public interface SwitcherCSS extends CssResource {
-            String onoffswitchInner();
-
-            String onoffswitch();
-
-            String onoffswitchSwitch();
-
-            String onoffswitchLabel();
-
-            String onoffswitchCheckbox();
-
-        }
-
-        @Source({"switcher.css", "org/eclipse/che/ide/api/ui/style.css"})
-        SwitcherCSS switcherCSS();
-    }
-
 
     public Switcher() {
         FlowPanel mainPanel = new FlowPanel();
@@ -86,34 +64,49 @@ public class Switcher extends Composite implements HasValue<Boolean> {
         initWidget(mainPanel);
     }
 
-    /** {@inheritDoc} */
     @Override
     public HandlerRegistration addValueChangeHandler(ValueChangeHandler<Boolean> handler) {
         return checkbox.addValueChangeHandler(handler);
     }
 
-
-    /** {@inheritDoc} */
     @Override
     public Boolean getValue() {
         return checkbox.getValue();
     }
 
-
-    /** {@inheritDoc} */
     @Override
     public void setValue(Boolean value) {
         checkbox.setValue(value);
     }
 
-
-    /** {@inheritDoc} */
     @Override
     public void setValue(Boolean value, boolean fireEvents) {
         checkbox.setValue(value);
+
         if (fireEvents) {
             ValueChangeEvent.fire(this, value);
         }
+    }
+
+    public interface Resources extends ClientBundle {
+        @Source({"switcher.css", "org/eclipse/che/ide/api/ui/style.css"})
+        SwitcherCSS switcherCSS();
+
+        interface SwitcherCSS extends CssResource {
+            String onoffswitchInner();
+
+            String onoffswitch();
+
+            String onoffswitchSwitch();
+
+            String onoffswitchLabel();
+
+            String onoffswitchCheckbox();
+        }
+    }
+
+    static {
+        resources.switcherCSS().ensureInjected();
     }
 
 }

@@ -16,6 +16,7 @@ import com.google.gwt.resources.client.TextResource;
 
 import org.eclipse.che.ide.api.parts.PartStackUIResources;
 import org.eclipse.che.ide.command.explorer.CommandsExplorerResources;
+import org.eclipse.che.ide.command.palette.CommandsPaletteResources;
 import org.eclipse.che.ide.menu.MenuResources;
 import org.eclipse.che.ide.notification.NotificationResources;
 import org.eclipse.che.ide.projecttype.wizard.ProjectWizardResources;
@@ -48,7 +49,8 @@ public interface Resources extends Tree.Resources,
                                    CategoriesList.Resources,
                                    ButtonLoaderResources,
                                    ProjectWizardResources,
-                                   CommandsExplorerResources {
+                                   CommandsExplorerResources,
+                                   CommandsPaletteResources {
 
     @Source({"Core.css", "org/eclipse/che/ide/ui/constants.css", "org/eclipse/che/ide/api/ui/style.css"})
     @NotStrict

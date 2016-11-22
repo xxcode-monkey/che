@@ -53,22 +53,28 @@ public class CommandsPaletteViewImpl extends Window implements CommandsPaletteVi
     TextBox filterField;
 
     @UiField(provided = true)
-    Tree commandsTree;
+    Tree tree;
 
     private ActionDelegate delegate;
 
     @Inject
-    public CommandsPaletteViewImpl(CommandTypeRegistry commandTypeRegistry, NodeFactory nodeFactory) {
+    public CommandsPaletteViewImpl(CommandTypeRegistry commandTypeRegistry,
+                                   NodeFactory nodeFactory,
+                                   CommandsPaletteResources resources) {
         this.commandTypeRegistry = commandTypeRegistry;
         this.nodeFactory = nodeFactory;
 
-        commandsTree = new Tree(new NodeStorage(), new NodeLoader());
+        tree = new Tree(new NodeStorage(), new NodeLoader());
 
         setWidget(UI_BINDER.createAndBindUi(this));
 
         setTitle("Commands Palette");
 
         filterField.getElement().setAttribute("placeholder", "Search command");
+//        filterField.getElement().addClassName(resources.commandsPaletteCss().filterPlaceholder1());
+
+        // hide footer
+        getFooter().removeFromParent();
     }
 
     @Override
@@ -108,7 +114,7 @@ public class CommandsPaletteViewImpl extends Window implements CommandsPaletteVi
     }
 
     private void renderCommands(Map<CommandType, List<ContextualCommand>> commands) {
-        commandsTree.getNodeStorage().clear();
+        tree.getNodeStorage().clear();
 
         for (Map.Entry<CommandType, List<ContextualCommand>> entry : commands.entrySet()) {
             List<ExecutableCommandNode> commandNodes = new ArrayList<>(entry.getValue().size());
@@ -117,10 +123,10 @@ public class CommandsPaletteViewImpl extends Window implements CommandsPaletteVi
             }
 
             final CommandTypeNode commandTypeNode = nodeFactory.newCommandTypeNode(entry.getKey(), null, commandNodes);
-            commandsTree.getNodeStorage().add(commandTypeNode);
+            tree.getNodeStorage().add(commandTypeNode);
         }
 
-        commandsTree.expandAll();
+        tree.expandAll();
     }
 
     @Override

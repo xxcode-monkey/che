@@ -48,7 +48,7 @@ public class InfoPage extends AbstractCommandEditorPage implements InfoPageView.
 
     @Inject
     public InfoPage(InfoPageView view, AppContext appContext) {
-        super("Info", "Base command info");
+        super("Info", "General command info");
 
         this.view = view;
         this.appContext = appContext;

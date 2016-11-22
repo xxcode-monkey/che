@@ -44,7 +44,7 @@ public class ArgumentsPage extends AbstractCommandEditorPage implements Argument
 
     @Inject
     public ArgumentsPage(final ArgumentsPageView view, EditorBuilder editorBuilder, FileTypeRegistry fileTypeRegistry) {
-        super("Arguments", "Command arguments");
+        super("Arguments", "Command line");
 
         this.view = view;
         this.fileTypeRegistry = fileTypeRegistry;

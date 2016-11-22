@@ -24,6 +24,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 
 import org.eclipse.che.ide.ui.radiobuttongroup.RadioButtonGroup;
+import org.eclipse.che.ide.ui.window.Window;
 
 /**
  * Implementation of {@link CommandEditorView}.
@@ -32,7 +33,8 @@ import org.eclipse.che.ide.ui.radiobuttongroup.RadioButtonGroup;
  */
 public class CommandEditorViewImpl extends Composite implements CommandEditorView {
 
-    private static final CommandEditorViewImplUiBinder UI_BINDER = GWT.create(CommandEditorViewImplUiBinder.class);
+    private static final CommandEditorViewImplUiBinder UI_BINDER        = GWT.create(CommandEditorViewImplUiBinder.class);
+    private static final Window.Resources              WINDOW_RESOURCES = GWT.create(Window.Resources.class);
 
     @UiField
     RadioButtonGroup pagesSwitcher;
@@ -46,7 +48,7 @@ public class CommandEditorViewImpl extends Composite implements CommandEditorVie
     @UiField
     DeckPanel pagesPanel;
 
-    // The total count of added pages
+    /** The total count of added pages. */
     private int            pagesCount;
     private ActionDelegate delegate;
 
@@ -55,6 +57,9 @@ public class CommandEditorViewImpl extends Composite implements CommandEditorVie
         initWidget(UI_BINDER.createAndBindUi(this));
 
         setSaveEnabled(false);
+
+        cancelButton.addStyleName(WINDOW_RESOURCES.windowCss().closeButton());
+        saveButton.addStyleName(WINDOW_RESOURCES.windowCss().primaryButton());
     }
 
     @Override

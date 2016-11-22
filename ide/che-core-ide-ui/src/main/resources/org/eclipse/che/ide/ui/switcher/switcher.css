@@ -8,6 +8,8 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
+@eval primaryButtonBackground org.eclipse.che.ide.api.theme.Style.theme.getPrimaryButtonBackground();
+
 .onoffswitch {
     position: relative;
     width: 50px;
@@ -25,16 +27,13 @@
     overflow: hidden;
     cursor: pointer;
     border: 2px solid #5E5E5E;
-    border-radius: 13px;
+    height: 17px;
 }
 
 .onoffswitchInner {
     width: 200%;
     margin-left: -100%;
-    -moz-transition: margin 0.3s ease-in 0s;
-    -webkit-transition: margin 0.3s ease-in 0s;
-    -o-transition: margin 0.3s ease-in 0s;
-    transition: margin 0.3s ease-in 0s;
+    transition: margin 0.3s ease-in;
 }
 
 .onoffswitchInner:before, .onoffswitchInner:after {
@@ -53,34 +52,28 @@
 }
 
 .onoffswitchInner:before {
-    content: "YES";
+    content: "NO";
     padding-left: 5px;
-    background-color: #3E6CA5;
-    color: #FFFFFF;
+    color: #999999;
 }
 
 .onoffswitchInner:after {
-    content: "NO";
+    content: "YES";
     padding-right: 3px;
-    background-color: #EEEEEE;
-    color: #999999;
+    color: primaryButtonBackground;
     text-align: right;
 }
 
 .onoffswitchSwitch {
     width: 21px;
     margin: -0.5px;
-    background: #DDDDDD;
+    background: primaryButtonBackground;
     border: 2px solid #5E5E5E;
-    border-radius: 13px;
     position: absolute;
     top: 0;
     bottom: 0;
     right: 26px;
-    -moz-transition: all 0.3s ease-in 0s;
-    -webkit-transition: all 0.3s ease-in 0s;
-    -o-transition: all 0.3s ease-in 0s;
-    transition: all 0.3s ease-in 0s;
+    transition: all 0.3s ease-in;
 }
 
 .onoffswitchCheckbox:checked + .onoffswitchLabel .onoffswitchInner {
@@ -89,4 +82,5 @@
 
 .onoffswitchCheckbox:checked + .onoffswitchLabel .onoffswitchSwitch {
     right: 0px;
+    background: white;
 }
