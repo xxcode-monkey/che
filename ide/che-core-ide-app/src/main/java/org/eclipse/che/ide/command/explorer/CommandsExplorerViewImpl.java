@@ -102,10 +102,10 @@ public class CommandsExplorerViewImpl extends BaseView<CommandsExplorerView.Acti
         for (Map.Entry<CommandType, List<ContextualCommand>> entry : commands.entrySet()) {
             List<CommandFileNode> commandNodes = new ArrayList<>(entry.getValue().size());
             for (ContextualCommand command : entry.getValue()) {
-                commandNodes.add(nodeFactory.newCommandFileNode(command, null));
+                commandNodes.add(nodeFactory.newCommandFileNode(command));
             }
 
-            final CommandTypeNode commandTypeNode = nodeFactory.newCommandTypeNode(entry.getKey(), null, commandNodes);
+            final CommandTypeNode commandTypeNode = nodeFactory.newCommandTypeNode(entry.getKey(), commandNodes);
             tree.getNodeStorage().add(commandTypeNode);
         }
 

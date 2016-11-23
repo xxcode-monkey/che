@@ -42,5 +42,8 @@ public interface CommandsPaletteView extends View<CommandsPaletteView.ActionDele
 
         /** Called when filtering commands is requested. */
         void onFilterChanged(String filterValue);
+
+        /** Called when command execution is requested. */
+        void onCommandExecute(ContextualCommand command);
     }
 }

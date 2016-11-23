@@ -15,6 +15,7 @@ import elemental.util.Collections;
 
 import com.google.gwt.core.client.Callback;
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.promises.client.Function;
@@ -51,6 +52,7 @@ import static org.eclipse.che.api.workspace.shared.Constants.COMMAND_PREVIEW_URL
  *
  * @author Artem Zatsarynnyi
  */
+@Singleton
 public class CommandManagerImpl3 implements CommandManager3, WsAgentComponent, WorkspaceReadyEvent.WorkspaceReadyHandler {
 
     private final CommandTypeRegistry             commandTypeRegistry;
@@ -336,7 +338,6 @@ public class CommandManagerImpl3 implements CommandManager3, WsAgentComponent, W
 
     @Nullable
     private Project getProjectByPath(String path) {
-        // TODO: should return all sub-projects (modules) also but not only root projects
         for (Project project : appContext.getProjects()) {
             if (path.equals(project.getPath())) {
                 return project;

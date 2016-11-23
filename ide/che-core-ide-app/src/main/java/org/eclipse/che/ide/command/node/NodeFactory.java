@@ -12,7 +12,6 @@ package org.eclipse.che.ide.command.node;
 
 import org.eclipse.che.ide.api.command.CommandType;
 import org.eclipse.che.ide.api.command.ContextualCommand;
-import org.eclipse.che.ide.api.data.tree.settings.NodeSettings;
 
 import java.util.List;
 
@@ -23,13 +22,9 @@ import java.util.List;
  */
 public interface NodeFactory {
 
-    CommandTypeNode newCommandTypeNode(CommandType data,
-                                       NodeSettings nodeSettings,
-                                       List<? extends AbstractCommandNode> commands);
+    CommandTypeNode newCommandTypeNode(CommandType data, List<? extends AbstractCommandNode> commands);
 
-    ExecutableCommandNode newExecutableCommandNode(ContextualCommand command,
-                                                   NodeSettings settings);
+    ExecutableCommandNode newExecutableCommandNode(ContextualCommand command, ExecutableCommandNode.ActionDelegate actionDelegate);
 
-    CommandFileNode newCommandFileNode(ContextualCommand data,
-                                       NodeSettings nodeSettings);
+    CommandFileNode newCommandFileNode(ContextualCommand data);
 }

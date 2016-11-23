@@ -13,7 +13,10 @@ package org.eclipse.che.ide.command.palette;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.command.CommandManager;
 import org.eclipse.che.ide.api.command.CommandManager3;
+import org.eclipse.che.ide.api.command.ContextualCommand;
 
 /**
  * Presenter for Commands Palette.
@@ -25,11 +28,18 @@ public class CommandsPalettePresenter implements CommandsPaletteView.ActionDeleg
 
     private final CommandsPaletteView view;
     private final CommandManager3     commandManager;
+    private final CommandManager      commandExecutor;
+    private final AppContext          appContext;
 
     @Inject
-    public CommandsPalettePresenter(CommandsPaletteView view, CommandManager3 commandManager) {
+    public CommandsPalettePresenter(CommandsPaletteView view,
+                                    CommandManager3 commandManager,
+                                    CommandManager commandExecutor,
+                                    AppContext appContext) {
         this.view = view;
         this.commandManager = commandManager;
+        this.commandExecutor = commandExecutor;
+        this.appContext = appContext;
 
         view.setDelegate(this);
     }
@@ -37,11 +47,16 @@ public class CommandsPalettePresenter implements CommandsPaletteView.ActionDeleg
     /** Open Commands Palette. */
     public void open() {
         view.show();
-
         view.setCommands(commandManager.getCommands());
     }
 
     @Override
     public void onFilterChanged(String filterValue) {
+    }
+
+    @Override
+    public void onCommandExecute(ContextualCommand command) {
+        commandExecutor.executeCommand(command, appContext.getDevMachine());
+        view.close();
     }
 }

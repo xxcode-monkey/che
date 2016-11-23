@@ -18,7 +18,6 @@ import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.ide.api.command.CommandType;
 import org.eclipse.che.ide.api.command.CommandTypeRegistry;
 import org.eclipse.che.ide.api.data.tree.Node;
-import org.eclipse.che.ide.api.data.tree.settings.NodeSettings;
 import org.eclipse.che.ide.api.icon.Icon;
 import org.eclipse.che.ide.api.icon.IconRegistry;
 import org.eclipse.che.ide.project.node.SyntheticNode;
@@ -42,12 +41,11 @@ public class CommandTypeNode extends SyntheticNode<CommandType> {
 
     @Inject
     public CommandTypeNode(@Assisted CommandType data,
-                           @Assisted NodeSettings nodeSettings,
                            @Assisted List<? extends AbstractCommandNode> commands,
                            PromiseProvider promiseProvider,
                            CommandTypeRegistry commandTypeRegistry,
                            IconRegistry iconRegistry) {
-        super(data, nodeSettings);
+        super(data, null);
 
         this.commands = commands;
         this.promiseProvider = promiseProvider;

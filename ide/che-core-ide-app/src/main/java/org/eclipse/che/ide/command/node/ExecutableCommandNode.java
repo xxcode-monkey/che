@@ -13,12 +13,9 @@ package org.eclipse.che.ide.command.node;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
-import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.command.CommandManager;
 import org.eclipse.che.ide.api.command.CommandTypeRegistry;
 import org.eclipse.che.ide.api.command.ContextualCommand;
 import org.eclipse.che.ide.api.data.tree.HasAction;
-import org.eclipse.che.ide.api.data.tree.settings.NodeSettings;
 import org.eclipse.che.ide.api.icon.IconRegistry;
 
 /**
@@ -30,24 +27,25 @@ import org.eclipse.che.ide.api.icon.IconRegistry;
  */
 public class ExecutableCommandNode extends AbstractCommandNode implements HasAction {
 
-    private final CommandManager commandExecutor;
-    private final AppContext     appContext;
+    private final ActionDelegate actionDelegate;
 
     @Inject
     public ExecutableCommandNode(@Assisted ContextualCommand data,
-                                 @Assisted NodeSettings nodeSettings,
+                                 @Assisted ActionDelegate actionDelegate,
                                  CommandTypeRegistry commandTypeRegistry,
-                                 IconRegistry iconRegistry,
-                                 CommandManager commandExecutor,
-                                 AppContext appContext) {
-        super(data, nodeSettings, commandTypeRegistry, iconRegistry);
+                                 IconRegistry iconRegistry) {
+        super(data, null, commandTypeRegistry, iconRegistry);
+        this.actionDelegate = actionDelegate;
 
-        this.commandExecutor = commandExecutor;
-        this.appContext = appContext;
     }
 
     @Override
     public void actionPerformed() {
-        commandExecutor.executeCommand(getData(), appContext.getDevMachine());
+        actionDelegate.actionPerformed();
+    }
+
+    /** Interface for delegating performing action on node. */
+    public interface ActionDelegate {
+        void actionPerformed();
     }
 }

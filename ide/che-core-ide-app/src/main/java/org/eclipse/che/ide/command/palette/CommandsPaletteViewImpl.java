@@ -118,11 +118,16 @@ public class CommandsPaletteViewImpl extends Window implements CommandsPaletteVi
 
         for (Map.Entry<CommandType, List<ContextualCommand>> entry : commands.entrySet()) {
             List<ExecutableCommandNode> commandNodes = new ArrayList<>(entry.getValue().size());
-            for (ContextualCommand command : entry.getValue()) {
-                commandNodes.add(nodeFactory.newExecutableCommandNode(command, null));
+            for (final ContextualCommand command : entry.getValue()) {
+                commandNodes.add(nodeFactory.newExecutableCommandNode(command, new ExecutableCommandNode.ActionDelegate() {
+                    @Override
+                    public void actionPerformed() {
+                        delegate.onCommandExecute(command);
+                    }
+                }));
             }
 
-            final CommandTypeNode commandTypeNode = nodeFactory.newCommandTypeNode(entry.getKey(), null, commandNodes);
+            final CommandTypeNode commandTypeNode = nodeFactory.newCommandTypeNode(entry.getKey(), commandNodes);
             tree.getNodeStorage().add(commandTypeNode);
         }
 
