@@ -32,7 +32,7 @@ public class Constants {
 
     public static final String LINK_REL_PROJECT_TYPES = "project types";
 
-    public static final String CODENVY_DIR = ".codenvy";
+    public static final String CHE_DIR = ".che";
 
     public static final String COMMANDS_ATTRIBUTE_NAME        = "commands";
     public static final String COMMANDS_ATTRIBUTE_DESCRIPTION = "Project-related commands";
