@@ -100,7 +100,7 @@ public class DefaultServicesStartStrategyTest {
         strategy.order(composeEnvironment);
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class, expectedExceptionsMessageRegExp = "A service can not link to itself: .*")
+    @Test(expectedExceptions = IllegalArgumentException.class, expectedExceptionsMessageRegExp = "A machine can not link to itself: .*")
     public void shouldFailIfMachineLinksByItSelf() {
         // given
         CheServicesEnvironmentImpl composeEnvironment = new CheServicesEnvironmentImpl();
@@ -110,7 +110,7 @@ public class DefaultServicesStartStrategyTest {
         strategy.order(composeEnvironment);
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class, expectedExceptionsMessageRegExp = "A service can not depend on itself: .*")
+    @Test(expectedExceptions = IllegalArgumentException.class, expectedExceptionsMessageRegExp = "A machine can not depend on itself: .*")
     public void shouldFailIfMachineDependsOnByItSelf() {
         // given
         CheServicesEnvironmentImpl composeEnvironment = new CheServicesEnvironmentImpl();
@@ -121,7 +121,7 @@ public class DefaultServicesStartStrategyTest {
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,
-          expectedExceptionsMessageRegExp = "A service can not contain 'volumes_from' to itself:.*")
+          expectedExceptionsMessageRegExp = "A machine can not contain 'volumes_from' to itself:.*")
     public void shouldFailIfMachineContainsVolumesFromByItSelf() {
         // given
         CheServicesEnvironmentImpl composeEnvironment = new CheServicesEnvironmentImpl();

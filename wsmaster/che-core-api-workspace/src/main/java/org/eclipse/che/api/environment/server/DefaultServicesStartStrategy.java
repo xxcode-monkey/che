@@ -67,20 +67,20 @@ public class DefaultServicesStartStrategy {
                                                                               service.getVolumesFrom().size());
 
             for (String dependsOn : service.getDependsOn()) {
-                checkDependency(dependsOn, serviceEntry.getKey(), services, "A service can not depend on itself");
+                checkDependency(dependsOn, serviceEntry.getKey(), services, "A machine can not depend on itself");
                 machineDependencies.add(dependsOn);
             }
 
             // links also counts as dependencies
             for (String link : service.getLinks()) {
                 String dependency = getServiceFromLink(link);
-                checkDependency(dependency, serviceEntry.getKey(), services, "A service can not link to itself");
+                checkDependency(dependency, serviceEntry.getKey(), services, "A machine can not link to itself");
                 machineDependencies.add(dependency);
             }
             // volumesFrom also counts as dependencies
             for (String volumesFrom : service.getVolumesFrom()) {
                 String dependency = getServiceFromVolumesFrom(volumesFrom);
-                checkDependency(dependency, serviceEntry.getKey(), services, "A service can not contain 'volumes_from' to itself");
+                checkDependency(dependency, serviceEntry.getKey(), services, "A machine can not contain 'volumes_from' to itself");
                 machineDependencies.add(dependency);
             }
             dependencies.put(serviceEntry.getKey(), machineDependencies);
@@ -94,20 +94,22 @@ public class DefaultServicesStartStrategy {
             for (Iterator<Map.Entry<String, Set<String>>> it = dependencies.entrySet().iterator(); it.hasNext();) {
                 // process not yet processed machines only
                 Map.Entry<String, Set<String>> serviceEntry = it.next();
-                if (serviceEntry.getValue().isEmpty()) {
+                String service = serviceEntry.getKey();
+                Set<String> serviceDependencies = serviceEntry.getValue();
+
+                if (serviceDependencies.isEmpty()) {
                     // no links - smallest weight 0
-                    weights.put(serviceEntry.getKey(), 0);
+                    weights.put(service, 0);
                     it.remove();
                 } else {
                     // machine has dependencies - check if it has not weighted dependencies
-                    if (weights.keySet().containsAll(serviceEntry.getValue())) {
+                    if (weights.keySet().containsAll(serviceDependencies)) {
                         // all connections are weighted - lets evaluate current machine
-                        Optional<String> maxWeight = serviceEntry.getValue()
-                                                                 .stream()
-                                                                 .max((o1, o2) -> weights.get(o1).compareTo(weights.get(o2)));
+                        Optional<String> maxWeight = serviceDependencies.stream()
+                                                                        .max((o1, o2) -> weights.get(o1).compareTo(weights.get(o2)));
                         // optional can't be empty because size of the list is checked above
                         //noinspection OptionalGetWithoutIsPresent
-                        weights.put(serviceEntry.getKey(), weights.get(maxWeight.get()) + 1);
+                        weights.put(service, weights.get(maxWeight.get()) + 1);
                         it.remove();
                     }
                 }
