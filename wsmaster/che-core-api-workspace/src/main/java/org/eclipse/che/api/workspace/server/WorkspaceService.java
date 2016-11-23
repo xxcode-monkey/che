@@ -523,10 +523,8 @@ public class WorkspaceService extends Service {
         requiredNotNull(newEnvironment, "New environment");
         requiredNotNull(envName, "New environment name");
         relativizeRecipeLinks(newEnvironment);
-        final WorkspaceImpl workspace = workspaceManager.getWorkspace(id);
-        workspace.getConfig().getEnvironments().put(envName, new EnvironmentImpl(newEnvironment));
-        validator.validateConfig(workspace.getConfig());
-        return linksInjector.injectLinks(asDto(workspaceManager.updateWorkspace(id, workspace)), getServiceContext());
+        workspaceManager.addEnvironment(id, envName, newEnvironment);
+        return linksInjector.injectLinks(asDto(workspaceManager.getWorkspace(id)), getServiceContext());
     }
 
     @PUT
@@ -582,10 +580,7 @@ public class WorkspaceService extends Service {
                                                          NotFoundException,
                                                          ConflictException,
                                                          ForbiddenException {
-        final WorkspaceImpl workspace = workspaceManager.getWorkspace(id);
-        if (workspace.getConfig().getEnvironments().remove(envName) != null) {
-            workspaceManager.updateWorkspace(id, workspace);
-        }
+        workspaceManager.deleteEnvironment(id, envName);
     }
 
     @POST

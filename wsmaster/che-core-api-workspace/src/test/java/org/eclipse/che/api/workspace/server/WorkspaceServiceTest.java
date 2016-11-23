@@ -19,6 +19,7 @@ import org.eclipse.che.account.shared.model.Account;
 import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.agent.server.WsAgentHealthChecker;
 import org.eclipse.che.api.core.model.machine.MachineStatus;
+import org.eclipse.che.api.core.model.machine.Recipe;
 import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
@@ -47,6 +48,7 @@ import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceRuntimeImpl;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
+import org.eclipse.che.api.workspace.shared.dto.EnvironmentRecipeDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
@@ -109,8 +111,10 @@ import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
@@ -605,25 +609,19 @@ public class WorkspaceServiceTest {
     public void shouldAddEnvironment() throws Exception {
         final WorkspaceImpl workspace = createWorkspace(createConfigDto());
         when(wsManager.getWorkspace(workspace.getId())).thenReturn(workspace);
-        when(wsManager.updateWorkspace(any(), any())).thenReturn(workspace);
         final EnvironmentDto envDto = createEnvDto();
-        final int envsSizeBefore = workspace.getConfig().getEnvironments().size();
+        final String newEnvName = "new-env";
 
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
                                          .contentType("application/json")
                                          .body(envDto)
                                          .when()
-                                         .queryParam("name", "new-env")
+                                         .queryParam("name", newEnvName)
                                          .post(SECURE_PATH + "/workspace/" + workspace.getId() + "/environment");
 
         assertEquals(response.getStatusCode(), 200);
-        assertEquals(new WorkspaceImpl(unwrapDto(response, WorkspaceDto.class), TEST_ACCOUNT)
-                             .getConfig()
-                             .getEnvironments()
-                             .size(), envsSizeBefore + 1);
-        verify(validator).validateConfig(workspace.getConfig());
-        verify(wsManager).updateWorkspace(any(), any());
+        verify(wsManager).addEnvironment(eq(workspace.getId()), eq(newEnvName), any());
     }
 
     @Test
@@ -688,7 +686,7 @@ public class WorkspaceServiceTest {
                                                  + "/environment/" + envEntry.getKey());
 
         assertEquals(response.getStatusCode(), 204);
-        verify(wsManager).updateWorkspace(any(), any());
+        verify(wsManager).deleteEnvironment(eq(workspace.getId()), eq(envEntry.getKey()));
     }
 
 
@@ -696,23 +694,32 @@ public class WorkspaceServiceTest {
     public void shouldRelativizeLinksOnAddEnvironment() throws Exception {
         final WorkspaceImpl workspace = createWorkspace(createConfigDto());
         final String initialLocation = "http://localhost:8080/api/recipe/idrecipe123456789/script";
-        when(wsManager.getWorkspace(workspace.getId())).thenReturn(workspace);
-        when(wsManager.updateWorkspace(any(), any())).thenReturn(workspace);
+        final WorkspaceDao wsDao = mock(WorkspaceDao.class);
+        when(wsDao.get(workspace.getId())).thenReturn(workspace);
+        final WorkspaceManager workspaceManager = spy(new WorkspaceManager(wsDao, null, null, null, false, false, null,
+                                                                           mock(CheEnvironmentValidator.class)));
+        doReturn(workspace).when(workspaceManager).getWorkspace(workspace.getId());
+        service = new WorkspaceService(API_ENDPOINT,
+                                       workspaceManager,
+                                       validator,
+                                       wsAgentHealthChecker,
+                                       new WorkspaceServiceLinksInjector(new MachineServiceLinksInjector()));
         final EnvironmentDto envDto = createEnvDto();
         envDto.getRecipe().withLocation(initialLocation).withType("dockerfile");
+        final String newEnvName = "new-env";
 
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
                                          .contentType("application/json")
                                          .body(envDto)
                                          .when()
-                                         .queryParam("name", "new-env")
+                                         .queryParam("name", newEnvName)
                                          .post(SECURE_PATH + "/workspace/" + workspace.getId() + "/environment");
 
         assertEquals(response.getStatusCode(), 200);
         String savedLocation = unwrapDto(response, WorkspaceDto.class).getConfig()
                                                                       .getEnvironments()
-                                                                      .get("new-env")
+                                                                      .get(newEnvName)
                                                                       .getRecipe()
                                                                       .getLocation();
 
