@@ -114,7 +114,7 @@ public abstract class BaseView<T extends BaseActionDelegate> extends Composite i
         toolbarHeader.addDomHandler(new DoubleClickHandler() {
             @Override
             public void onDoubleClick(DoubleClickEvent event) {
-                onMaximize();
+                onToggleMaximize();
             }
         }, DoubleClickEvent.getType());
 
@@ -146,7 +146,7 @@ public abstract class BaseView<T extends BaseActionDelegate> extends Composite i
         maximizeButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                onMaximize();
+                onToggleMaximize();
             }
         });
 
@@ -225,11 +225,11 @@ public abstract class BaseView<T extends BaseActionDelegate> extends Composite i
     }
 
     /**
-     * Maximizes the view.
+     * Toggles maximized state of the view.
      */
-    public void onMaximize() {
+    public void onToggleMaximize() {
         if (delegate != null) {
-            delegate.onMaximize();
+            delegate.onToggleMaximize();
         }
     }
 

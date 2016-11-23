@@ -38,7 +38,7 @@ public interface PartStack extends Presenter {
         /**
          * Part stack is minimized by minimize button.
          * Having this state part stack can not be maximized or collapsed but
-         *  only can be restored by clicking the pab button.
+         *  only can be restored by clicking the tab button.
          */
         MINIMIZED,
 
@@ -126,7 +126,7 @@ public interface PartStack extends Presenter {
     void minimize();
 
     /**
-     * Restores the part stack ant the perspective to the default state.
+     * Restores the part stack and the perspective to the default state.
      */
     void restore();
 

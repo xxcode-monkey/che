@@ -18,9 +18,9 @@ package org.eclipse.che.ide.api.parts.base;
 public interface BaseActionDelegate {
 
     /**
-     * Maximizes the part.
+     * Toggles maximized state of the part.
      */
-    void onMaximize();
+    void onToggleMaximize();
 
     /**
      * Minimizes the part.

@@ -25,7 +25,7 @@ public abstract class BasePresenter extends AbstractPartPresenter implements Bas
     protected PartStack partStack;
 
     @Override
-    public void onMaximize() {
+    public void onToggleMaximize() {
         if (partStack != null) {
             if (partStack.getPartStackState() == PartStack.State.MAXIMIZED) {
                 partStack.restore();
