@@ -32,7 +32,6 @@ import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.parts.base.BasePresenter;
-import org.eclipse.che.ide.api.workspace.WorkspaceReadyEvent;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 import java.util.ArrayList;
@@ -52,7 +51,6 @@ import static org.eclipse.che.ide.api.parts.PartStackType.NAVIGATION;
 @Singleton
 public class CommandsExplorerPresenter extends BasePresenter implements CommandsExplorerView.ActionDelegate,
                                                                         WsAgentStateHandler,
-                                                                        WorkspaceReadyEvent.WorkspaceReadyHandler,
                                                                         CommandManager3.CommandChangedListener {
 
     private static final String TITLE   = "Commands";
@@ -64,6 +62,14 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
     private final CommandManager3           commandManager;
     private final CommandTypeRegistry       commandTypeRegistry;
     private final NotificationManager       notificationManager;
+
+    /** {@link DelayedTask} for refreshing the view. */
+    private DelayedTask refreshViewTask = new DelayedTask() {
+        @Override
+        public void onExecute() {
+            refreshView();
+        }
+    };
 
     @Inject
     public CommandsExplorerPresenter(CommandsExplorerView view,
@@ -83,7 +89,6 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
         view.setDelegate(this);
 
         eventBus.addHandler(WsAgentStateEvent.TYPE, this);
-//        eventBus.addHandler(WorkspaceReadyEvent.getType(), this);
 
         commandManager.addCommandChangedListener(this);
     }
@@ -212,14 +217,6 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
         refreshViewTask.delay(300);
     }
 
-    /** {@link DelayedTask} for refreshing the view. */
-    private DelayedTask refreshViewTask = new DelayedTask() {
-        @Override
-        public void onExecute() {
-            refreshView();
-        }
-    };
-
     private void refreshView() {
         final Map<CommandType, List<ContextualCommand>> commands = new HashMap<>();
 
@@ -242,11 +239,5 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
         }
 
         view.setCommands(commands);
-    }
-
-    @Override
-    public void onWorkspaceReady(WorkspaceReadyEvent event) {
-        workspaceAgent.openPart(this, NAVIGATION);
-        workspaceAgent.setActivePart(this);
     }
 }
