@@ -30,6 +30,7 @@ import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.environment.server.CheEnvironmentValidator;
 import org.eclipse.che.api.environment.server.exception.EnvironmentException;
 import org.eclipse.che.api.machine.server.exception.SnapshotException;
+import org.eclipse.che.api.machine.server.exception.SourceNotFoundException;
 import org.eclipse.che.api.machine.server.spi.SnapshotDao;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
 import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
@@ -65,6 +66,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
+import static com.google.common.base.Throwables.getCausalChain;
 import static java.lang.Boolean.parseBoolean;
 import static java.lang.String.format;
 import static java.lang.System.currentTimeMillis;
@@ -868,6 +870,11 @@ public class WorkspaceManager {
                         LOG.error("Couldn't remove temporary workspace {}, because : {}",
                                   workspace.getId(),
                                   rmEx.getLocalizedMessage());
+                    }
+                }
+                for (Throwable cause : getCausalChain(ex)) {
+                    if (cause instanceof SourceNotFoundException) {
+                        return;
                     }
                 }
                 LOG.error(ex.getLocalizedMessage(), ex);
