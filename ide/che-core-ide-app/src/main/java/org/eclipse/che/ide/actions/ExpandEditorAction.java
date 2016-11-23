@@ -28,6 +28,8 @@ import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.CustomComponentAction;
 import org.eclipse.che.ide.api.action.Presentation;
+import org.eclipse.che.ide.api.parts.PartStack;
+import org.eclipse.che.ide.api.parts.PartStackType;
 import org.eclipse.che.ide.api.parts.Perspective;
 import org.eclipse.che.ide.api.parts.PerspectiveManager;
 import org.eclipse.che.ide.api.FontAwesome;
@@ -45,7 +47,6 @@ public class ExpandEditorAction extends Action implements CustomComponentAction 
 
     private FlowPanel buttonPanel;
     private FlowPanel button;
-    private boolean   expanded;
 
     @Inject
     public ExpandEditorAction(Resources resources,
@@ -107,18 +108,17 @@ public class ExpandEditorAction extends Action implements CustomComponentAction 
             return;
         }
 
-        expanded = !expanded;
+        PartStack partStack = perspective.getPartStack(PartStackType.EDITING);
+        if (partStack == null) {
+            return;
+        }
 
-        if (expanded) {
+        if (partStack.getPartStackState() == PartStack.State.NORMAL) {
             perspective.maximizeCentralPartStack();
-            if (button != null) {
-                button.getElement().setInnerHTML(FontAwesome.COMPRESS);
-            }
+            button.getElement().setInnerHTML(FontAwesome.COMPRESS);
         } else {
             perspective.restore();
-            if (button != null) {
-                button.getElement().setInnerHTML(FontAwesome.EXPAND);
-            }
+            button.getElement().setInnerHTML(FontAwesome.EXPAND);
         }
     }
 
