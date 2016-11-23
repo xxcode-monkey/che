@@ -71,7 +71,7 @@ public class CommandsPaletteViewImpl extends Window implements CommandsPaletteVi
         setTitle("Commands Palette");
 
         filterField.getElement().setAttribute("placeholder", "Search command");
-//        filterField.getElement().addClassName(resources.commandsPaletteCss().filterPlaceholder1());
+//        filterField.getElement().addClassName(resources.commandsPaletteCss().filterPlaceholder());
 
         // hide footer
         getFooter().removeFromParent();
@@ -82,6 +82,8 @@ public class CommandsPaletteViewImpl extends Window implements CommandsPaletteVi
         super.show();
 
         filterField.setValue("");
+
+        filterField.setFocus(true);
     }
 
     @Override

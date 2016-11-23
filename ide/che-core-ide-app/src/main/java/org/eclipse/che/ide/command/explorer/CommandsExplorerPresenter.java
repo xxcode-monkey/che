@@ -21,6 +21,7 @@ import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.ide.DelayedTask;
 import org.eclipse.che.ide.api.command.ApplicableContext;
 import org.eclipse.che.ide.api.command.CommandManager3;
 import org.eclipse.che.ide.api.command.CommandType;
@@ -198,18 +199,26 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
 
     @Override
     public void onCommandAdded(ContextualCommand command) {
-        refreshView();
+        refreshViewTask.delay(300);
     }
 
     @Override
     public void onCommandUpdated(ContextualCommand command) {
-        refreshView();
+        refreshViewTask.delay(300);
     }
 
     @Override
     public void onCommandRemoved(ContextualCommand command) {
-        refreshView();
+        refreshViewTask.delay(300);
     }
+
+    /** {@link DelayedTask} for refreshing the view. */
+    private DelayedTask refreshViewTask = new DelayedTask() {
+        @Override
+        public void onExecute() {
+            refreshView();
+        }
+    };
 
     private void refreshView() {
         final Map<CommandType, List<ContextualCommand>> commands = new HashMap<>();

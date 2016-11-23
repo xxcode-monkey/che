@@ -25,6 +25,7 @@
             border-color: borderColor;
             background-color: partBackground;
             margin-top: 7px;
+            min-width: 99%;
         }
     </ui:style>
 

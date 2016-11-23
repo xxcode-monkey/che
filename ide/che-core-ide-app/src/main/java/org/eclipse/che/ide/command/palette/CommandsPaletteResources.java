@@ -29,6 +29,6 @@ public interface CommandsPaletteResources extends ClientBundle {
     DataResource findIcon();
 
     interface CSS extends CssResource {
-        String filterPlaceholder1();
+        String filterPlaceholder();
     }
 }
