@@ -11,6 +11,7 @@
 @eval primaryButtonBackground org.eclipse.che.ide.api.theme.Style.theme.getPrimaryButtonBackground();
 @eval buttonBackground org.eclipse.che.ide.api.theme.Style.theme.getButtonBackground();
 @eval partBackground org.eclipse.che.ide.api.theme.Style.theme.partBackground();
+@eval outputBackgroundColor org.eclipse.che.ide.api.theme.Style.theme.outputBackgroundColor();
 
 .onoffswitch {
     position: relative;
@@ -28,14 +29,15 @@
     display: block;
     overflow: hidden;
     cursor: pointer;
-    border: 2px solid #5E5E5E;
+    width: 55px;
     height: 17px;
+    background-color: outputBackgroundColor;
 }
 
 .onoffswitchInner {
     width: 200%;
     margin-left: -100%;
-    transition: margin 0.3s ease-in;
+    transition: margin 0.2s ease-in;
 }
 
 .onoffswitchInner:before, .onoffswitchInner:after {
@@ -54,29 +56,27 @@
 }
 
 .onoffswitchInner:before {
-    content: "NO";
+    content: "YES";
     padding-left: 5px;
-    color: #999999;
+    color: primaryButtonBackground;
 }
 
 .onoffswitchInner:after {
-    content: "YES";
-    padding-right: 3px;
-    color: primaryButtonBackground;
+    content: "NO";
+    padding-right: 8px;
+    color: #999999;
     text-align: right;
 }
 
 .onoffswitchSwitch {
     width: 21px;
-    height: 13px;
+    height: 12px;
     margin: -0.5px;
-    background: primaryButtonBackground;
-    border-top: 2px solid partBackground;
+    background: buttonBackground;
     position: absolute;
-    top: 2px;
-    bottom: 0;
+    top: 3px;
     right: 26px;
-    transition: all 0.3s ease-in;
+    transition: all 0.2s ease-in;
 }
 
 .onoffswitchCheckbox:checked + .onoffswitchLabel .onoffswitchInner {
@@ -85,5 +85,5 @@
 
 .onoffswitchCheckbox:checked + .onoffswitchLabel .onoffswitchSwitch {
     right: 0px;
-    background: buttonBackground;
+    background: primaryButtonBackground;
 }

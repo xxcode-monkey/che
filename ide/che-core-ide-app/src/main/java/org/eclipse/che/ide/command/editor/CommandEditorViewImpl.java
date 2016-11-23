@@ -43,9 +43,6 @@ public class CommandEditorViewImpl extends Composite implements CommandEditorVie
     Button saveButton;
 
     @UiField
-    Button cancelButton;
-
-    @UiField
     DeckPanel pagesPanel;
 
     /** The total count of added pages. */
@@ -58,7 +55,6 @@ public class CommandEditorViewImpl extends Composite implements CommandEditorVie
 
         setSaveEnabled(false);
 
-        cancelButton.addStyleName(WINDOW_RESOURCES.windowCss().closeButton());
         saveButton.addStyleName(WINDOW_RESOURCES.windowCss().primaryButton());
     }
 
@@ -85,13 +81,7 @@ public class CommandEditorViewImpl extends Composite implements CommandEditorVie
 
     @Override
     public void setSaveEnabled(boolean enable) {
-        cancelButton.setEnabled(enable);
         saveButton.setEnabled(enable);
-    }
-
-    @UiHandler("cancelButton")
-    public void handleCancelButton(ClickEvent clickEvent) {
-        delegate.onCommandRevert();
     }
 
     @UiHandler("saveButton")

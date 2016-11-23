@@ -264,10 +264,6 @@ public class CommandEditor extends AbstractEditorPresenter implements CommandEdi
     }
 
     @Override
-    public void onCommandRevert() {
-    }
-
-    @Override
     public void onCommandSave() {
         doSave();
     }

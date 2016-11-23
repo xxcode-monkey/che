@@ -29,19 +29,17 @@
         }
 
         .button {
-            margin-left: 6px;
+            margin-left: 77px;
             float: none;
-            position: static;
         }
     </ui:style>
 
     <g:DockLayoutPanel addStyleNames="{style.mainPanel}">
         <g:north size="30" addStyleNames="{style.tabsPanel}">
             <g:FlowPanel>
-                <g:SimplePanel debugId="ppp">
+                <g:SimplePanel>
                     <che:radiobuttongroup.RadioButtonGroup ui:field="pagesSwitcher" debugId="command-editor-pages-switcher"/>
                 </g:SimplePanel>
-                <g:Button ui:field="cancelButton" text="Cancel" addStyleNames="{style.button}" debugId="command-editor-button-cancel"/>
                 <g:Button ui:field="saveButton" text="Save" addStyleNames="{style.button}" debugId="command-editor-button-save"/>
             </g:FlowPanel>
         </g:north>
