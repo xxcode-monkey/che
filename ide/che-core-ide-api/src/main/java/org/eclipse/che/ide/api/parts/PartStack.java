@@ -164,7 +164,7 @@ public interface PartStack extends Presenter {
         void onMaximize(PartStack partStack);
 
         /**
-         * Requests the delegate to  restore part stack state,
+         * Requests the delegate to  restore part stack state.
          *
          * @param partStack
          *          part stack

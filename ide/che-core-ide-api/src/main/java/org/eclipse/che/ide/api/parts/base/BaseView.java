@@ -22,6 +22,7 @@ import com.google.gwt.event.dom.client.MouseUpEvent;
 import com.google.gwt.event.dom.client.MouseUpHandler;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Label;
@@ -100,6 +101,9 @@ public abstract class BaseView<T extends BaseActionDelegate> extends Composite i
         toolbarHeader = new DockLayoutPanel(Style.Unit.PX);
         toolbarHeader.getElement().setAttribute("role", "toolbar-header");
         toolBar.addNorth(toolbarHeader, 22);
+
+        // padding 2 pixels from the right
+        toolbarHeader.addEast(new FlowPanel(), 2);
 
         titleLabel = new Label();
         titleLabel.setStyleName(resources.partStackCss().ideBasePartTitleLabel());
@@ -181,7 +185,7 @@ public abstract class BaseView<T extends BaseActionDelegate> extends Composite i
      */
     public final void addToolButton(@NotNull IsWidget button) {
         if (button != null) {
-            toolbarHeader.addEast(button, 22);
+            toolbarHeader.addEast(button, 18);
         }
     }
 
