@@ -81,7 +81,6 @@ import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
@@ -101,6 +100,7 @@ import static org.testng.Assert.assertTrue;
  * Covers main cases of {@link WorkspaceManager}.
  *
  * @author Yevhenii Voevodin
+ * @author Mykola Morhun
  */
 @Listeners(value = {MockitoTestNGListener.class})
 public class WorkspaceManagerTest {
@@ -1060,7 +1060,6 @@ public class WorkspaceManagerTest {
         final WorkspaceImpl workspace = workspaceManager.createWorkspace(createConfig(), NAMESPACE);
 
         when(workspaceDao.get(workspace.getId())).thenReturn(workspace);
-        doNothing().when(environmentValidator).validate(newEnvName, newEnv);
 
         // when
         workspaceManager.addEnvironment(workspace.getId(), newEnvName, newEnv);
@@ -1069,13 +1068,12 @@ public class WorkspaceManagerTest {
         assertEquals(workspace.getConfig().getEnvironments().get(newEnvName), newEnv);
     }
 
-    @Test(expectedExceptions = ConflictException.class, expectedExceptionsMessageRegExp = "Environment with '.*' name already exists")
+    @Test(expectedExceptions = ConflictException.class, expectedExceptionsMessageRegExp = "Environment with name '.*' already exists")
     public void shouldThrowConflictExceptionWhenAddNewEnvironmentWithAlreadyExistedName() throws Exception {
         // given
         final WorkspaceImpl workspace = workspaceManager.createWorkspace(createConfig(), NAMESPACE);
 
         when(workspaceDao.get(workspace.getId())).thenReturn(workspace);
-        doNothing().when(environmentValidator).validate(anyString(), any());
 
         // when
         workspaceManager.addEnvironment(workspace.getId(), workspace.getConfig().getDefaultEnv(), mock(Environment.class));
@@ -1098,7 +1096,6 @@ public class WorkspaceManagerTest {
         final WorkspaceImpl workspace = workspaceManager.createWorkspace(createConfig(), NAMESPACE);
 
         when(workspaceDao.get(workspace.getId())).thenReturn(workspace);
-        doNothing().when(environmentValidator).validate(envName, env);
 
         workspaceManager.addEnvironment(workspace.getId(), envName, env);
 
@@ -1120,7 +1117,6 @@ public class WorkspaceManagerTest {
                                                                                          "location"),
                                                                new HashMap<>());
         when(workspaceDao.get(workspace.getId())).thenReturn(workspace);
-        doNothing().when(environmentValidator).validate(anyString(), any());
 
         // when
         workspaceManager.updateEnvironment(workspace.getId(), envName, updatedEnv);
@@ -1135,7 +1131,6 @@ public class WorkspaceManagerTest {
         final WorkspaceImpl workspace = workspaceManager.createWorkspace(createConfig(), NAMESPACE);
 
         when(workspaceDao.get(workspace.getId())).thenReturn(workspace);
-        doNothing().when(environmentValidator).validate(anyString(), any());
 
         // when
         workspaceManager.updateEnvironment(workspace.getId(), "non-existing-env", mock(Environment.class));
@@ -1149,7 +1144,6 @@ public class WorkspaceManagerTest {
 
         when(workspaceDao.get(workspace.getId())).thenReturn(workspace);
         when(runtime.getActiveEnv()).thenReturn(workspace.getConfig().getDefaultEnv());
-        doNothing().when(environmentValidator).validate(anyString(), any());
 
         workspace.setRuntime(runtime);
 
@@ -1169,7 +1163,6 @@ public class WorkspaceManagerTest {
         final WorkspaceImpl workspace = workspaceManager.createWorkspace(createConfig(), NAMESPACE);
 
         when(workspaceDao.get(workspace.getId())).thenReturn(workspace);
-        doNothing().when(environmentValidator).validate(anyString(), any());
 
         workspaceManager.addEnvironment(workspace.getId(), envName, newEnv);
 
@@ -1206,7 +1199,6 @@ public class WorkspaceManagerTest {
 
         when(workspaceDao.get(workspace.getId())).thenReturn(workspace);
         when(runtime.getActiveEnv()).thenReturn(envName);
-        doNothing().when(environmentValidator).validate(anyString(), any());
 
         workspaceManager.addEnvironment(workspace.getId(), envName, env);
         workspace.setRuntime(runtime);
@@ -1239,9 +1231,9 @@ public class WorkspaceManagerTest {
         final WorkspaceImpl workspace = workspaceManager.createWorkspace(createConfig(), NAMESPACE);
 
         when(workspaceDao.get(workspace.getId())).thenReturn(workspace);
-        doNothing().when(environmentValidator).validate(envName, env);
 
         workspaceManager.addEnvironment(workspace.getId(), envName, env);
+        final int environmentsNumber = workspace.getConfig().getEnvironments().size();
 
         // when
         workspaceManager.renameEnvironment(workspace.getId(), envName, newEnvName);
@@ -1249,6 +1241,28 @@ public class WorkspaceManagerTest {
         // then
         verify(workspaceManager).updateEnvironmentSnapshots(eq(workspace.getId()), eq(envName), eq(newEnvName));
         assertEquals(workspace.getConfig().getEnvironments().get(newEnvName), env);
+        assertEquals(workspace.getConfig().getEnvironments().size(), environmentsNumber);
+    }
+
+    @Test
+    public void shouldBeAbleToRenameDefaultEnvironment() throws Exception {
+        // given
+        final WorkspaceImpl workspace = workspaceManager.createWorkspace(createConfig(), NAMESPACE);
+        final String defaultEnvName = workspace.getConfig().getDefaultEnv();
+        final String envName = "envName";
+        final Environment defaultEnv = workspace.getConfig().getEnvironments().get(defaultEnvName);
+
+        when(workspaceDao.get(workspace.getId())).thenReturn(workspace);
+
+        final int environmentsNumber = workspace.getConfig().getEnvironments().size();
+
+        // when
+        workspaceManager.renameEnvironment(workspace.getId(), defaultEnvName, envName);
+
+        // then
+        verify(workspaceManager).updateEnvironmentSnapshots(eq(workspace.getId()), eq(defaultEnvName), eq(envName));
+        assertEquals(workspace.getConfig().getEnvironments().get(envName), defaultEnv);
+        assertEquals(workspace.getConfig().getEnvironments().size(), environmentsNumber);
     }
 
     @Test(expectedExceptions = NotFoundException.class)
@@ -1260,6 +1274,26 @@ public class WorkspaceManagerTest {
 
         // when
         workspaceManager.renameEnvironment(workspace.getId(), "non-existing-env", "newName");
+    }
+
+    @Test(expectedExceptions = ConflictException.class)
+    public void shouldThrowConflictExceptionWhenTryToRenameEnvironmentToAlreadyExistingName() throws Exception {
+        // given
+        final String existedEnvName = "envName";
+        final EnvironmentImpl env = new EnvironmentImpl(new EnvironmentRecipeImpl("type",
+                                                                                  "contentType",
+                                                                                  "content",
+                                                                                  "location"),
+                                                        null);
+        final WorkspaceImpl workspace = workspaceManager.createWorkspace(createConfig(), NAMESPACE);
+
+        when(workspaceDao.get(workspace.getId())).thenReturn(workspace);
+
+        workspaceManager.addEnvironment(workspace.getId(), existedEnvName, env);
+
+        // when
+        workspaceManager.renameEnvironment(workspace.getId(), workspace.getConfig().getDefaultEnv(), existedEnvName);
+
     }
 
     @Test(expectedExceptions = ConflictException.class)
@@ -1276,7 +1310,6 @@ public class WorkspaceManagerTest {
 
         when(workspaceDao.get(workspace.getId())).thenReturn(workspace);
         when(runtime.getActiveEnv()).thenReturn(envName);
-        doNothing().when(environmentValidator).validate(anyString(), any());
 
         workspaceManager.addEnvironment(workspace.getId(), envName, env);
         workspace.setRuntime(runtime);

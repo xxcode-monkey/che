@@ -24,6 +24,7 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.environment.server.CheEnvironmentValidator;
 import org.eclipse.che.api.machine.server.jpa.MachineJpaModule;
 import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
 import org.eclipse.che.api.machine.server.spi.SnapshotDao;
@@ -130,6 +131,7 @@ public class CascadeRemovalTest {
                 install(new JpaPersistModule("test"));
                 bind(SchemaInitializer.class).toInstance(new FlywaySchemaInitializer(inMemoryDefault(), "che-schema"));
                 bind(DBInitializer.class).asEagerSingleton();
+                bind(CheEnvironmentValidator.class).toInstance(mock(CheEnvironmentValidator.class));
                 install(new UserJpaModule());
                 install(new AccountModule());
                 install(new SshJpaModule());

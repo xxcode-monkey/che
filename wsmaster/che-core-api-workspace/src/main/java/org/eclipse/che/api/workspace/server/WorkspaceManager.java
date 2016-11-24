@@ -89,6 +89,7 @@ import static org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEven
  * @author Alexander Garagatyi
  * @author Yevhenii Voevodin
  * @author Igor Vinokur
+ * @author Mykola Morhun
  */
 @Singleton
 public class WorkspaceManager {
@@ -558,10 +559,11 @@ public class WorkspaceManager {
         environmentValidator.validate(newEnvName, newEnvironment);
         final WorkspaceImpl workspace = workspaceDao.get(workspaceId);
         if (workspace.getConfig().getEnvironments().get(newEnvName) != null) {
-            throw new ConflictException(format("Environment with '%s' name already exists", newEnvName));
+            throw new ConflictException(format("Environment with name '%s' already exists", newEnvName));
         }
 
         workspace.getConfig().getEnvironments().put(newEnvName, new EnvironmentImpl(newEnvironment));
+        normalizeState(workspaceDao.update(workspace));
     }
 
     /**
@@ -604,7 +606,9 @@ public class WorkspaceManager {
             removeEnvironmentSnapshots(workspaceId, envName);
         }
 
-        return workspace.getConfig().getEnvironments().put(envName, new EnvironmentImpl(update));
+        Environment oldEnv = workspace.getConfig().getEnvironments().put(envName, new EnvironmentImpl(update));
+        normalizeState(workspaceDao.update(workspace));
+        return oldEnv;
     }
 
     /**
@@ -639,7 +643,9 @@ public class WorkspaceManager {
         }
 
         removeEnvironmentSnapshots(workspaceId, envName);
-        return workspace.getConfig().getEnvironments().remove(envName);
+        EnvironmentImpl deletedEnv = workspace.getConfig().getEnvironments().remove(envName);
+        normalizeState(workspaceDao.update(workspace));
+        return deletedEnv;
     }
 
     /**
@@ -654,23 +660,35 @@ public class WorkspaceManager {
      * @throws NotFoundException
      *         when workspace doesn't contain specified environment
      * @throws ConflictException
-     *         when try to rename running environment
+     *         when try to rename running environment,
+     *         when try to rename to existing environment name
      * @throws ServerException
      *         when other error occurs
      */
     public void renameEnvironment(String workspaceId, String oldEnvName, String newEnvName) throws NotFoundException,
                                                                                                    ServerException,
                                                                                                    ConflictException {
+        if (oldEnvName.equals(newEnvName)) {
+            return;
+        }
         final WorkspaceImpl workspace = workspaceDao.get(workspaceId);
         if (!workspace.getConfig().getEnvironments().containsKey(oldEnvName)) {
             throw new NotFoundException(format("Workspace '%s' doesn't contain environment '%s'", workspaceId, oldEnvName));
+        }
+        if (workspace.getConfig().getEnvironments().containsKey(newEnvName)) {
+            throw new ConflictException(format("Workspace '%s' already contains environment '%s'", workspaceId, oldEnvName));
         }
         if (workspace.getRuntime() != null && workspace.getRuntime().getActiveEnv().equals(oldEnvName)) {
             throw new ConflictException(format("Cannot rename active environment: '%s'", oldEnvName));
         }
 
+        workspace.getConfig().getEnvironments().put(newEnvName,
+                                                    new EnvironmentImpl(workspace.getConfig().getEnvironments().remove(oldEnvName)));
+        if (workspace.getConfig().getDefaultEnv().equals(oldEnvName)) {
+            workspace.getConfig().setDefaultEnv(newEnvName);
+        }
+        normalizeState(workspaceDao.update(workspace));
         updateEnvironmentSnapshots(workspaceId, oldEnvName, newEnvName);
-        workspace.getConfig().getEnvironments().put(newEnvName, workspace.getConfig().getEnvironments().get(oldEnvName));
     }
 
     /** Updates environment snapshots in database */
