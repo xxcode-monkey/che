@@ -19,7 +19,6 @@ import org.eclipse.che.account.shared.model.Account;
 import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.agent.server.WsAgentHealthChecker;
 import org.eclipse.che.api.core.model.machine.MachineStatus;
-import org.eclipse.che.api.core.model.machine.Recipe;
 import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
@@ -48,7 +47,6 @@ import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceRuntimeImpl;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
-import org.eclipse.che.api.workspace.shared.dto.EnvironmentRecipeDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
@@ -696,7 +694,10 @@ public class WorkspaceServiceTest {
         final String initialLocation = "http://localhost:8080/api/recipe/idrecipe123456789/script";
         final WorkspaceDao wsDao = mock(WorkspaceDao.class);
         when(wsDao.get(workspace.getId())).thenReturn(workspace);
-        final WorkspaceManager workspaceManager = spy(new WorkspaceManager(wsDao, null, null, null, false, false, null,
+        when(wsDao.update(workspace)).thenReturn(workspace);
+        final WorkspaceManager workspaceManager = spy(new WorkspaceManager(wsDao,
+                                                                           mock(WorkspaceRuntimes.class),
+                                                                           null, null, false, false, null,
                                                                            mock(CheEnvironmentValidator.class)));
         doReturn(workspace).when(workspaceManager).getWorkspace(workspace.getId());
         service = new WorkspaceService(API_ENDPOINT,
