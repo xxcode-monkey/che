@@ -47,9 +47,11 @@ public class ContextualCommand extends CommandImpl {
     }
 
     public ContextualCommand(ContextualCommand command) {
-        super(command);
-
-        this.applicableContext = command.getApplicableContext();
+        this(command.getName(),
+             command.getCommandLine(),
+             command.getType(),
+             command.getAttributes(),
+             command.getApplicableContext());
     }
 
     /** Returns command's applicable context. */

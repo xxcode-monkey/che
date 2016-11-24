@@ -46,7 +46,7 @@ public class CommandImpl implements Command {
         this.name = name;
         this.commandLine = commandLine;
         this.type = type;
-        this.attributes = attributes;
+        this.attributes = new HashMap<>(attributes);
     }
 
     /** Creates a copy of the given {@link Command}. */

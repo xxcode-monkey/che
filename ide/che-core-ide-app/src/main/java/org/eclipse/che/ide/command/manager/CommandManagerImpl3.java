@@ -129,7 +129,6 @@ public class CommandManagerImpl3 implements CommandManager3, WsAgentComponent, W
 
     @Override
     public List<ContextualCommand> getCommands() {
-        // return copy of the commands in order to prevent it modification directly
         List<ContextualCommand> list = new ArrayList<>(commands.size());
         for (ContextualCommand command : commands.values()) {
             list.add(new ContextualCommand(command));
@@ -176,12 +175,15 @@ public class CommandManagerImpl3 implements CommandManager3, WsAgentComponent, W
         final ArrayOf<Promise<?>> commandPromises = Collections.arrayOf();
 
         if (applicableContext.isWorkspaceApplicable()) {
-            Promise<CommandImpl> p = workspaceCommandManagerDelegate.createCommand(newCommand).then(new Operation<CommandImpl>() {
-                @Override
-                public void apply(CommandImpl arg) throws OperationException {
-                    newCommand.getApplicableContext().setWorkspaceApplicable(true);
-                }
-            });
+            Promise<CommandImpl> p = workspaceCommandManagerDelegate.createCommand(newCommand).then(
+                    new Function<CommandImpl, CommandImpl>() {
+                        @Override
+                        public CommandImpl apply(CommandImpl arg) throws FunctionException {
+                            newCommand.getApplicableContext().setWorkspaceApplicable(true);
+
+                            return newCommand;
+                        }
+                    });
 
             commandPromises.push(p);
         }
@@ -193,12 +195,15 @@ public class CommandManagerImpl3 implements CommandManager3, WsAgentComponent, W
                 continue;
             }
 
-            Promise<CommandImpl> p = projectCommandManagerDelegate.createCommand(project, newCommand).then(new Operation<CommandImpl>() {
-                @Override
-                public void apply(CommandImpl arg) throws OperationException {
-                    newCommand.getApplicableContext().addApplicableProject(projectPath);
-                }
-            });
+            Promise<CommandImpl> p = projectCommandManagerDelegate.createCommand(project, newCommand).then(
+                    new Function<CommandImpl, CommandImpl>() {
+                        @Override
+                        public CommandImpl apply(CommandImpl arg) throws FunctionException {
+                            newCommand.getApplicableContext().addApplicableProject(projectPath);
+
+                            return newCommand;
+                        }
+                    });
 
             commandPromises.push(p);
         }
@@ -247,10 +252,12 @@ public class CommandManagerImpl3 implements CommandManager3, WsAgentComponent, W
         final ArrayOf<Promise<?>> commandPromises = Collections.arrayOf();
 
         if (applicableContext.isWorkspaceApplicable()) {
-            final Promise<Void> p = workspaceCommandManagerDelegate.removeCommand(commandName).then(new Operation<Void>() {
+            final Promise<Void> p = workspaceCommandManagerDelegate.removeCommand(commandName).then(new Function<Void, Void>() {
                 @Override
-                public void apply(Void arg) throws OperationException {
+                public Void apply(Void arg) throws FunctionException {
                     command.getApplicableContext().setWorkspaceApplicable(false);
+
+                    return null;
                 }
             });
 
@@ -264,10 +271,12 @@ public class CommandManagerImpl3 implements CommandManager3, WsAgentComponent, W
                 continue;
             }
 
-            final Promise<Void> p = projectCommandManagerDelegate.removeCommand(project, commandName).then(new Operation<Void>() {
+            final Promise<Void> p = projectCommandManagerDelegate.removeCommand(project, commandName).then(new Function<Void, Void>() {
                 @Override
-                public void apply(Void arg) throws OperationException {
+                public Void apply(Void arg) throws FunctionException {
                     command.getApplicableContext().removeApplicableProject(projectPath);
+
+                    return null;
                 }
             });
 

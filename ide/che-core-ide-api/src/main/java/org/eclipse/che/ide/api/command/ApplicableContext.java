@@ -45,7 +45,7 @@ public class ApplicableContext {
         this(applicableContext.isWorkspaceApplicable(),
              applicableContext.isProjectApplicable(),
              applicableContext.isFileApplicable(),
-             applicableContext.getApplicableProjects());
+             new ArrayList<>(applicableContext.getApplicableProjects()));
     }
 
     public boolean isWorkspaceApplicable() {
