@@ -273,21 +273,26 @@ public class PartStackPresenter implements Presenter, PartStackView.ActionDelega
 
     @Override
     public void maximize() {
+        // Update the view state.
         view.setMaximized(true);
 
+        // Update dimensions of the part stack if it's already maximized. Used when resizing the view.
         if (state == State.MAXIMIZED) {
             workBenchPartController.maximize();
             return;
         }
 
+        // Part stack can be maximized only having NORMAL state.
         if (state != State.NORMAL) {
             return;
         }
 
+        // Maximize and update the state.
         currentSize = workBenchPartController.getSize();
         workBenchPartController.maximize();
         state = State.MAXIMIZED;
 
+        // Ask the delegate to maximize this part stack and collapse other.
         if (delegate != null) {
             delegate.onMaximize(this);
         }
@@ -295,16 +300,20 @@ public class PartStackPresenter implements Presenter, PartStackView.ActionDelega
 
     @Override
     public void collapse() {
+        // Update the view state.
         view.setMaximized(false);
 
+        // Part stack can be collapsed only having NORMAL state.
         if (state != State.NORMAL) {
             return;
         }
 
+        // Collapse and update the state.
         currentSize = workBenchPartController.getSize();
         workBenchPartController.setSize(0);
         state = State.COLLAPSED;
 
+        // Deselect the active tab.
         if (activeTab != null) {
             activeTab.unSelect();
         }
@@ -317,20 +326,24 @@ public class PartStackPresenter implements Presenter, PartStackView.ActionDelega
 
     @Override
     public void minimize() {
+        // Update the view state.
         view.setMaximized(false);
 
+        // Ask the delegate to restore pack stack if it's maximized.
         if (state == State.MAXIMIZED) {
             if (delegate != null) {
                 delegate.onRestore(this);
             }
         }
 
+        // Part stack can be minimized only having NORMAL state.
         if (state == State.NORMAL) {
             currentSize = workBenchPartController.getSize();
             workBenchPartController.setSize(0);
             state = State.MINIMIZED;
         }
 
+        // Deselect active tab.
         if (activeTab != null) {
             activeTab.unSelect();
         }
@@ -338,22 +351,27 @@ public class PartStackPresenter implements Presenter, PartStackView.ActionDelega
 
     @Override
     public void restore() {
+        // Update the view state.
         view.setMaximized(false);
 
+        // Don't restore part stack if it's in MINIMIZED or NORMAL state.
         if (state == State.MINIMIZED || state == State.NORMAL) {
             return;
         }
 
+        // Restore and update the stack.
         State prevState = state;
         state = State.NORMAL;
         workBenchPartController.setSize(currentSize);
 
+        // Ask the delegate to restore part stacks if this part stack was maximized.
         if (prevState == State.MAXIMIZED) {
             if (delegate != null) {
                 delegate.onRestore(this);
             }
         }
 
+        // Select active tab.
         if (activeTab != null) {
             activeTab.select();
         }
@@ -362,10 +380,12 @@ public class PartStackPresenter implements Presenter, PartStackView.ActionDelega
     /** {@inheritDoc} */
     @Override
     public void onTabClicked(@NotNull TabItem selectedTab) {
+        // Change the state to COLLAPSED for the following restoring.
         if (state == State.MINIMIZED) {
             state = State.COLLAPSED;
         }
 
+        // Restore COLLAPSED part stack.
         if (state == State.COLLAPSED) {
             activeTab = selectedTab;
 
@@ -380,6 +400,7 @@ public class PartStackPresenter implements Presenter, PartStackView.ActionDelega
             return;
         }
 
+        // Minimize the part stack if user clicked on the active tab.
         if (selectedTab.equals(activeTab)) {
             if (state == State.NORMAL) {
                 minimize();
@@ -392,6 +413,7 @@ public class PartStackPresenter implements Presenter, PartStackView.ActionDelega
             return;
         }
 
+        // Change active tab.
         activeTab = selectedTab;
         activePart = parts.get(selectedTab);
         activePart.onOpen();

@@ -252,7 +252,7 @@ public class EditorPartStackView extends ResizeComposite implements PartStackVie
 
     @Override
     public void setMaximized(boolean maximized) {
-        getElement().setAttribute("maximized", "" + maximized);
+        getElement().setAttribute("maximized", Boolean.toString(maximized));
     }
 
     /** {@inheritDoc} */
