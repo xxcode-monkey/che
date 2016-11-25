@@ -22,7 +22,6 @@ import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.DelayedTask;
-import org.eclipse.che.ide.api.command.ApplicableContext;
 import org.eclipse.che.ide.api.command.CommandManager3;
 import org.eclipse.che.ide.api.command.CommandType;
 import org.eclipse.che.ide.api.command.CommandTypeRegistry;
@@ -141,7 +140,7 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
 
     @Override
     public void onCommandAdd() {
-        final ApplicableContext defaultApplicableContext = new ApplicableContext();
+        final ContextualCommand.ApplicableContext defaultApplicableContext = new ContextualCommand.ApplicableContext();
         // by default, command should be applicable to the workspace only
         defaultApplicableContext.setWorkspaceApplicable(true);
 
@@ -155,7 +154,7 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
             }).catchError(new Operation<PromiseError>() {
                 @Override
                 public void apply(PromiseError arg) throws OperationException {
-                    notificationManager.notify("New command", "Unable to create command: " + arg.getMessage(), FAIL, EMERGE_MODE);
+                    notificationManager.notify("Unable to create command", arg.getMessage(), FAIL, EMERGE_MODE);
                 }
             });
         }
@@ -171,7 +170,7 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
         }).catchError(new Operation<PromiseError>() {
             @Override
             public void apply(PromiseError arg) throws OperationException {
-                notificationManager.notify(command.getName(), "Unable to create command: " + arg.getMessage(), FAIL, EMERGE_MODE);
+                notificationManager.notify("Unable to duplicate command", arg.getMessage(), FAIL, EMERGE_MODE);
             }
         });
     }
@@ -186,7 +185,7 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
         }).catchError(new Operation<PromiseError>() {
             @Override
             public void apply(PromiseError arg) throws OperationException {
-                notificationManager.notify(command.getName(), "Unable to remove command: " + arg.getMessage(), FAIL, EMERGE_MODE);
+                notificationManager.notify("Unable to remove command", arg.getMessage(), FAIL, EMERGE_MODE);
             }
         });
     }

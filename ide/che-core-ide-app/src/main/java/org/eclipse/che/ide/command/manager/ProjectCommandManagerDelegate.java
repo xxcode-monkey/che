@@ -17,8 +17,7 @@ import org.eclipse.che.api.machine.shared.dto.CommandDto;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.api.promises.client.js.JsPromiseError;
-import org.eclipse.che.api.promises.client.js.Promises;
+import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.command.CommandManager3;
 import org.eclipse.che.ide.api.command.CommandType;
@@ -41,11 +40,13 @@ import static org.eclipse.che.api.project.shared.Constants.COMMANDS_ATTRIBUTE_NA
 @Singleton
 class ProjectCommandManagerDelegate {
 
-    private final DtoFactory dtoFactory;
+    private final DtoFactory      dtoFactory;
+    private final PromiseProvider promiseProvider;
 
     @Inject
-    ProjectCommandManagerDelegate(DtoFactory dtoFactory) {
+    ProjectCommandManagerDelegate(DtoFactory dtoFactory, PromiseProvider promiseProvider) {
         this.dtoFactory = dtoFactory;
+        this.promiseProvider = promiseProvider;
     }
 
     /**
@@ -80,8 +81,8 @@ class ProjectCommandManagerDelegate {
 
         for (CommandImpl projectCommand : projectCommands) {
             if (projectCommand.getName().equals(newCommand.getName())) {
-                return Promises.reject(JsPromiseError.create("Command with name " + newCommand.getName() +
-                                                             " is already associated to the project " + project.getName()));
+                return promiseProvider.reject(new Exception("Command '" + newCommand.getName() +
+                                                            "' is already associated to the project '" + project.getName() + "'"));
             }
         }
 
@@ -128,8 +129,8 @@ class ProjectCommandManagerDelegate {
         final List<CommandImpl> projectCommands = getCommands(project);
 
         if (projectCommands.isEmpty()) {
-            return Promises.reject(JsPromiseError.create("Command " + command.getName() + " isn't associated with the project " +
-                                                         project.getName()));
+            return promiseProvider.reject(new Exception("Command '" + command.getName() + "' is not associated with the project '" +
+                                                        project.getName() + "'"));
         }
 
         final List<CommandImpl> commandsToUpdate = new ArrayList<>();
@@ -155,8 +156,8 @@ class ProjectCommandManagerDelegate {
         final List<CommandImpl> projectCommands = getCommands(project);
 
         if (projectCommands.isEmpty()) {
-            return Promises.reject(JsPromiseError.create("Command " + commandName + " isn't associated with the project " +
-                                                         project.getName()));
+            return promiseProvider.reject(new Exception("Command '" + commandName + "' is not associated with the project '" +
+                                                        project.getName() + "'"));
         }
 
         final List<CommandImpl> commandsToUpdate = new ArrayList<>();

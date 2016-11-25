@@ -38,6 +38,7 @@ import org.eclipse.che.ide.command.editor.page.arguments.ArgumentsPage;
 import org.eclipse.che.ide.command.editor.page.info.InfoPage;
 import org.eclipse.che.ide.command.editor.page.previewurl.PreviewUrlPage;
 import org.eclipse.che.ide.command.node.CommandFileNode;
+import org.eclipse.che.ide.util.loging.Log;
 import org.vectomatic.dom.svg.ui.SVGImage;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
@@ -45,7 +46,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.WARNING;
 
 /**
  * Presenter for editing commands.
@@ -207,9 +211,11 @@ public class CommandEditor extends AbstractEditorPresenter implements CommandEdi
         }).catchError(new Operation<PromiseError>() {
             @Override
             public void apply(PromiseError arg) throws OperationException {
-                notificationManager.notify(commandNameInitial, "Unable to save command: " + arg.getMessage(), FAIL, EMERGE_MODE);
+                notificationManager.notify("Unable to save command", arg.getMessage(), WARNING, EMERGE_MODE);
 
                 callback.onFailure(arg.getCause());
+
+                throw new OperationException(arg.getMessage());
             }
         });
     }

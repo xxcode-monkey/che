@@ -14,7 +14,7 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.google.inject.Inject;
 
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.command.ApplicableContext;
+import org.eclipse.che.ide.api.command.ContextualCommand.ApplicableContext;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.command.editor.page.AbstractCommandEditorPage;
 import org.eclipse.che.ide.command.editor.page.CommandEditorPage;
@@ -64,18 +64,18 @@ public class InfoPage extends AbstractCommandEditorPage implements InfoPageView.
 
     @Override
     protected void initialize() {
-        final ApplicableContext applicableContext = editedCommand.getApplicableContext();
+        final ApplicableContext context = editedCommand.getApplicableContext();
 
         commandNameInitial = editedCommand.getName();
-        workspaceInitial = applicableContext.isWorkspaceApplicable();
-        applicableProjectsInitial = new ArrayList<>(applicableContext.getApplicableProjects());
+        workspaceInitial = context.isWorkspaceApplicable();
+        applicableProjectsInitial = new ArrayList<>(context.getApplicableProjects());
 
         view.setCommandName(editedCommand.getName());
         view.setWorkspace(editedCommand.getApplicableContext().isWorkspaceApplicable());
 
         // initialize projects
         for (Project project : appContext.getProjects()) {
-            final boolean state = applicableContext.getApplicableProjects().contains(project.getPath());
+            final boolean state = context.getApplicableProjects().contains(project.getPath());
             projectsState.put(project, state);
         }
 
@@ -111,7 +111,6 @@ public class InfoPage extends AbstractCommandEditorPage implements InfoPageView.
 
     @Override
     public void onProjectChanged(boolean value) {
-
     }
 
     @Override
@@ -120,9 +119,9 @@ public class InfoPage extends AbstractCommandEditorPage implements InfoPageView.
 
         final ApplicableContext applicableContext = editedCommand.getApplicableContext();
         if (value) {
-            applicableContext.addApplicableProject(project.getPath());
+            applicableContext.addProject(project.getPath());
         } else {
-            applicableContext.removeApplicableProject(project.getPath());
+            applicableContext.removeProject(project.getPath());
         }
 
         notifyDirtyStateChanged();
