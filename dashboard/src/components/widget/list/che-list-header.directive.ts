@@ -35,9 +35,13 @@ export class CheListHeader {
       onAdd: '&?cheOnAdd',
       deleteButtonTitle: '@?cheDeleteButtonTitle',
       onDelete: '&?cheOnDelete',
+      filterValues: '=?cheFilterValues',
+      onFilterChanged: '=?cheOnFilterChanged',
       hideDelete: '=?cheHideDelete',
       hideSearch: '=?cheHideSearch',
-      hideHeader:'=?cheHideHeader'
+      hideHeader:'=?cheHideHeader',
+      hideFilter: '=?cheHideFilter'
     };
+
   }
 }
