@@ -44,7 +44,6 @@ import java.util.Map;
 import java.util.Set;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static org.eclipse.che.api.promises.client.js.JsPromiseError.create;
 import static org.eclipse.che.api.workspace.shared.Constants.COMMAND_PREVIEW_URL_ATTRIBUTE_NAME;
 
 /**
@@ -117,10 +116,15 @@ public class CommandManagerImpl3 implements CommandManager3, WsAgentComponent, W
 
                             commands.put(command.getName(), command);
                         } else {
-                            // TODO: if workspace contains command with the same name
-                            // need to check commands equality
-//                            if (projectCommand.equals(command)) {
-//                            }
+                            if (projectCommand.equals(command)) {
+                                command.getApplicableContext().addProject(project.getPath());
+                            } else {
+                                final ApplicableContext context = new ApplicableContext();
+                                context.addProject(project.getPath());
+
+                                final ContextualCommand newCommand = new ContextualCommand(projectCommand, context);
+                                commands.put(newCommand.getName(), newCommand);
+                            }
                         }
                     }
                 }
