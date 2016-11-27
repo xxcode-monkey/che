@@ -26,6 +26,7 @@ import org.eclipse.che.ide.api.command.CommandManager3;
 import org.eclipse.che.ide.api.command.CommandType;
 import org.eclipse.che.ide.api.command.CommandTypeRegistry;
 import org.eclipse.che.ide.api.command.ContextualCommand;
+import org.eclipse.che.ide.api.command.ContextualCommand.ApplicableContext;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.ide.api.notification.NotificationManager;
@@ -140,8 +141,8 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
 
     @Override
     public void onCommandAdd() {
-        final ContextualCommand.ApplicableContext defaultApplicableContext = new ContextualCommand.ApplicableContext();
         // by default, command should be applicable to the workspace only
+        final ApplicableContext defaultApplicableContext = new ApplicableContext();
         defaultApplicableContext.setWorkspaceApplicable(true);
 
         final CommandType selectedCommandType = view.getSelectedCommandType();

@@ -42,7 +42,7 @@ public class ContextualCommand extends CommandImpl {
 
     /**
      * Creates new {@link ContextualCommand} based on the given
-     * {@code command} with the default applicable context.
+     * {@code command} with the empty applicable context.
      */
     public ContextualCommand(Command command) {
         super(command);

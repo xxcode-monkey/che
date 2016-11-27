@@ -54,27 +54,27 @@ import static org.eclipse.che.api.workspace.shared.Constants.COMMAND_PREVIEW_URL
 @Singleton
 public class CommandManagerImpl3 implements CommandManager3, WsAgentComponent, WorkspaceReadyEvent.WorkspaceReadyHandler {
 
-    private final CommandTypeRegistry             commandTypeRegistry;
     private final AppContext                      appContext;
+    private final PromiseProvider                 promiseProvider;
+    private final CommandTypeRegistry             commandTypeRegistry;
     private final ProjectCommandManagerDelegate   projectCommandManagerDelegate;
     private final WorkspaceCommandManagerDelegate workspaceCommandManagerDelegate;
-    private final PromiseProvider                 promiseProvider;
 
     private final Map<String, ContextualCommand> commands;
     private final Set<CommandChangedListener>    commandChangedListeners;
 
     @Inject
-    public CommandManagerImpl3(CommandTypeRegistry commandTypeRegistry,
-                               AppContext appContext,
+    public CommandManagerImpl3(AppContext appContext,
+                               PromiseProvider promiseProvider,
+                               CommandTypeRegistry commandTypeRegistry,
                                ProjectCommandManagerDelegate projectCommandManagerDelegate,
                                WorkspaceCommandManagerDelegate workspaceCommandManagerDelegate,
-                               PromiseProvider promiseProvider,
                                EventBus eventBus) {
-        this.commandTypeRegistry = commandTypeRegistry;
         this.appContext = appContext;
+        this.promiseProvider = promiseProvider;
+        this.commandTypeRegistry = commandTypeRegistry;
         this.projectCommandManagerDelegate = projectCommandManagerDelegate;
         this.workspaceCommandManagerDelegate = workspaceCommandManagerDelegate;
-        this.promiseProvider = promiseProvider;
 
         commands = new HashMap<>();
         commandChangedListeners = new HashSet<>();
@@ -94,7 +94,7 @@ public class CommandManagerImpl3 implements CommandManager3, WsAgentComponent, W
     }
 
     private void fetchCommands() {
-        // TODO: rewrite commands fetching
+        // get all commands related to the workspace
         workspaceCommandManagerDelegate.getCommands(appContext.getWorkspaceId()).then(new Operation<List<CommandImpl>>() {
             @Override
             public void apply(List<CommandImpl> arg) throws OperationException {
@@ -105,25 +105,26 @@ public class CommandManagerImpl3 implements CommandManager3, WsAgentComponent, W
                     commands.put(workspaceCommand.getName(), new ContextualCommand(workspaceCommand, context));
                 }
 
+                // get all commands related to the projects
                 for (Project project : appContext.getProjects()) {
                     for (CommandImpl projectCommand : projectCommandManagerDelegate.getCommands(project)) {
-                        ContextualCommand command = commands.get(projectCommand.getName());
-                        if (command == null) {
+                        final ContextualCommand existedCommand = commands.get(projectCommand.getName());
+
+                        if (existedCommand == null) {
                             final ApplicableContext context = new ApplicableContext();
                             context.addProject(project.getPath());
 
-                            command = new ContextualCommand(projectCommand, context);
-
-                            commands.put(command.getName(), command);
+                            commands.put(projectCommand.getName(), new ContextualCommand(projectCommand, context));
                         } else {
-                            if (projectCommand.equals(command)) {
-                                command.getApplicableContext().addProject(project.getPath());
+                            if (projectCommand.equals(existedCommand)) {
+                                existedCommand.getApplicableContext().addProject(project.getPath());
                             } else {
-                                final ApplicableContext context = new ApplicableContext();
-                                context.addProject(project.getPath());
-
-                                final ContextualCommand newCommand = new ContextualCommand(projectCommand, context);
-                                commands.put(newCommand.getName(), newCommand);
+                                // should never happen
+                                // ignore such command
+//                                final ApplicableContext context = new ApplicableContext();
+//                                context.addProject(project.getPath());
+//
+//                                commands.put(projectCommand.getName(), new ContextualCommand(projectCommand, context));
                             }
                         }
                     }
