@@ -23,8 +23,12 @@ import org.eclipse.che.ide.api.command.CommandTypeRegistry;
 import org.eclipse.che.ide.api.component.Component;
 import org.eclipse.che.ide.api.component.WsAgentComponent;
 import org.eclipse.che.ide.api.filetypes.FileType;
+import org.eclipse.che.ide.command.editor.page.arguments.macro.MacrosExplorerView;
+import org.eclipse.che.ide.command.editor.page.arguments.macro.MacrosExplorerViewImpl;
 import org.eclipse.che.ide.command.manager.CommandManagerImpl3;
 import org.eclipse.che.ide.command.node.NodeFactory;
+import org.eclipse.che.ide.command.palette.CommandsPaletteView;
+import org.eclipse.che.ide.command.palette.CommandsPaletteViewImpl;
 import org.eclipse.che.ide.command.producer.CommandProducerActionFactory;
 import org.eclipse.che.ide.command.producer.CommandProducerActionManager;
 
@@ -42,6 +46,7 @@ public class CommandApiModule extends AbstractGinModule {
         bind(CommandTypeRegistry.class).to(CommandTypeRegistryImpl.class).in(Singleton.class);
         bind(CommandManager3.class).to(CommandManagerImpl3.class).in(Singleton.class);
 
+        // start command manager on WS-agent starting in order to fetch all commands
         GinMapBinder.newMapBinder(binder(), String.class, WsAgentComponent.class)
                     .addBinding("Command Manager")
                     .to(CommandManagerImpl3.class);
@@ -50,9 +55,12 @@ public class CommandApiModule extends AbstractGinModule {
                     .addBinding("CommandProducerActionManager")
                     .to(CommandProducerActionManager.class);
 
+        install(new GinFactoryModuleBuilder().build(CommandProducerActionFactory.class));
+
         install(new GinFactoryModuleBuilder().build(NodeFactory.class));
 
-        install(new GinFactoryModuleBuilder().build(CommandProducerActionFactory.class));
+        bind(MacrosExplorerView.class).to(MacrosExplorerViewImpl.class).in(Singleton.class);
+        bind(CommandsPaletteView.class).to(CommandsPaletteViewImpl.class).in(Singleton.class);
     }
 
     @Provides

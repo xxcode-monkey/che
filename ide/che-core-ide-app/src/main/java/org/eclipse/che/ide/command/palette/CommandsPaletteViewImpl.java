@@ -110,11 +110,6 @@ public class CommandsPaletteViewImpl extends Window implements CommandsPaletteVi
         renderCommands(commandsByType);
     }
 
-    @Override
-    public String getFilterValue() {
-        return filterField.getValue();
-    }
-
     private void renderCommands(Map<CommandType, List<ContextualCommand>> commands) {
         tree.getNodeStorage().clear();
 
@@ -143,7 +138,7 @@ public class CommandsPaletteViewImpl extends Window implements CommandsPaletteVi
 
     @UiHandler({"filterField"})
     void onFilterChanged(@SuppressWarnings("UnusedParameters") KeyUpEvent event) {
-        delegate.onFilterChanged(getFilterValue());
+        delegate.onFilterChanged(filterField.getValue());
     }
 
     interface CommandsPaletteViewImplUiBinder extends UiBinder<Widget, CommandsPaletteViewImpl> {

@@ -46,7 +46,9 @@ public class CommandEditorViewImpl extends Composite implements CommandEditorVie
     DeckPanel pagesPanel;
 
     /** The total count of added pages. */
-    private int            pagesCount;
+    private int pagesCount;
+
+    /** The delegate to receive events from this view. */
     private ActionDelegate delegate;
 
     @Inject

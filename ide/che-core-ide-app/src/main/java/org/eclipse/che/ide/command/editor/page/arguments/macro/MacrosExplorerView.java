@@ -8,19 +8,19 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.command.palette;
+package org.eclipse.che.ide.command.editor.page.arguments.macro;
 
-import org.eclipse.che.ide.api.command.ContextualCommand;
+import org.eclipse.che.ide.api.macro.Macro;
 import org.eclipse.che.ide.api.mvp.View;
 
 import java.util.List;
 
 /**
- * The view of {@link CommandsPalettePresenter}.
+ * The view for the command macros explorer.
  *
  * @author Artem Zatsarynnyi
  */
-public interface CommandsPaletteView extends View<CommandsPaletteView.ActionDelegate> {
+public interface MacrosExplorerView extends View<MacrosExplorerView.ActionDelegate> {
 
     /** Show the view. */
     void show();
@@ -28,16 +28,15 @@ public interface CommandsPaletteView extends View<CommandsPaletteView.ActionDele
     /** Close the view. */
     void close();
 
-    /** Sets the commands to display in the view. */
-    void setCommands(List<ContextualCommand> commands);
+    void setData(List<Macro> macros);
 
-    /** The action delegate for this view. */
+    /** The delegate to receive events from this view. */
     interface ActionDelegate {
 
-        /** Called when filtering commands is requested. */
-        void onFilterChanged(String filterValue);
+        /** Called when macro has been chosen. */
+        void onMacroChosen(Macro macro);
 
-        /** Called when command execution is requested. */
-        void onCommandExecute(ContextualCommand command);
+        /** Called when filtering macros is requested. */
+        void onFilterChanged(String filterValue);
     }
 }

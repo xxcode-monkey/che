@@ -17,13 +17,16 @@ import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.ide.api.editor.OpenEditorCallbackImpl;
 import org.eclipse.che.ide.api.editor.defaulteditor.EditorBuilder;
+import org.eclipse.che.ide.api.editor.document.Document;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
+import org.eclipse.che.ide.api.macro.Macro;
 import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.parts.PropertyListener;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.command.editor.page.AbstractCommandEditorPage;
 import org.eclipse.che.ide.command.editor.page.CommandEditorPage;
+import org.eclipse.che.ide.command.editor.page.arguments.macro.MacrosExplorerPresenter;
 
 import static org.eclipse.che.ide.api.editor.EditorPartPresenter.PROP_DIRTY;
 import static org.eclipse.che.ide.api.editor.EditorPartPresenter.PROP_INPUT;
@@ -35,19 +38,24 @@ import static org.eclipse.che.ide.api.editor.EditorPartPresenter.PROP_INPUT;
  */
 public class ArgumentsPage extends AbstractCommandEditorPage implements ArgumentsPageView.ActionDelegate {
 
-    private final ArgumentsPageView view;
-    private final FileTypeRegistry  fileTypeRegistry;
-    private final TextEditor        textEditor;
+    private final ArgumentsPageView       view;
+    private final FileTypeRegistry        fileTypeRegistry;
+    private final MacrosExplorerPresenter macrosExplorerPresenter;
+    private final TextEditor              textEditor;
 
     // initial value of the command line value
     private String commandLineInitial;
 
     @Inject
-    public ArgumentsPage(final ArgumentsPageView view, EditorBuilder editorBuilder, FileTypeRegistry fileTypeRegistry) {
+    public ArgumentsPage(final ArgumentsPageView view,
+                         EditorBuilder editorBuilder,
+                         FileTypeRegistry fileTypeRegistry,
+                         MacrosExplorerPresenter macrosExplorerPresenter) {
         super("Arguments", "Command line");
 
         this.view = view;
         this.fileTypeRegistry = fileTypeRegistry;
+        this.macrosExplorerPresenter = macrosExplorerPresenter;
 
         view.setDelegate(this);
 
@@ -113,5 +121,17 @@ public class ArgumentsPage extends AbstractCommandEditorPage implements Argument
         editedCommand.setCommandLine(commandLine);
 
         notifyDirtyStateChanged();
+    }
+
+    @Override
+    public void onExploreMacros() {
+        macrosExplorerPresenter.show(new MacrosExplorerPresenter.MacroChosenCallback() {
+            @Override
+            public void onMacroChosen(Macro macro) {
+                final Document document = textEditor.getDocument();
+
+                document.replace(document.getCursorOffset(), 0, macro.getName());
+            }
+        });
     }
 }

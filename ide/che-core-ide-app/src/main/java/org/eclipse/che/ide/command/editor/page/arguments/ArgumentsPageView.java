@@ -16,7 +16,7 @@ import com.google.inject.ImplementedBy;
 import org.eclipse.che.ide.api.mvp.View;
 
 /**
- * The view of {@link ArgumentsPage}.
+ * The view for {@link ArgumentsPage}.
  *
  * @author Artem Zatsarynnyi
  */
@@ -27,5 +27,8 @@ public interface ArgumentsPageView extends View<ArgumentsPageView.ActionDelegate
 
     /** The action delegate for this view. */
     interface ActionDelegate {
+
+        /** Called when exploring macros is requested. */
+        void onExploreMacros();
     }
 }
