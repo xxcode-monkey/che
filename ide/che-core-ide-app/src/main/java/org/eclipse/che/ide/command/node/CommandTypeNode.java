@@ -55,7 +55,7 @@ public class CommandTypeNode extends SyntheticNode<CommandType> {
 
     @Override
     public void updatePresentation(NodePresentation presentation) {
-        presentation.setPresentableText(getName());
+        presentation.setPresentableText(getName() + " (" + commands.size() + ")");
 
         // set icon
         final String commandTypeId = getData().getId();
