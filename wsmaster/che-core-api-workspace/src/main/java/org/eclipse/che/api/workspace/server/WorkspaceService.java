@@ -33,7 +33,6 @@ import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
 import org.eclipse.che.api.machine.shared.dto.CommandDto;
 import org.eclipse.che.api.machine.shared.dto.SnapshotDto;
-import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
@@ -556,7 +555,7 @@ public class WorkspaceService extends Service {
         requiredNotNull(update, "Environment description");
         relativizeRecipeLinks(update);
         workspaceManager.updateEnvironment(id, envName, update);
-        if (newEnvName != null && !newEnvName.equals(envName)) {
+        if (newEnvName != null && !"".equals(newEnvName) && !newEnvName.equals(envName)) {
             workspaceManager.renameEnvironment(id, envName, newEnvName);
         }
         return linksInjector.injectLinks(asDto(workspaceManager.getWorkspace(id)), getServiceContext());

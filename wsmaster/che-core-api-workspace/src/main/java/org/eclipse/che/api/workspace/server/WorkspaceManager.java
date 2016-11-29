@@ -696,7 +696,9 @@ public class WorkspaceManager {
 
     /** Updates environment snapshots in database */
     @VisibleForTesting
-    void updateEnvironmentSnapshots(String workspaceId, String oldEnvName, String newEnvName) throws SnapshotException {
+    void updateEnvironmentSnapshots(String workspaceId, String oldEnvName, String newEnvName) throws NotFoundException,
+                                                                                                     ConflictException,
+                                                                                                     SnapshotException {
         for (SnapshotImpl snapshot : snapshotDao.findSnapshots(workspaceId)) {
             if (snapshot.getEnvName().equals(oldEnvName)) {
                 snapshot.setEnvName(newEnvName);
@@ -798,7 +800,8 @@ public class WorkspaceManager {
      * @throws ServerException
      *          when any other error occurs
      */
-    public void removeEnvironmentSnapshots(String workspaceId, String envName) throws NotFoundException, ServerException {
+    @VisibleForTesting
+    void removeEnvironmentSnapshots(String workspaceId, String envName) throws NotFoundException, ServerException {
         getSnapshot(workspaceId).stream()
                                 .filter(snapshot -> snapshot.getEnvName().equals(envName))
                                 .forEach(snapshot -> {

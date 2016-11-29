@@ -12,6 +12,7 @@ package org.eclipse.che.api.machine.server.jpa;
 
 import com.google.inject.persist.Transactional;
 
+import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.core.db.jpa.DuplicateKeyException;
 import org.eclipse.che.api.machine.server.exception.SnapshotException;
@@ -133,11 +134,15 @@ public class JpaSnapshotDao implements SnapshotDao {
     }
 
     @Override
-    public SnapshotImpl updateSnapshot(SnapshotImpl update) throws SnapshotException {
+    public SnapshotImpl updateSnapshot(SnapshotImpl update) throws NotFoundException, ConflictException, SnapshotException {
         requireNonNull(update, "Required non-null snapshot");
         requireNonNull(update.getId(), "Required non-null snapshot id");
         try {
             return doUpdate(update);
+        } catch (DuplicateKeyException dkEx) {
+            throw new ConflictException(format("Snapshot of machine '%s' in environment '%s' already exists",
+                                               update.getMachineName(),
+                                               update.getEnvName()));
         } catch (RuntimeException x) {
             throw new SnapshotException(x.getLocalizedMessage(), x);
         }
@@ -174,7 +179,10 @@ public class JpaSnapshotDao implements SnapshotDao {
     }
 
     @Transactional
-    protected SnapshotImpl doUpdate(SnapshotImpl update) {
+    protected SnapshotImpl doUpdate(SnapshotImpl update) throws NotFoundException, SnapshotException {
+        if (managerProvider.get().find(SnapshotImpl.class, update.getId()) == null) {
+            throw new NotFoundException(format("Snapshot with id '%s' doesn't exist", update.getId()));
+        }
         return managerProvider.get().merge(update);
     }
 
