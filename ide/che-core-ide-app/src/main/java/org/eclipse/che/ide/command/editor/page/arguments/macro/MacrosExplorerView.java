@@ -10,13 +10,13 @@
  *******************************************************************************/
 package org.eclipse.che.ide.command.editor.page.arguments.macro;
 
+import com.google.gwt.view.client.ListDataProvider;
+
 import org.eclipse.che.ide.api.macro.Macro;
 import org.eclipse.che.ide.api.mvp.View;
 
-import java.util.List;
-
 /**
- * The view for the command macros explorer.
+ * Defines requirements for the view for the macros explorer.
  *
  * @author Artem Zatsarynnyi
  */
@@ -28,15 +28,26 @@ public interface MacrosExplorerView extends View<MacrosExplorerView.ActionDelega
     /** Close the view. */
     void close();
 
-    void setData(List<Macro> macros);
+    /** Bind the given {@code dataProvider} to the view. */
+    void bindMacrosList(ListDataProvider<Macro> dataProvider);
 
     /** The delegate to receive events from this view. */
     interface ActionDelegate {
 
-        /** Called when macro has been chosen. */
+        /**
+         * Called when macro has been chosen.
+         *
+         * @param macro
+         *         {@link Macro} which has been chosen
+         */
         void onMacroChosen(Macro macro);
 
-        /** Called when filtering macros is requested. */
+        /**
+         * Called when filtering macros list is requested.
+         *
+         * @param filterValue
+         *         value for filtering the macros list
+         */
         void onFilterChanged(String filterValue);
     }
 }

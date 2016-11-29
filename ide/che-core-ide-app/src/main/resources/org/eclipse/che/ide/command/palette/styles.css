@@ -16,6 +16,8 @@
 @eval categorySelectElementBackgroundColor org.eclipse.che.ide.api.theme.Style.theme.categorySelectElementBackgroundColor();
 @eval categorySelectElementColor org.eclipse.che.ide.api.theme.Style.theme.categorySelectElementColor();
 
+@external .filterPlaceholder;
+
 input.filterPlaceholder::-webkit-input-placeholder {
     font-weight: bold;
     padding-left: literal("calc(50% - 15px)");

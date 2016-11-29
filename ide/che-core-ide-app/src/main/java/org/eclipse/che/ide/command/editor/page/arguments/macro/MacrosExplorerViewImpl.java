@@ -31,16 +31,12 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.api.macro.Macro;
+import org.eclipse.che.ide.command.palette.CommandsPaletteResources;
 import org.eclipse.che.ide.ui.window.Window;
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-
-import static org.eclipse.che.ide.util.StringUtils.containsIgnoreCase;
-
 /**
- * The implementation of the view for the command macros explorer.
+ * The implementation of the {@link MacrosExplorerView} that shows table for exploring and choosing macros.
+ * Also provides ability to filter data in the table.
  *
  * @author Artem Zatsarynnyi
  */
@@ -49,35 +45,24 @@ public class MacrosExplorerViewImpl extends Window implements MacrosExplorerView
 
     private static final MacrosExplorerViewImplUiBinder UI_BINDER = GWT.create(MacrosExplorerViewImplUiBinder.class);
 
-    /** Comparator for ordering macros by it's name. */
-    private static final Comparator<Macro> MACRO_COMPARATOR = new Comparator<Macro>() {
-        @Override
-        public int compare(Macro o1, Macro o2) {
-            return o1.getName().compareTo(o2.getName());
-        }
-    };
-
-    private final ListDataProvider<Macro> dataProvider;
-
     @UiField(provided = true)
     CellTable<Macro> macrosTable;
+
     @UiField
-    TextBox          filterField;
+    TextBox filterField;
 
     private ActionDelegate delegate;
-    private List<Macro>    allMacros;
 
     @Inject
-    public MacrosExplorerViewImpl(org.eclipse.che.ide.Resources coreResources) {
-        dataProvider = new ListDataProvider<>();
-        macrosTable = new CellTable<>(15, coreResources);
+    public MacrosExplorerViewImpl(org.eclipse.che.ide.Resources coreResources, CommandsPaletteResources commandsPaletteResources) {
+        macrosTable = new CellTable<>(500, coreResources);
         initMacrosTable();
-        dataProvider.addDataDisplay(macrosTable);
 
         setTitle("Command Macros");
         setWidget(UI_BINDER.createAndBindUi(this));
 
         filterField.getElement().setAttribute("placeholder", "Search macro");
+        filterField.getElement().addClassName(commandsPaletteResources.commandsPaletteCss().filterPlaceholder());
 
         // hide footer
         getFooter().removeFromParent();
@@ -110,14 +95,18 @@ public class MacrosExplorerViewImpl extends Window implements MacrosExplorerView
         macrosTable.addDomHandler(new DoubleClickHandler() {
             @Override
             public void onDoubleClick(DoubleClickEvent event) {
-                delegate.onMacroChosen(selectionModel.getSelectedObject());
+                if (selectionModel.getSelectedObject() != null) {
+                    delegate.onMacroChosen(selectionModel.getSelectedObject());
+                }
             }
         }, DoubleClickEvent.getType());
 
         macrosTable.addDomHandler(new KeyUpHandler() {
             @Override
             public void onKeyUp(KeyUpEvent event) {
-                if (KeyCodes.KEY_ENTER == event.getNativeKeyCode() || KeyCodes.KEY_MAC_ENTER == event.getNativeKeyCode()) {
+                if (selectionModel.getSelectedObject() != null &&
+                    (KeyCodes.KEY_ENTER == event.getNativeKeyCode() || KeyCodes.KEY_MAC_ENTER == event.getNativeKeyCode())) {
+
                     delegate.onMacroChosen(selectionModel.getSelectedObject());
                 }
             }
@@ -133,6 +122,7 @@ public class MacrosExplorerViewImpl extends Window implements MacrosExplorerView
     public void show() {
         super.show();
 
+        filterField.setValue("");
         filterField.setFocus(true);
     }
 
@@ -142,38 +132,13 @@ public class MacrosExplorerViewImpl extends Window implements MacrosExplorerView
     }
 
     @Override
-    public void setData(List<Macro> macros) {
-        allMacros = macros;
-
-        filterField.setValue("");
-
-        Collections.sort(allMacros, MACRO_COMPARATOR);
-
-        macrosTable.setRowCount(allMacros.size());
-        macrosTable.setVisibleRange(0, allMacros.size());
-
-        dataProvider.getList().addAll(allMacros);
+    public void bindMacrosList(ListDataProvider<Macro> dataProvider) {
+        dataProvider.addDataDisplay(macrosTable);
     }
 
     @UiHandler({"filterField"})
     void onFilterChanged(@SuppressWarnings("UnusedParameters") KeyUpEvent event) {
-        dataProvider.getList().clear();
-
-        final String filterValue = filterField.getValue();
-
-        if (filterValue.isEmpty()) {
-            dataProvider.getList().addAll(allMacros);
-
-            return;
-        }
-
-        for (Macro macro : allMacros) {
-            if (containsIgnoreCase(macro.getName(), filterValue) || containsIgnoreCase(macro.getDescription(), filterValue)) {
-                dataProvider.getList().add(macro);
-            }
-        }
-
-        delegate.onFilterChanged(filterValue);
+        delegate.onFilterChanged(filterField.getValue());
     }
 
     interface MacrosExplorerViewImplUiBinder extends UiBinder<Widget, MacrosExplorerViewImpl> {

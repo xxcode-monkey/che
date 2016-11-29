@@ -125,7 +125,7 @@ public class ArgumentsPage extends AbstractCommandEditorPage implements Argument
 
     @Override
     public void onExploreMacros() {
-        macrosExplorerPresenter.show(new MacrosExplorerPresenter.MacroChosenCallback() {
+        macrosExplorerPresenter.showDialog(new MacrosExplorerPresenter.MacroChosenCallback() {
             @Override
             public void onMacroChosen(Macro macro) {
                 final Document document = textEditor.getDocument();
