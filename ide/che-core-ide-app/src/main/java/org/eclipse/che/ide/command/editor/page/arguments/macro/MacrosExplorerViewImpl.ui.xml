@@ -16,16 +16,12 @@
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
              xmlns:c='urn:import:com.google.gwt.user.cellview.client'>
 
-    <ui:style>
-        .filter-field {
-            width: 96%;
-        }
-    </ui:style>
+    <ui:with field='res' type='org.eclipse.che.ide.Resources'/>
 
-    <g:DockLayoutPanel unit="PX" width="600px" height="500px">
+    <g:DockLayoutPanel unit="PX" width="600px" height="400px">
         <g:north size="30">
             <g:FlowPanel>
-                <g:TextBox ui:field="filterField" addStyleNames="{style.filter-field}"/>
+                <g:TextBox ui:field="filterField" addStyleNames="{res.commandsPaletteCss.filterField}"/>
             </g:FlowPanel>
         </g:north>
         <g:center>

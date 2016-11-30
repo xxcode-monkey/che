@@ -31,7 +31,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.api.macro.Macro;
-import org.eclipse.che.ide.command.palette.CommandsPaletteResources;
 import org.eclipse.che.ide.ui.window.Window;
 
 /**
@@ -54,15 +53,14 @@ public class MacrosExplorerViewImpl extends Window implements MacrosExplorerView
     private ActionDelegate delegate;
 
     @Inject
-    public MacrosExplorerViewImpl(org.eclipse.che.ide.Resources coreResources, CommandsPaletteResources commandsPaletteResources) {
-        macrosTable = new CellTable<>(500, coreResources);
+    public MacrosExplorerViewImpl(org.eclipse.che.ide.Resources resources) {
+        macrosTable = new CellTable<>(500, resources);
         initMacrosTable();
 
         setTitle("Command Macros");
         setWidget(UI_BINDER.createAndBindUi(this));
 
         filterField.getElement().setAttribute("placeholder", "Search macro");
-        filterField.getElement().addClassName(commandsPaletteResources.commandsPaletteCss().filterPlaceholder());
 
         // hide footer
         getFooter().removeFromParent();

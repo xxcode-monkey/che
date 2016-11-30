@@ -16,8 +16,6 @@
 @eval categorySelectElementBackgroundColor org.eclipse.che.ide.api.theme.Style.theme.categorySelectElementBackgroundColor();
 @eval categorySelectElementColor org.eclipse.che.ide.api.theme.Style.theme.categorySelectElementColor();
 
-@external .filterPlaceholder;
-
 .hintLabel {
     color: textFieldColor;
     font-size: largeLabel;

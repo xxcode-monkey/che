@@ -21,14 +21,15 @@ import com.google.gwt.resources.client.DataResource;
  */
 public interface CommandsPaletteResources extends ClientBundle {
 
+    /** Resource is used as CSS constant's value for setting 'background-image' property. */
+    @DataResource.MimeType("image/svg+xml")
+    @Source("../magnifier.svg")
+    DataResource magnifier();
+
     @Source({"styles.css", "org/eclipse/che/ide/api/ui/style.css"})
     CSS commandsPaletteCss();
 
-    @DataResource.MimeType("image/svg+xml")
-    @Source("find-icon.svg")
-    DataResource findIcon();
-
     interface CSS extends CssResource {
-        String filterPlaceholder();
+        String filterField();
     }
 }

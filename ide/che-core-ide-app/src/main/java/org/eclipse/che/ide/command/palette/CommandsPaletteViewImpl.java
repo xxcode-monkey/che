@@ -58,9 +58,7 @@ public class CommandsPaletteViewImpl extends Window implements CommandsPaletteVi
     private ActionDelegate delegate;
 
     @Inject
-    public CommandsPaletteViewImpl(CommandTypeRegistry commandTypeRegistry,
-                                   NodeFactory nodeFactory,
-                                   CommandsPaletteResources resources) {
+    public CommandsPaletteViewImpl(CommandTypeRegistry commandTypeRegistry, NodeFactory nodeFactory) {
         this.commandTypeRegistry = commandTypeRegistry;
         this.nodeFactory = nodeFactory;
 
@@ -71,7 +69,6 @@ public class CommandsPaletteViewImpl extends Window implements CommandsPaletteVi
         setTitle("Commands Palette");
 
         filterField.getElement().setAttribute("placeholder", "Search command");
-//        filterField.getElement().addClassName(resources.commandsPaletteCss().filterPlaceholder());
 
         // hide footer
         getFooter().removeFromParent();
