@@ -74,10 +74,10 @@ import org.eclipse.che.ide.util.loging.Log;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 import javax.validation.constraints.NotNull;
-import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -1004,6 +1004,25 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
                 view.setStopButtonVisibility(entry.getKey(), false);
             }
         }
+    }
+
+    @Override
+    public void onToggleMaximizeConsole() {
+        super.onToggleMaximize();
+
+        if (partStack != null) {
+            if (partStack.getPartStackState() == PartStack.State.MAXIMIZED) {
+                view.setProcessesTreeVisible(false);
+            } else {
+                view.setProcessesTreeVisible(true);
+            }
+        }
+    }
+
+    @Override
+    public void onToggleMaximize() {
+        super.onToggleMaximize();
+        view.setProcessesTreeVisible(true);
     }
 
     /**
