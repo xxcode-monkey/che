@@ -48,9 +48,19 @@ public interface CommandManager3 {
     /** Removes command with the specified {@code commandName}. */
     Promise<Void> removeCommand(String commandName);
 
+    void addCommandLoadedListener(CommandLoadedListener listener);
+
+    void removeCommandLoadedListener(CommandLoadedListener listener);
+
     void addCommandChangedListener(CommandChangedListener listener);
 
     void removeCommandChangedListener(CommandChangedListener listener);
+
+    /** Listener for notifying when all commands have been loaded. */
+    interface CommandLoadedListener {
+
+        void onCommandsLoaded();
+    }
 
     /** Listener that will be called when command has been changed. */
     interface CommandChangedListener {

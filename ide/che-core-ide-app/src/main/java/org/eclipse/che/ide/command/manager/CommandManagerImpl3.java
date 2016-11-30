@@ -61,6 +61,7 @@ public class CommandManagerImpl3 implements CommandManager3, WsAgentComponent, W
     private final WorkspaceCommandManagerDelegate workspaceCommandManagerDelegate;
 
     private final Map<String, ContextualCommand> commands;
+    private final Set<CommandLoadedListener>     commandLoadedListeners;
     private final Set<CommandChangedListener>    commandChangedListeners;
 
     @Inject
@@ -77,6 +78,7 @@ public class CommandManagerImpl3 implements CommandManager3, WsAgentComponent, W
         this.workspaceCommandManagerDelegate = workspaceCommandManagerDelegate;
 
         commands = new HashMap<>();
+        commandLoadedListeners = new HashSet<>();
         commandChangedListeners = new HashSet<>();
 
         eventBus.addHandler(WorkspaceReadyEvent.getType(), this);
@@ -129,6 +131,8 @@ public class CommandManagerImpl3 implements CommandManager3, WsAgentComponent, W
                         }
                     }
                 }
+
+                notifyCommandsLoaded();
             }
         });
     }
@@ -310,6 +314,16 @@ public class CommandManagerImpl3 implements CommandManager3, WsAgentComponent, W
     }
 
     @Override
+    public void addCommandLoadedListener(CommandLoadedListener listener) {
+        commandLoadedListeners.add(listener);
+    }
+
+    @Override
+    public void removeCommandLoadedListener(CommandLoadedListener listener) {
+        commandLoadedListeners.remove(listener);
+    }
+
+    @Override
     public void addCommandChangedListener(CommandChangedListener listener) {
         commandChangedListeners.add(listener);
     }
@@ -317,6 +331,12 @@ public class CommandManagerImpl3 implements CommandManager3, WsAgentComponent, W
     @Override
     public void removeCommandChangedListener(CommandChangedListener listener) {
         commandChangedListeners.remove(listener);
+    }
+
+    private void notifyCommandsLoaded() {
+        for (CommandLoadedListener listener : commandLoadedListeners) {
+            listener.onCommandsLoaded();
+        }
     }
 
     private void notifyCommandAdded(ContextualCommand command) {

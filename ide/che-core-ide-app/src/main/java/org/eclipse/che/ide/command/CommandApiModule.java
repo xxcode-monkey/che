@@ -23,6 +23,8 @@ import org.eclipse.che.ide.api.command.CommandTypeRegistry;
 import org.eclipse.che.ide.api.component.Component;
 import org.eclipse.che.ide.api.component.WsAgentComponent;
 import org.eclipse.che.ide.api.filetypes.FileType;
+import org.eclipse.che.ide.command.action.ContextualCommandActionDistributor;
+import org.eclipse.che.ide.command.action.ContextualCommandActionFactory;
 import org.eclipse.che.ide.command.editor.page.arguments.macro.MacrosExplorerView;
 import org.eclipse.che.ide.command.editor.page.arguments.macro.MacrosExplorerViewImpl;
 import org.eclipse.che.ide.command.manager.CommandManagerImpl3;
@@ -51,11 +53,13 @@ public class CommandApiModule extends AbstractGinModule {
                     .addBinding("Command Manager")
                     .to(CommandManagerImpl3.class);
 
-        GinMapBinder.newMapBinder(binder(), String.class, Component.class)
-                    .addBinding("CommandProducerActionManager")
-                    .to(CommandProducerActionManager.class);
+        GinMapBinder<String, Component> componentBinder = GinMapBinder.newMapBinder(binder(), String.class, Component.class);
+        componentBinder.addBinding("CommandProducerActionManager").to(CommandProducerActionManager.class);
+        componentBinder.addBinding("ContextualCommandActionDistributor").to(ContextualCommandActionDistributor.class);
+
 
         install(new GinFactoryModuleBuilder().build(CommandProducerActionFactory.class));
+        install(new GinFactoryModuleBuilder().build(ContextualCommandActionFactory.class));
 
         install(new GinFactoryModuleBuilder().build(NodeFactory.class));
 
