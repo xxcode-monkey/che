@@ -26,9 +26,11 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.model.workspace.Environment;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.rest.Service;
 import org.eclipse.che.api.core.rest.annotations.GenerateLink;
+import org.eclipse.che.api.environment.server.CheEnvironmentValidator;
 import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
 import org.eclipse.che.api.machine.shared.dto.CommandDto;
@@ -85,6 +87,7 @@ public class WorkspaceService extends Service {
 
     private final WorkspaceManager              workspaceManager;
     private final WorkspaceValidator            validator;
+    private final CheEnvironmentValidator       environmentValidator;
     private final WsAgentHealthChecker          agentHealthChecker;
     private final WorkspaceServiceLinksInjector linksInjector;
     private final String                        apiEndpoint;
@@ -96,11 +99,13 @@ public class WorkspaceService extends Service {
     public WorkspaceService(@Named("che.api") String apiEndpoint,
                             WorkspaceManager workspaceManager,
                             WorkspaceValidator validator,
+                            CheEnvironmentValidator environmentValidator,
                             WsAgentHealthChecker agentHealthChecker,
                             WorkspaceServiceLinksInjector workspaceServiceLinksInjector) {
         this.apiEndpoint = apiEndpoint;
         this.workspaceManager = workspaceManager;
         this.validator = validator;
+        this.environmentValidator = environmentValidator;
         this.agentHealthChecker = agentHealthChecker;
         this.linksInjector = workspaceServiceLinksInjector;
     }
@@ -521,6 +526,7 @@ public class WorkspaceService extends Service {
                                                               ForbiddenException {
         requiredNotNull(newEnvironment, "New environment");
         requiredNotNull(envName, "New environment name");
+        requiredValidEnvironment(envName, newEnvironment);
         relativizeRecipeLinks(newEnvironment);
         workspaceManager.addEnvironment(id, envName, newEnvironment);
         return linksInjector.injectLinks(asDto(workspaceManager.getWorkspace(id)), getServiceContext());
@@ -553,6 +559,7 @@ public class WorkspaceService extends Service {
                                                                     ConflictException,
                                                                     ForbiddenException {
         requiredNotNull(update, "Environment description");
+        requiredValidEnvironment(envName, update);
         relativizeRecipeLinks(update);
         workspaceManager.updateEnvironment(id, envName, update);
         if (newEnvName != null && !"".equals(newEnvName) && !newEnvName.equals(envName)) {
@@ -729,6 +736,26 @@ public class WorkspaceService extends Service {
     private void requiredNotNull(Object object, String subject) throws BadRequestException {
         if (object == null) {
             throw new BadRequestException(subject + " required");
+        }
+    }
+
+    /**
+     * Validates environment.
+     *
+     * @param envName
+     *         name of environment to validate
+     * @param environment
+     *         environment to validate
+     * @throws BadRequestException
+     *         when given environment config is not valid
+     * @throws ServerException
+     *         when recipe is incorrect
+     */
+    private void requiredValidEnvironment(String envName, Environment environment) throws BadRequestException, ServerException {
+        try {
+            environmentValidator.validate(envName, environment);
+        } catch (IllegalArgumentException e) {
+            throw new BadRequestException(e.getLocalizedMessage());
         }
     }
 

@@ -137,13 +137,15 @@ public class WorkspaceServiceTest {
     private static final EnvironmentFilter  FILTER       = new EnvironmentFilter();
 
     @Mock
-    private WorkspaceManager      wsManager;
+    private WorkspaceManager        wsManager;
     @Mock
-    private MachineProcessManager machineProcessManager;
+    private MachineProcessManager   machineProcessManager;
     @Mock
-    private WorkspaceValidator    validator;
+    private WorkspaceValidator      validator;
     @Mock
-    private WsAgentHealthChecker  wsAgentHealthChecker;
+    private CheEnvironmentValidator environmentValidator;
+    @Mock
+    private WsAgentHealthChecker    wsAgentHealthChecker;
 
     private WorkspaceService service;
 
@@ -152,6 +154,7 @@ public class WorkspaceServiceTest {
         service = new WorkspaceService(API_ENDPOINT,
                                        wsManager,
                                        validator,
+                                       environmentValidator,
                                        wsAgentHealthChecker,
                                        new WorkspaceServiceLinksInjector(new MachineServiceLinksInjector()));
     }
@@ -648,10 +651,10 @@ public class WorkspaceServiceTest {
     @Test
     public void shouldRespond404WhenUpdatingEnvironmentWhichDoesNotExist() throws Exception {
         final WorkspaceDao wsDao = mock(WorkspaceDao.class);
-        final CheEnvironmentValidator envValidator = mock(CheEnvironmentValidator.class);
         service = new WorkspaceService(API_ENDPOINT,
-                                       new WorkspaceManager(wsDao, null, null, null, false, false, null, envValidator),
+                                       new WorkspaceManager(wsDao, null, null, null, false, false, null, environmentValidator),
                                        validator,
+                                       environmentValidator,
                                        wsAgentHealthChecker,
                                        new WorkspaceServiceLinksInjector(new MachineServiceLinksInjector()));
         final WorkspaceImpl workspace = createWorkspace(createConfigDto());
@@ -703,6 +706,7 @@ public class WorkspaceServiceTest {
         service = new WorkspaceService(API_ENDPOINT,
                                        workspaceManager,
                                        validator,
+                                       environmentValidator,
                                        wsAgentHealthChecker,
                                        new WorkspaceServiceLinksInjector(new MachineServiceLinksInjector()));
         final EnvironmentDto envDto = createEnvDto();
