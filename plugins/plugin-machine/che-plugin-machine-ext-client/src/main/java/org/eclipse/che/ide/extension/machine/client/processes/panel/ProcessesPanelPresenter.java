@@ -47,6 +47,7 @@ import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.outputconsole.OutputConsole;
 import org.eclipse.che.ide.api.parts.PartStack;
+import org.eclipse.che.ide.api.parts.PartStackStateChangedEvent;
 import org.eclipse.che.ide.api.parts.PartStackType;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.parts.base.BasePresenter;
@@ -107,7 +108,8 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
                                                                       MachineStateEvent.Handler,
                                                                       WsAgentStateHandler,
                                                                       EnvironmentOutputEvent.Handler,
-                                                                      DownloadWorkspaceOutputEvent.Handler {
+                                                                      DownloadWorkspaceOutputEvent.Handler,
+                                                                      PartStackStateChangedEvent.Handler {
 
     public static final  String SSH_PORT                    = "22";
     private static final String DEFAULT_TERMINAL_NAME       = "Terminal";
@@ -189,6 +191,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         eventBus.addHandler(MachineStateEvent.TYPE, this);
         eventBus.addHandler(EnvironmentOutputEvent.TYPE, this);
         eventBus.addHandler(DownloadWorkspaceOutputEvent.TYPE, this);
+        eventBus.addHandler(PartStackStateChangedEvent.TYPE, this);
 
         updateMachineList();
 
@@ -1020,9 +1023,11 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
     }
 
     @Override
-    public void onToggleMaximize() {
-        super.onToggleMaximize();
-        view.setProcessesTreeVisible(true);
+    public void onPartStackStateChanged(PartStackStateChangedEvent event) {
+        if (partStack.equals(event.getPartStack()) &&
+                partStack.getPartStackState() == PartStack.State.NORMAL) {
+            view.setProcessesTreeVisible(true);
+        }
     }
 
     /**
