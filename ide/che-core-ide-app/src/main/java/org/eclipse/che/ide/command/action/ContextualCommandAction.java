@@ -11,10 +11,12 @@
 
 package org.eclipse.che.ide.command.action;
 
+import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.assistedinject.Assisted;
 
+import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
@@ -24,12 +26,15 @@ import org.eclipse.che.ide.api.command.CommandTypeRegistry;
 import org.eclipse.che.ide.api.command.ContextualCommand;
 import org.eclipse.che.ide.api.icon.Icon;
 import org.eclipse.che.ide.api.icon.IconRegistry;
-import org.eclipse.che.ide.api.machine.DevMachine;
+import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.api.resources.Resource;
 import org.vectomatic.dom.svg.ui.SVGImage;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
+import java.util.List;
+
 /**
- * //
+ * Action for executing a {@link ContextualCommand}.
  *
  * @author Artem Zatsarynnyi
  */
@@ -55,13 +60,37 @@ public class ContextualCommandAction extends Action {
         this.iconRegistry = iconRegistry;
         this.commandTypeRegistry = commandTypeRegistry;
         this.command = command;
+
+        getTemplatePresentation().setSVGResource(getCommandIcon());
     }
 
     @Override
     public void update(ActionEvent e) {
-        final SVGResource icon = getCommandIcon();
+        final List<String> applicableProjects = command.getApplicableContext().getApplicableProjects();
 
-        e.getPresentation().setSVGResource(icon);
+        if (applicableProjects.isEmpty()) {
+            e.getPresentation().setEnabledAndVisible(true);
+        } else {
+            // action should be visible only for the applicable projects
+
+            final Resource currentResource = appContext.getResource();
+
+            if (currentResource != null) {
+                final Optional<Project> currentProjectOptional = currentResource.getRelatedProject();
+
+                if (currentProjectOptional.isPresent()) {
+                    final Project currentProject = currentProjectOptional.get();
+
+                    if (applicableProjects.contains(currentProject.getPath())) {
+                        e.getPresentation().setEnabledAndVisible(true);
+
+                        return;
+                    }
+                }
+            }
+
+            e.getPresentation().setEnabledAndVisible(false);
+        }
     }
 
     private SVGResource getCommandIcon() {
@@ -85,10 +114,10 @@ public class ContextualCommandAction extends Action {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        final DevMachine devMachine = appContext.getDevMachine();
+        final Machine machine = appContext.getCurrentMachine();
 
-        if (devMachine != null) {
-            commandManager.executeCommand(command, devMachine);
+        if (machine != null) {
+            commandManager.executeCommand(command, machine);
         }
     }
 }

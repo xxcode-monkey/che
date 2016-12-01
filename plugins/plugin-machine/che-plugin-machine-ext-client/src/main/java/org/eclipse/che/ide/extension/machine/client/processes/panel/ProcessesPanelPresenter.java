@@ -54,6 +54,7 @@ import org.eclipse.che.ide.api.ssh.SshServiceClient;
 import org.eclipse.che.ide.api.workspace.event.EnvironmentOutputEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStartedEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
+import org.eclipse.che.ide.context.AppContextImpl;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
 import org.eclipse.che.ide.extension.machine.client.MachineResources;
 import org.eclipse.che.ide.extension.machine.client.inject.factories.EntityFactory;
@@ -476,6 +477,8 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
     public void onTreeNodeSelected(final ProcessTreeNode node) {
         if (node != null) {
             if (ProcessTreeNode.ProcessNodeType.MACHINE_NODE == node.getType()) {
+                final MachineEntity machine = getMachine(node.getId());
+                ((AppContextImpl)appContext).setCurrentMachine(machine);
                 view.showProcessOutput(node.getName());
             } else {
                 view.showProcessOutput(node.getId());

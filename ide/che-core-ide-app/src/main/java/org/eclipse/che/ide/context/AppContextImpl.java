@@ -16,6 +16,7 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.promises.client.Operation;
@@ -89,6 +90,7 @@ public class AppContextImpl implements AppContext,
     private FactoryDto          factory;
     private DevMachine          devMachine;
     private Path                projectsRoot;
+    private Machine             currentMachine;
     /**
      * List of actions with parameters which comes from startup URL.
      * Can be processed after IDE initialization as usual after starting ws-agent.
@@ -126,6 +128,15 @@ public class AppContextImpl implements AppContext,
     @Override
     public void setWorkspace(Workspace workspace) {
         this.usersWorkspace = workspace;
+    }
+
+    public void setCurrentMachine(Machine machine) {
+        currentMachine = machine;
+    }
+
+    @Override
+    public Machine getCurrentMachine() {
+        return currentMachine;
     }
 
     @Override

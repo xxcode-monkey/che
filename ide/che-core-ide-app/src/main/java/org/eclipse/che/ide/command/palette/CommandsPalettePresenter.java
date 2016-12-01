@@ -13,6 +13,7 @@ package org.eclipse.che.ide.command.palette;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.command.CommandManager;
 import org.eclipse.che.ide.api.command.CommandManager3;
@@ -56,7 +57,12 @@ public class CommandsPalettePresenter implements CommandsPaletteView.ActionDeleg
 
     @Override
     public void onCommandExecute(ContextualCommand command) {
-        commandExecutor.executeCommand(command, appContext.getDevMachine());
         view.close();
+
+        final Machine machine = appContext.getCurrentMachine();
+
+        if (machine != null) {
+            commandExecutor.executeCommand(command, machine);
+        }
     }
 }

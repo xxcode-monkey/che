@@ -13,6 +13,7 @@ package org.eclipse.che.ide.api.app;
 import com.google.common.annotations.Beta;
 
 import org.eclipse.che.api.core.model.factory.Factory;
+import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
@@ -201,4 +202,6 @@ public interface AppContext {
      *         current workspace or {@code null}
      */
     void setWorkspace(Workspace workspace);
+
+    Machine getCurrentMachine();
 }
