@@ -1,0 +1,22 @@
+{
+	"ImportPath": "github.com/eclipse/che/exec-agent",
+	"GoVersion": "go1.6",
+	"GodepVersion": "v74",
+	"Deps": [
+		{
+			"ImportPath": "github.com/eclipse/che-lib/pty",
+			"Comment": "4.6.0-2-g69a9cee",
+			"Rev": "69a9cee57914086c88c8400f5f66cd25422f1fa7"
+		},
+		{
+			"ImportPath": "github.com/eclipse/che-lib/websocket",
+			"Comment": "4.6.0-2-g69a9cee",
+			"Rev": "69a9cee57914086c88c8400f5f66cd25422f1fa7"
+		},
+		{
+			"ImportPath": "github.com/gorilla/mux",
+			"Comment": "v1.1-13-g9fa818a",
+			"Rev": "9fa818a44c2bf1396a17f9d5a3c0f6dd39d2ff8e"
+		}
+	]
+}
