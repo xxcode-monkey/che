@@ -15,14 +15,17 @@ import com.google.gwt.core.client.Callback;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.action.DefaultActionGroup;
 import org.eclipse.che.ide.api.command.CommandManager3;
+import org.eclipse.che.ide.api.command.CommandManager3.CommandChangedListener;
+import org.eclipse.che.ide.api.command.CommandManager3.CommandLoadedListener;
 import org.eclipse.che.ide.api.command.ContextualCommand;
 import org.eclipse.che.ide.api.component.Component;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_CONSOLES_TREE_CONTEXT_MENU;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_EDITOR_TAB_CONTEXT_MENU;
@@ -34,13 +37,16 @@ import static org.eclipse.che.ide.api.action.IdeActions.GROUP_MAIN_CONTEXT_MENU;
  * @author Artem Zatsarynnyi
  */
 @Singleton
-public class ContextualCommandActionDistributor implements Component {
+public class ContextualCommandActionDistributor implements Component,
+                                                           CommandLoadedListener,
+                                                           CommandChangedListener {
 
     private final CommandManager3                commandManager;
     private final ActionManager                  actionManager;
     private final ContextualCommandActionFactory contextualCommandActionFactory;
 
-    private final List<DefaultActionGroup> actionGroups;
+    private final DefaultActionGroup             commandsPopUpGroup;
+    private final Map<ContextualCommand, Action> command2Action;
 
     @Inject
     public ContextualCommandActionDistributor(CommandManager3 commandManager,
@@ -50,39 +56,64 @@ public class ContextualCommandActionDistributor implements Component {
         this.actionManager = actionManager;
         this.contextualCommandActionFactory = contextualCommandActionFactory;
 
-        commandManager.addCommandLoadedListener(new CommandManager3.CommandLoadedListener() {
-            @Override
-            public void onCommandsLoaded() {
-                populateMenus();
-            }
-        });
+        command2Action = new HashMap<>();
 
-        actionGroups = new ArrayList<>();
+        commandManager.addCommandLoadedListener(this);
+        commandManager.addCommandChangedListener(this);
 
-        final DefaultActionGroup mainContextMenu = (DefaultActionGroup)actionManager.getAction(GROUP_MAIN_CONTEXT_MENU);
-        DefaultActionGroup editorTabContextMenu = (DefaultActionGroup)actionManager.getAction(GROUP_EDITOR_TAB_CONTEXT_MENU);
-        DefaultActionGroup machineContextMenu = (DefaultActionGroup)actionManager.getAction(GROUP_CONSOLES_TREE_CONTEXT_MENU);
+        commandsPopUpGroup = new DefaultActionGroup("Commands", true, actionManager);
+        actionManager.registerAction("commandsPopUpGroup", commandsPopUpGroup);
 
-        actionGroups.add(mainContextMenu);
-        actionGroups.add(editorTabContextMenu);
-        actionGroups.add(machineContextMenu);
+        // inject 'Commands' menu into context menus
+        ((DefaultActionGroup)actionManager.getAction(GROUP_MAIN_CONTEXT_MENU)).add(commandsPopUpGroup);
+        ((DefaultActionGroup)actionManager.getAction(GROUP_EDITOR_TAB_CONTEXT_MENU)).add(commandsPopUpGroup);
+        ((DefaultActionGroup)actionManager.getAction(GROUP_CONSOLES_TREE_CONTEXT_MENU)).add(commandsPopUpGroup);
     }
 
     @Override
     public void start(Callback<Component, Exception> callback) {
-        populateMenus();
-
         callback.onSuccess(this);
     }
 
-    private void populateMenus() {
+    @Override
+    public void onCommandsLoaded() {
         for (ContextualCommand command : commandManager.getCommands()) {
-            final ContextualCommandAction action = contextualCommandActionFactory.create(command);
+            addAction(command);
+        }
+    }
 
-            for (DefaultActionGroup actionGroup : actionGroups) {
-                actionManager.registerAction(command.getName(), action);
+    @Override
+    public void onCommandAdded(ContextualCommand command) {
+        addAction(command);
+    }
 
-                actionGroup.add(action);
+    private void addAction(ContextualCommand command) {
+        final ContextualCommandAction action = contextualCommandActionFactory.create(command);
+
+        command2Action.put(command, action);
+
+        actionManager.registerAction(command.getName(), action);
+        commandsPopUpGroup.add(action);
+    }
+
+    @Override
+    public void onCommandUpdated(ContextualCommand command) {
+        // TODO: update/replace action
+    }
+
+    @Override
+    public void onCommandRemoved(ContextualCommand command) {
+        removeAction(command);
+    }
+
+    private void removeAction(ContextualCommand command) {
+        final Action action = command2Action.remove(command);
+
+        if (action != null) {
+            final String actionId = actionManager.getId(action);
+            if (actionId != null) {
+                actionManager.unregisterAction(actionId);
+                commandsPopUpGroup.remove(action);
             }
         }
     }
