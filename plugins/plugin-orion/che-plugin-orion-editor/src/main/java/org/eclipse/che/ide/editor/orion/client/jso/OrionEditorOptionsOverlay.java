@@ -13,17 +13,29 @@ package org.eclipse.che.ide.editor.orion.client.jso;
 import com.google.gwt.core.client.JavaScriptObject;
 
 /**
+ * Overlay for Orion editor options.
+ *
  * @author Alexander Andrienko
  */
-public class OrionEditorOptionsOverlay extends JavaScriptObject {//todo add more fields
+public class OrionEditorOptionsOverlay extends JavaScriptObject {
 
     protected OrionEditorOptionsOverlay() {
     }
 
+    /**
+     * Returns status reporter function.
+     * This function handles editor status messages.
+     */
     public final native JavaScriptObject getStatusReporter() /*-{
         return this.statusReporter;
     }-*/;
 
+    /**
+     * Set status reporter function.
+     *
+     * @param statusReporter
+     *         status reporter function.
+     */
     public final native void setStatusReporter(JavaScriptObject statusReporter) /*-{
         this.statusReporter = statusReporter;
     }-*/;

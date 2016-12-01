@@ -8,11 +8,20 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.state.message;
+package org.eclipse.che.ide.status.message;
 
 /**
+ * Observer to update object which is
+ * interested in {@link StatusMessage} report.
+ *
  * @author Alexander Andrienko
  */
-public interface StateMessageObserver {
-    void update(StateMessage message);
+public interface StatusMessageObserver {
+    /**
+     * Update interested object by new editor status message.
+     *
+     * @param message
+     *         message about editor status.
+     */
+    void update(StatusMessage message);
 }

@@ -75,8 +75,8 @@ import org.eclipse.che.ide.api.preferences.PreferencesManager;
 import org.eclipse.che.ide.editor.orion.client.events.HasScrollHandlers;
 import org.eclipse.che.ide.editor.orion.client.events.ScrollEvent;
 import org.eclipse.che.ide.editor.orion.client.events.ScrollHandler;
-import org.eclipse.che.ide.editor.orion.client.incremental.find.IncrementalFindReportStateObserver;
-import org.eclipse.che.ide.state.message.StatusMessageReporter;
+import org.eclipse.che.ide.editor.orion.client.incremental.find.IncrementalFindReportStatusObserver;
+import org.eclipse.che.ide.status.message.StatusMessageReporter;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionEditorOptionsOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionAnnotationModelOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionAnnotationOverlay;
@@ -179,7 +179,7 @@ public class OrionEditorWidget extends CompositeEditorWidget implements HasChang
                              @Assisted final WidgetInitializedCallback widgetInitializedCallback,
                              final Provider<OrionEditorOptionsOverlay> editorOptionsProvider,
                              final StatusMessageReporter statusMessageReporter,
-                             final IncrementalFindReportStateObserver incrementalFindObserver) {
+                             final IncrementalFindReportStatusObserver incrementalFindObserver) {
         this.contentAssistWidgetFactory = contentAssistWidgetFactory;
         this.moduleHolder = moduleHolder;
         this.keyModeInstances = keyModeInstances;

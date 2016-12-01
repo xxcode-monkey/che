@@ -19,40 +19,60 @@ import com.google.inject.Inject;
 import org.eclipse.che.ide.api.editor.texteditor.EditorWidget;
 import org.eclipse.che.ide.editor.orion.client.OrionEditorWidget;
 import org.eclipse.che.ide.editor.orion.client.OrionResource;
-import org.eclipse.che.ide.state.message.StateMessage;
-import org.eclipse.che.ide.state.message.StateMessageObserver;
+import org.eclipse.che.ide.status.message.StatusMessage;
+import org.eclipse.che.ide.status.message.StatusMessageObserver;
 import org.eclipse.che.ide.util.dom.Elements;
 
 import static org.eclipse.che.ide.util.StringUtils.isNullOrEmpty;
 
 /**
+ * IncrementalFindReportStatusObserver listens editor status messages and filter messages
+ * which contains information about incremental find state. It creates simple UI
+ * for user notification about incremental find operation progress.
+ * Note: incremental find can be straight or reverse.
+ *
  * @author Alexander Andrienko
  */
-public class IncrementalFindReportStateObserver implements StateMessageObserver {
+public class IncrementalFindReportStatusObserver implements StatusMessageObserver {
 
     private final OrionResource orionResource;
 
     private EditorWidget editorWidget;
-    private DivElement findDiv;
+    private DivElement   findDiv;
 
     @Inject
-    public IncrementalFindReportStateObserver(OrionResource orionResource) {
-       this.orionResource = orionResource;
+    public IncrementalFindReportStatusObserver(OrionResource orionResource) {
+        this.orionResource = orionResource;
     }
 
+    /**
+     * Sets editor widget which contains text source to incremental search.
+     *
+     * @param editorWidget
+     *         editor widget with content to search.
+     */
     public void setEditorWidget(OrionEditorWidget editorWidget) {
         this.editorWidget = editorWidget;
     }
 
+    /**
+     *
+     * Checks if {@code statusMessage} is incremental find message.
+     * In case if this is true than create or update simple UI to display
+     * message content, otherwise skip this message.
+     *
+     * @param statusMessage
+     *         editor status message.
+     */
     @Override
-    public void update(StateMessage stateMessage) {
-        String message = stateMessage.getMessage();
+    public void update(StatusMessage statusMessage) {
+        String message = statusMessage.getMessage();
         boolean isIncrementalFindMessage = message.startsWith("Incremental find:") | message.startsWith("Reverse Incremental find:");
         if (!message.isEmpty() && !isIncrementalFindMessage) {
             return;
         }
 
-        Element editorElem = editorWidget.asWidget().getElement().getParentElement();
+        Element editorElem = editorWidget.asWidget().getElement();
 
         Element findDiv = createFindDiv(message);
         setStyle(message, findDiv);
@@ -77,9 +97,10 @@ public class IncrementalFindReportStateObserver implements StateMessageObserver 
 
     private void setStyle(String message, Element element) {
         if (message.endsWith("(not found)")) {
-            element.setClassName(orionResource.getIncementalFindStyle().incrementalFindError());
+            element.addClassName(orionResource.getIncrementalFindStyle().incrementalFindContainer());
+            element.addClassName(orionResource.getIncrementalFindStyle().incrementalFindError());
         } else {
-            element.setClassName(orionResource.getIncementalFindStyle().incrementalFindContainer());
+            element.setClassName(orionResource.getIncrementalFindStyle().incrementalFindContainer());
         }
     }
 }
