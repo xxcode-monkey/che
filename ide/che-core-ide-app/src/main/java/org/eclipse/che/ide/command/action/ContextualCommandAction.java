@@ -17,6 +17,7 @@ import com.google.inject.Singleton;
 import com.google.inject.assistedinject.Assisted;
 
 import org.eclipse.che.api.core.model.machine.Machine;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
@@ -24,10 +25,13 @@ import org.eclipse.che.ide.api.command.CommandManager;
 import org.eclipse.che.ide.api.command.CommandType;
 import org.eclipse.che.ide.api.command.CommandTypeRegistry;
 import org.eclipse.che.ide.api.command.ContextualCommand;
+import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.icon.Icon;
 import org.eclipse.che.ide.api.icon.IconRegistry;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
+import org.eclipse.che.ide.api.selection.Selection;
+import org.eclipse.che.ide.api.selection.SelectionAgent;
 import org.vectomatic.dom.svg.ui.SVGImage;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
@@ -45,6 +49,8 @@ public class ContextualCommandAction extends Action {
     private final AppContext          appContext;
     private final IconRegistry        iconRegistry;
     private final CommandTypeRegistry commandTypeRegistry;
+    private final SelectionAgent      selectionAgent;
+    private final DialogFactory       dialogFactory;
     private final ContextualCommand   command;
 
     @Inject
@@ -52,6 +58,8 @@ public class ContextualCommandAction extends Action {
                                    AppContext appContext,
                                    IconRegistry iconRegistry,
                                    CommandTypeRegistry commandTypeRegistry,
+                                   SelectionAgent selectionAgent,
+                                   DialogFactory dialogFactory,
                                    @Assisted ContextualCommand command) {
         super(command.getName());
 
@@ -59,6 +67,8 @@ public class ContextualCommandAction extends Action {
         this.appContext = appContext;
         this.iconRegistry = iconRegistry;
         this.commandTypeRegistry = commandTypeRegistry;
+        this.selectionAgent = selectionAgent;
+        this.dialogFactory = dialogFactory;
         this.command = command;
 
         getTemplatePresentation().setSVGResource(getCommandIcon());
@@ -66,6 +76,15 @@ public class ContextualCommandAction extends Action {
 
     @Override
     public void update(ActionEvent e) {
+        // it should be possible to execute any command
+        // if machine is currently selected
+        if (isMachineSelected()) {
+            e.getPresentation().setEnabledAndVisible(true);
+
+            return;
+        }
+
+        // let's check applicable projects
         final List<String> applicableProjects = command.getApplicableContext().getApplicableProjects();
 
         if (applicableProjects.isEmpty()) {
@@ -93,6 +112,38 @@ public class ContextualCommandAction extends Action {
         }
     }
 
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        final Machine machine = getSelectedMachine();
+
+        if (machine != null) {
+            commandManager.executeCommand(command, machine);
+        } else {
+            dialogFactory.createMessageDialog("", "Machine isn't selected", null).show();
+        }
+    }
+
+    /** Whether machine is currently selected? */
+    private boolean isMachineSelected() {
+        return getSelectedMachine() != null;
+    }
+
+    /** Returns the currently selected machine. */
+    @Nullable
+    private Machine getSelectedMachine() {
+        final Selection<?> selection = selectionAgent.getSelection();
+
+        if (selection != null && !selection.isEmpty() && selection.isSingleSelection()) {
+            final Object possibleNode = selection.getHeadElement();
+
+            if (possibleNode instanceof Machine) {
+                return (Machine)possibleNode;
+            }
+        }
+
+        return null;
+    }
+
     private SVGResource getCommandIcon() {
         final String commandTypeId = command.getType();
         final CommandType commandType = commandTypeRegistry.getCommandTypeById(commandTypeId);
@@ -110,14 +161,5 @@ public class ContextualCommandAction extends Action {
         }
 
         return null;
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        final Machine machine = appContext.getCurrentMachine();
-
-        if (machine != null) {
-            commandManager.executeCommand(command, machine);
-        }
     }
 }

@@ -50,11 +50,11 @@ import org.eclipse.che.ide.api.parts.PartStack;
 import org.eclipse.che.ide.api.parts.PartStackType;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.parts.base.BasePresenter;
+import org.eclipse.che.ide.api.selection.Selection;
 import org.eclipse.che.ide.api.ssh.SshServiceClient;
 import org.eclipse.che.ide.api.workspace.event.EnvironmentOutputEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStartedEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
-import org.eclipse.che.ide.context.AppContextImpl;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
 import org.eclipse.che.ide.extension.machine.client.MachineResources;
 import org.eclipse.che.ide.extension.machine.client.inject.factories.EntityFactory;
@@ -75,10 +75,10 @@ import org.eclipse.che.ide.util.loging.Log;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 import javax.validation.constraints.NotNull;
-import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -478,7 +478,10 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         if (node != null) {
             if (ProcessTreeNode.ProcessNodeType.MACHINE_NODE == node.getType()) {
                 final MachineEntity machine = getMachine(node.getId());
-                ((AppContextImpl)appContext).setCurrentMachine(machine);
+                if (machine != null) {
+                    setSelection(new Selection<>(machine));
+                }
+
                 view.showProcessOutput(node.getName());
             } else {
                 view.showProcessOutput(node.getId());

@@ -14,10 +14,12 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.api.core.model.machine.Machine;
-import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.command.CommandManager;
 import org.eclipse.che.ide.api.command.CommandManager3;
 import org.eclipse.che.ide.api.command.ContextualCommand;
+import org.eclipse.che.ide.api.dialogs.DialogFactory;
+import org.eclipse.che.ide.api.selection.Selection;
+import org.eclipse.che.ide.api.selection.SelectionAgent;
 
 /**
  * Presenter for Commands Palette.
@@ -30,17 +32,20 @@ public class CommandsPalettePresenter implements CommandsPaletteView.ActionDeleg
     private final CommandsPaletteView view;
     private final CommandManager3     commandManager;
     private final CommandManager      commandExecutor;
-    private final AppContext          appContext;
+    private final SelectionAgent      selectionAgent;
+    private final DialogFactory       dialogFactory;
 
     @Inject
     public CommandsPalettePresenter(CommandsPaletteView view,
                                     CommandManager3 commandManager,
                                     CommandManager commandExecutor,
-                                    AppContext appContext) {
+                                    SelectionAgent selectionAgent,
+                                    DialogFactory dialogFactory) {
         this.view = view;
         this.commandManager = commandManager;
         this.commandExecutor = commandExecutor;
-        this.appContext = appContext;
+        this.selectionAgent = selectionAgent;
+        this.dialogFactory = dialogFactory;
 
         view.setDelegate(this);
     }
@@ -57,12 +62,20 @@ public class CommandsPalettePresenter implements CommandsPaletteView.ActionDeleg
 
     @Override
     public void onCommandExecute(ContextualCommand command) {
-        view.close();
+        final Selection<?> selection = selectionAgent.getSelection();
 
-        final Machine machine = appContext.getCurrentMachine();
+        if (selection != null && !selection.isEmpty() && selection.isSingleSelection()) {
+            final Object possibleNode = selection.getHeadElement();
 
-        if (machine != null) {
-            commandExecutor.executeCommand(command, machine);
+            if (possibleNode instanceof Machine) {
+                view.close();
+
+                commandExecutor.executeCommand(command, (Machine)possibleNode);
+
+                return;
+            }
         }
+
+        dialogFactory.createMessageDialog("", "Machine isn't selected", null).show();
     }
 }
