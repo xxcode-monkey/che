@@ -34,16 +34,6 @@ public class StatusMessageReporter {
     }
 
     /**
-     * Remove {@code observer}
-     *
-     * @param observer
-     *         observer to remove.
-     */
-    public void removeObserver(StatusMessageObserver observer) {//todo
-        observers.remove(observer);
-    }
-
-    /**
      * Notify all observers about new editor status message.
      *
      * @param message
