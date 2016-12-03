@@ -91,14 +91,13 @@ public class ContextualCommand extends CommandImpl {
 
         ContextualCommand other = (ContextualCommand)o;
 
-        return super.equals(other) && Objects.equals(getApplicableContext(), other.getApplicableContext());
+        return Objects.equals(getApplicableContext(), other.getApplicableContext());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(applicableContext);
+        return Objects.hash(super.hashCode(), applicableContext);
     }
-
 
     /** Defines the context in which command can be executed. */
     public static class ApplicableContext {
@@ -175,6 +174,32 @@ public class ContextualCommand extends CommandImpl {
         /** Removes applicable project's path. */
         public void removeProject(String path) {
             projects.remove(path);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+
+            if (!(o instanceof ApplicableContext)) {
+                return false;
+            }
+
+            ApplicableContext other = (ApplicableContext)o;
+
+            return workspaceApplicable == other.workspaceApplicable &&
+                   projectApplicable == other.projectApplicable &&
+                   fileApplicable == other.fileApplicable &&
+                   Objects.equals(projects, other.projects);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(workspaceApplicable,
+                                projectApplicable,
+                                fileApplicable,
+                                projects);
         }
     }
 }
