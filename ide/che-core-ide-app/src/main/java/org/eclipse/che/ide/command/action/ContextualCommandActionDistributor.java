@@ -45,8 +45,9 @@ public class ContextualCommandActionDistributor implements Component,
     private final ActionManager                  actionManager;
     private final ContextualCommandActionFactory contextualCommandActionFactory;
 
-    private final DefaultActionGroup             commandsPopUpGroup;
-    private final Map<ContextualCommand, Action> command2Action;
+    private final DefaultActionGroup              commandsPopUpGroup;
+    private final Map<String, Action>             command2Action;
+    private final Map<String, DefaultActionGroup> commandTypePopUpGroups;
 
     @Inject
     public ContextualCommandActionDistributor(CommandManager3 commandManager,
@@ -57,6 +58,7 @@ public class ContextualCommandActionDistributor implements Component,
         this.contextualCommandActionFactory = contextualCommandActionFactory;
 
         command2Action = new HashMap<>();
+        commandTypePopUpGroups = new HashMap<>();
 
         commandManager.addCommandLoadedListener(this);
         commandManager.addCommandChangedListener(this);
@@ -87,13 +89,38 @@ public class ContextualCommandActionDistributor implements Component,
         addAction(command);
     }
 
+    /**
+     * Creates action for executing the given command and
+     * adds created action to the appropriate action group.
+     */
     private void addAction(ContextualCommand command) {
         final ContextualCommandAction action = contextualCommandActionFactory.create(command);
 
-        command2Action.put(command, action);
-
         actionManager.registerAction(command.getName(), action);
-        commandsPopUpGroup.add(action);
+        command2Action.put(command.getName(), action);
+
+        getActionGroupForCommand(command).add(action);
+    }
+
+    /**
+     * Returns the action group which is appropriate for placing the action for executing the given command.
+     * If appropriate action group doesn't exist it will be created and added to right place.
+     */
+    private DefaultActionGroup getActionGroupForCommand(ContextualCommand command) {
+        final String commandTypeId = command.getType();
+
+        DefaultActionGroup commandTypePopUpGroup = commandTypePopUpGroups.get(commandTypeId);
+
+        if (commandTypePopUpGroup == null) {
+            commandTypePopUpGroup = new DefaultActionGroup(commandTypeId, true, actionManager);
+
+            actionManager.registerAction(commandTypeId, commandTypePopUpGroup);
+            commandTypePopUpGroups.put(commandTypeId, commandTypePopUpGroup);
+
+            commandsPopUpGroup.add(commandTypePopUpGroup);
+        }
+
+        return commandTypePopUpGroup;
     }
 
     @Override
@@ -106,14 +133,30 @@ public class ContextualCommandActionDistributor implements Component,
         removeAction(command);
     }
 
+    /**
+     * Removes action for executing the given command and
+     * removes the appropriate action group in case it's empty.
+     */
     private void removeAction(ContextualCommand command) {
-        final Action action = command2Action.remove(command);
+        final Action action = command2Action.remove(command.getName());
 
         if (action != null) {
             final String actionId = actionManager.getId(action);
+
             if (actionId != null) {
                 actionManager.unregisterAction(actionId);
-                commandsPopUpGroup.remove(action);
+            }
+
+            // remove action from it's action group
+            final DefaultActionGroup commandTypePopUpGroup = commandTypePopUpGroups.get(command.getType());
+
+            if (commandTypePopUpGroup != null) {
+                commandTypePopUpGroup.remove(action);
+
+                // remove action group if it is empty
+                if (commandTypePopUpGroup.getChildrenCount() == 0) {
+                    commandsPopUpGroup.remove(commandTypePopUpGroup);
+                }
             }
         }
     }
