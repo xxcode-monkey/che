@@ -43,6 +43,7 @@ public class ContextualCommandActionDistributor implements Component,
 
     private final CommandManager3                commandManager;
     private final ActionManager                  actionManager;
+    private final CommandTypePopUpGroupFactory   commandTypePopUpGroupFactory;
     private final ContextualCommandActionFactory contextualCommandActionFactory;
 
     private final DefaultActionGroup              commandsPopUpGroup;
@@ -52,9 +53,11 @@ public class ContextualCommandActionDistributor implements Component,
     @Inject
     public ContextualCommandActionDistributor(CommandManager3 commandManager,
                                               ActionManager actionManager,
+                                              CommandTypePopUpGroupFactory commandTypePopUpGroupFactory,
                                               ContextualCommandActionFactory contextualCommandActionFactory) {
         this.commandManager = commandManager;
         this.actionManager = actionManager;
+        this.commandTypePopUpGroupFactory = commandTypePopUpGroupFactory;
         this.contextualCommandActionFactory = contextualCommandActionFactory;
 
         command2Action = new HashMap<>();
@@ -112,7 +115,7 @@ public class ContextualCommandActionDistributor implements Component,
         DefaultActionGroup commandTypePopUpGroup = commandTypePopUpGroups.get(commandTypeId);
 
         if (commandTypePopUpGroup == null) {
-            commandTypePopUpGroup = new DefaultActionGroup(commandTypeId, true, actionManager);
+            commandTypePopUpGroup = commandTypePopUpGroupFactory.create(commandTypeId);
 
             actionManager.registerAction(commandTypeId, commandTypePopUpGroup);
             commandTypePopUpGroups.put(commandTypeId, commandTypePopUpGroup);

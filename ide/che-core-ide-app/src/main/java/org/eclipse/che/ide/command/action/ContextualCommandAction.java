@@ -43,7 +43,7 @@ import java.util.List;
  * @author Artem Zatsarynnyi
  */
 @Singleton
-public class ContextualCommandAction extends Action {
+class ContextualCommandAction extends Action {
 
     private final CommandManager      commandManager;
     private final AppContext          appContext;
@@ -54,13 +54,13 @@ public class ContextualCommandAction extends Action {
     private final ContextualCommand   command;
 
     @Inject
-    public ContextualCommandAction(CommandManager commandManager,
-                                   AppContext appContext,
-                                   IconRegistry iconRegistry,
-                                   CommandTypeRegistry commandTypeRegistry,
-                                   SelectionAgent selectionAgent,
-                                   DialogFactory dialogFactory,
-                                   @Assisted ContextualCommand command) {
+    ContextualCommandAction(@Assisted ContextualCommand command,
+                            CommandManager commandManager,
+                            AppContext appContext,
+                            IconRegistry iconRegistry,
+                            CommandTypeRegistry commandTypeRegistry,
+                            SelectionAgent selectionAgent,
+                            DialogFactory dialogFactory) {
         super(command.getName());
 
         this.commandManager = commandManager;
@@ -71,7 +71,11 @@ public class ContextualCommandAction extends Action {
         this.dialogFactory = dialogFactory;
         this.command = command;
 
-        getTemplatePresentation().setSVGResource(getCommandIcon());
+        // set icon
+        final SVGResource commandIcon = getCommandIcon();
+        if (commandIcon != null) {
+            getTemplatePresentation().setSVGResource(commandIcon);
+        }
     }
 
     @Override

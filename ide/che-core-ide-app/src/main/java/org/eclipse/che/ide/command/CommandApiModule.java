@@ -23,6 +23,7 @@ import org.eclipse.che.ide.api.command.CommandTypeRegistry;
 import org.eclipse.che.ide.api.component.Component;
 import org.eclipse.che.ide.api.component.WsAgentComponent;
 import org.eclipse.che.ide.api.filetypes.FileType;
+import org.eclipse.che.ide.command.action.CommandTypePopUpGroupFactory;
 import org.eclipse.che.ide.command.action.ContextualCommandActionDistributor;
 import org.eclipse.che.ide.command.action.ContextualCommandActionFactory;
 import org.eclipse.che.ide.command.editor.page.arguments.macro.MacrosExplorerView;
@@ -60,6 +61,7 @@ public class CommandApiModule extends AbstractGinModule {
 
         install(new GinFactoryModuleBuilder().build(CommandProducerActionFactory.class));
         install(new GinFactoryModuleBuilder().build(ContextualCommandActionFactory.class));
+        install(new GinFactoryModuleBuilder().build(CommandTypePopUpGroupFactory.class));
 
         install(new GinFactoryModuleBuilder().build(NodeFactory.class));
 
