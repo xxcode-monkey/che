@@ -33,13 +33,16 @@ import static org.eclipse.che.ide.api.action.IdeActions.GROUP_MAIN_CONTEXT_MENU;
 
 /**
  * Distributes the {@link ContextualCommandAction}s over the context menus.
+ * <p>Manages the actions for the contextual commands.
+ * <p>Manager listens for creating/removing commands and adds/removes
+ * related {@link ContextualCommandAction}s in the context menus.
  *
  * @author Artem Zatsarynnyi
  */
 @Singleton
-public class ContextualCommandActionDistributor implements Component,
-                                                           CommandLoadedListener,
-                                                           CommandChangedListener {
+public class ContextualCommandActionManager implements Component,
+                                                       CommandLoadedListener,
+                                                       CommandChangedListener {
 
     private final CommandManager3                commandManager;
     private final ActionManager                  actionManager;
@@ -51,10 +54,10 @@ public class ContextualCommandActionDistributor implements Component,
     private final Map<String, DefaultActionGroup> commandTypePopUpGroups;
 
     @Inject
-    public ContextualCommandActionDistributor(CommandManager3 commandManager,
-                                              ActionManager actionManager,
-                                              CommandTypePopUpGroupFactory commandTypePopUpGroupFactory,
-                                              ContextualCommandActionFactory contextualCommandActionFactory) {
+    public ContextualCommandActionManager(CommandManager3 commandManager,
+                                          ActionManager actionManager,
+                                          CommandTypePopUpGroupFactory commandTypePopUpGroupFactory,
+                                          ContextualCommandActionFactory contextualCommandActionFactory) {
         this.commandManager = commandManager;
         this.actionManager = actionManager;
         this.commandTypePopUpGroupFactory = commandTypePopUpGroupFactory;

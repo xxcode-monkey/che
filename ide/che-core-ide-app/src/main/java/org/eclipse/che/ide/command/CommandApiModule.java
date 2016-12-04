@@ -24,7 +24,7 @@ import org.eclipse.che.ide.api.component.Component;
 import org.eclipse.che.ide.api.component.WsAgentComponent;
 import org.eclipse.che.ide.api.filetypes.FileType;
 import org.eclipse.che.ide.command.action.CommandTypePopUpGroupFactory;
-import org.eclipse.che.ide.command.action.ContextualCommandActionDistributor;
+import org.eclipse.che.ide.command.action.ContextualCommandActionManager;
 import org.eclipse.che.ide.command.action.ContextualCommandActionFactory;
 import org.eclipse.che.ide.command.editor.page.arguments.macro.MacrosExplorerView;
 import org.eclipse.che.ide.command.editor.page.arguments.macro.MacrosExplorerViewImpl;
@@ -56,7 +56,7 @@ public class CommandApiModule extends AbstractGinModule {
 
         GinMapBinder<String, Component> componentBinder = GinMapBinder.newMapBinder(binder(), String.class, Component.class);
         componentBinder.addBinding("CommandProducerActionManager").to(CommandProducerActionManager.class);
-        componentBinder.addBinding("ContextualCommandActionDistributor").to(ContextualCommandActionDistributor.class);
+        componentBinder.addBinding("ContextualCommandActionManager").to(ContextualCommandActionManager.class);
 
 
         install(new GinFactoryModuleBuilder().build(CommandProducerActionFactory.class));
