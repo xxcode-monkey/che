@@ -21,6 +21,11 @@ import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.selection.Selection;
 import org.eclipse.che.ide.api.selection.SelectionAgent;
 
+import java.util.List;
+import java.util.ListIterator;
+
+import static org.eclipse.che.ide.util.StringUtils.containsIgnoreCase;
+
 /**
  * Presenter for Commands Palette.
  *
@@ -51,13 +56,28 @@ public class CommandsPalettePresenter implements CommandsPaletteView.ActionDeleg
     }
 
     /** Open Commands Palette. */
-    public void open() {
+    public void showDialog() {
         view.show();
         view.setCommands(commandManager.getCommands());
     }
 
     @Override
     public void onFilterChanged(String filterValue) {
+        final List<ContextualCommand> filteredCommands = commandManager.getCommands();
+
+        if (!filterValue.isEmpty()) {
+            final ListIterator<ContextualCommand> it = filteredCommands.listIterator();
+
+            while (it.hasNext()) {
+                final ContextualCommand command = it.next();
+
+                if (!containsIgnoreCase(command.getName(), filterValue)) {
+                    it.remove();
+                }
+            }
+        }
+
+        view.setCommands(filteredCommands);
     }
 
     @Override

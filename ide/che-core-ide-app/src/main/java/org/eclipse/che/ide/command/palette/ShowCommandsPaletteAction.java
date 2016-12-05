@@ -35,6 +35,6 @@ public class ShowCommandsPaletteAction extends Action {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        presenter.open();
+        presenter.showDialog();
     }
 }
