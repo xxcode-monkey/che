@@ -31,9 +31,9 @@ public interface CommandEditorPage {
     IsWidget getView();
 
     /**
-     * <p>This method is called every time when command is opening in the editor.
-     * <p>Typically, implementor should hold the given {@code command}
-     * instance for subsequent modifying it directly and show the page's view.
+     * This method is called every time when command is opening in the editor.
+     * Typically, implementor should hold the given {@code command}
+     * instance for subsequent modifying it directly.
      */
     void setCommand(ContextualCommand command);
 

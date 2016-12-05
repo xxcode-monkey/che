@@ -41,7 +41,9 @@ public class ArgumentsPage extends AbstractCommandEditorPage implements Argument
     private final ArgumentsPageView       view;
     private final FileTypeRegistry        fileTypeRegistry;
     private final MacrosExplorerPresenter macrosExplorerPresenter;
-    private final TextEditor              textEditor;
+
+    /** Command line editor. */
+    private TextEditor editor;
 
     // initial value of the command line value
     private String commandLineInitial;
@@ -59,27 +61,28 @@ public class ArgumentsPage extends AbstractCommandEditorPage implements Argument
 
         view.setDelegate(this);
 
-        textEditor = editorBuilder.buildEditor();
+        initializeEditor(editorBuilder);
+    }
 
-        textEditor.activate();
-        textEditor.onOpen();
+    private void initializeEditor(EditorBuilder editorBuilder) {
+        editor = editorBuilder.buildEditor();
 
-//        VirtualFile file = new CommandLineFile("cmd", "cccmmmddd");
-//        textEditor.init(new EditorInputImpl(fileTypeRegistry.getFileTypeByFile(file), file), new OpenEditorCallbackImpl());
+        editor.activate();
+        editor.onOpen();
 
-        textEditor.addPropertyListener(new PropertyListener() {
+        editor.addPropertyListener(new PropertyListener() {
             @Override
             public void propertyChanged(PartPresenter source, int propId) {
                 switch (propId) {
                     case PROP_INPUT:
-                        textEditor.go(view.getEditorContainer());
+                        editor.go(view.getEditorContainer());
 
                         break;
                     case PROP_DIRTY:
-                        textEditor.getEditorInput().getFile().getContent().then(new Operation<String>() {
+                        editor.getEditorInput().getFile().getContent().then(new Operation<String>() {
                             @Override
                             public void apply(String arg) throws OperationException {
-                                onCommandLineChanged(textEditor.getDocument().getContents());
+                                onCommandLineChanged(editor.getDocument().getContents());
                             }
                         });
 
@@ -103,9 +106,9 @@ public class ArgumentsPage extends AbstractCommandEditorPage implements Argument
     }
 
     private void setCommandLine(String commandLine) {
-        VirtualFile file = new CommandLineFile(editedCommand.getName() + ".sh", commandLine);
+        final VirtualFile file = new CommandLineFile(editedCommand.getName() + ".sh", commandLine);
 
-        textEditor.init(new EditorInputImpl(fileTypeRegistry.getFileTypeByFile(file), file), new OpenEditorCallbackImpl());
+        editor.init(new EditorInputImpl(fileTypeRegistry.getFileTypeByFile(file), file), new OpenEditorCallbackImpl());
     }
 
     @Override
@@ -128,7 +131,7 @@ public class ArgumentsPage extends AbstractCommandEditorPage implements Argument
         macrosExplorerPresenter.showDialog(new MacrosExplorerPresenter.MacroChosenCallback() {
             @Override
             public void onMacroChosen(Macro macro) {
-                final Document document = textEditor.getDocument();
+                final Document document = editor.getDocument();
 
                 document.replace(document.getCursorOffset(), 0, macro.getName());
             }
