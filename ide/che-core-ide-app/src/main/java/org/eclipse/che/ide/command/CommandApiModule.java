@@ -24,14 +24,16 @@ import org.eclipse.che.ide.api.component.Component;
 import org.eclipse.che.ide.api.component.WsAgentComponent;
 import org.eclipse.che.ide.api.filetypes.FileType;
 import org.eclipse.che.ide.command.action.CommandTypePopUpGroupFactory;
-import org.eclipse.che.ide.command.action.ContextualCommandActionManager;
 import org.eclipse.che.ide.command.action.ContextualCommandActionFactory;
-import org.eclipse.che.ide.command.editor.page.arguments.macro.MacrosExplorerView;
-import org.eclipse.che.ide.command.editor.page.arguments.macro.MacrosExplorerViewImpl;
+import org.eclipse.che.ide.command.action.ContextualCommandActionManager;
+import org.eclipse.che.ide.command.macro.MacrosExplorerView;
+import org.eclipse.che.ide.command.macro.MacrosExplorerViewImpl;
 import org.eclipse.che.ide.command.manager.CommandManagerImpl3;
 import org.eclipse.che.ide.command.node.NodeFactory;
-import org.eclipse.che.ide.command.palette.CommandsPaletteView;
-import org.eclipse.che.ide.command.palette.CommandsPaletteViewImpl;
+import org.eclipse.che.ide.command.palette.CommandPaletteView;
+import org.eclipse.che.ide.command.palette.CommandPaletteViewImpl;
+import org.eclipse.che.ide.command.palette.MachineSelectorView;
+import org.eclipse.che.ide.command.palette.MachineSelectorViewImpl;
 import org.eclipse.che.ide.command.producer.CommandProducerActionFactory;
 import org.eclipse.che.ide.command.producer.CommandProducerActionManager;
 
@@ -66,7 +68,8 @@ public class CommandApiModule extends AbstractGinModule {
         install(new GinFactoryModuleBuilder().build(NodeFactory.class));
 
         bind(MacrosExplorerView.class).to(MacrosExplorerViewImpl.class).in(Singleton.class);
-        bind(CommandsPaletteView.class).to(CommandsPaletteViewImpl.class).in(Singleton.class);
+        bind(CommandPaletteView.class).to(CommandPaletteViewImpl.class).in(Singleton.class);
+        bind(MachineSelectorView.class).to(MachineSelectorViewImpl.class);
     }
 
     @Provides

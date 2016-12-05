@@ -37,12 +37,12 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Implementation of {@link CommandsPaletteView}.
+ * Implementation of {@link CommandPaletteView}.
  *
  * @author Artem Zatsarynnyi
  */
 @Singleton
-public class CommandsPaletteViewImpl extends Window implements CommandsPaletteView {
+public class CommandPaletteViewImpl extends Window implements CommandPaletteView {
 
     private static final CommandsPaletteViewImplUiBinder UI_BINDER = GWT.create(CommandsPaletteViewImplUiBinder.class);
 
@@ -58,7 +58,7 @@ public class CommandsPaletteViewImpl extends Window implements CommandsPaletteVi
     private ActionDelegate delegate;
 
     @Inject
-    public CommandsPaletteViewImpl(CommandTypeRegistry commandTypeRegistry, NodeFactory nodeFactory) {
+    public CommandPaletteViewImpl(CommandTypeRegistry commandTypeRegistry, NodeFactory nodeFactory) {
         this.commandTypeRegistry = commandTypeRegistry;
         this.nodeFactory = nodeFactory;
 
@@ -66,7 +66,7 @@ public class CommandsPaletteViewImpl extends Window implements CommandsPaletteVi
 
         setWidget(UI_BINDER.createAndBindUi(this));
 
-        setTitle("Commands Palette");
+        setTitle("Command Palette");
 
         filterField.getElement().setAttribute("placeholder", "Search command");
 
@@ -138,6 +138,6 @@ public class CommandsPaletteViewImpl extends Window implements CommandsPaletteVi
         delegate.onFilterChanged(filterField.getValue());
     }
 
-    interface CommandsPaletteViewImplUiBinder extends UiBinder<Widget, CommandsPaletteViewImpl> {
+    interface CommandsPaletteViewImplUiBinder extends UiBinder<Widget, CommandPaletteViewImpl> {
     }
 }

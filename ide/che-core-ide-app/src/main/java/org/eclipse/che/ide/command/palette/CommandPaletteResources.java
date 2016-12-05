@@ -15,11 +15,11 @@ import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.resources.client.DataResource;
 
 /**
- * {@link ClientBundle} for Commands Palette.
+ * {@link ClientBundle} for Command Palette.
  *
  * @author Artem Zatsarynnyi
  */
-public interface CommandsPaletteResources extends ClientBundle {
+public interface CommandPaletteResources extends ClientBundle {
 
     /** Resource is used as CSS constant's value for setting 'background-image' property. */
     @DataResource.MimeType("image/svg+xml")

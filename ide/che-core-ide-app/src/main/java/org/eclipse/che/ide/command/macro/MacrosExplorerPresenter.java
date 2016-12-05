@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.command.editor.page.arguments.macro;
+package org.eclipse.che.ide.command.macro;
 
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.inject.Inject;

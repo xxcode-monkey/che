@@ -17,18 +17,18 @@ import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
 
 /**
- * Action for opening Commands Palette.
+ * Action for opening Command Palette.
  *
  * @author Artem Zatsarynnyi
  */
 @Singleton
-public class ShowCommandsPaletteAction extends Action {
+public class ShowCommandPaletteAction extends Action {
 
-    private final CommandsPalettePresenter presenter;
+    private final CommandPalettePresenter presenter;
 
     @Inject
-    public ShowCommandsPaletteAction(CommandsPalettePresenter presenter) {
-        super("Commands Palette", "Show Commands Palette", null, null);
+    public ShowCommandPaletteAction(CommandPalettePresenter presenter) {
+        super("Command Palette", "Show Command Palette", null, null);
 
         this.presenter = presenter;
     }

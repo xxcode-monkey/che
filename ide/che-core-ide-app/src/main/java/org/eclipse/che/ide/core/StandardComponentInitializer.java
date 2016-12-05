@@ -64,7 +64,7 @@ import org.eclipse.che.ide.api.icon.IconRegistry;
 import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
 import org.eclipse.che.ide.api.keybinding.KeyBuilder;
 import org.eclipse.che.ide.command.editor.CommandEditorProvider;
-import org.eclipse.che.ide.command.palette.ShowCommandsPaletteAction;
+import org.eclipse.che.ide.command.palette.ShowCommandPaletteAction;
 import org.eclipse.che.ide.connection.WsConnectionListener;
 import org.eclipse.che.ide.imageviewer.ImageViewerProvider;
 import org.eclipse.che.ide.macro.ServerHostNameMacro;
@@ -291,7 +291,7 @@ public class StandardComponentInitializer {
     private CloseActiveEditorAction closeActiveEditorAction;
 
     @Inject
-    private ShowCommandsPaletteAction showCommandsPaletteAction;
+    private ShowCommandPaletteAction showCommandPaletteAction;
 
     @Inject
     private MessageLoaderResources messageLoaderResources;
@@ -670,9 +670,9 @@ public class StandardComponentInitializer {
         actionManager.registerAction("noOpAction", new NoOpAction());
         actionManager.registerAction("signatureHelp", signatureHelpAction);
 
-        actionManager.registerAction("showCommandsPalette", showCommandsPaletteAction);
+        actionManager.registerAction("showCommandsPalette", showCommandPaletteAction);
         DefaultActionGroup runGroup = (DefaultActionGroup)actionManager.getAction(IdeActions.GROUP_RUN);
-        runGroup.add(showCommandsPaletteAction);
+        runGroup.add(showCommandPaletteAction);
 
         DefaultActionGroup editorContextMenuGroup = new DefaultActionGroup(actionManager);
         actionManager.registerAction(IdeActions.GROUP_EDITOR_CONTEXT_MENU, editorContextMenuGroup);

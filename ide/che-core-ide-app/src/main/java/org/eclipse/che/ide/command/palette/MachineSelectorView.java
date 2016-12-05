@@ -8,19 +8,20 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
+
 package org.eclipse.che.ide.command.palette;
 
-import org.eclipse.che.ide.api.command.ContextualCommand;
+import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.ide.api.mvp.View;
 
 import java.util.List;
 
 /**
- * The view of {@link CommandsPalettePresenter}.
+ * Contact for the view of the machine selector.
  *
  * @author Artem Zatsarynnyi
  */
-public interface CommandsPaletteView extends View<CommandsPaletteView.ActionDelegate> {
+public interface MachineSelectorView extends View<MachineSelectorView.ActionDelegate> {
 
     /** Show the view. */
     void show();
@@ -28,16 +29,16 @@ public interface CommandsPaletteView extends View<CommandsPaletteView.ActionDele
     /** Close the view. */
     void close();
 
-    /** Sets the commands to display in the view. */
-    void setCommands(List<ContextualCommand> commands);
+    /** Sets the machines to display in the view. */
+    void setMachines(List<? extends Machine> machines);
 
     /** The action delegate for this view. */
     interface ActionDelegate {
 
-        /** Called when filtering commands is requested. */
-        void onFilterChanged(String filterValue);
+        /** Called when machine is selected. */
+        void onMachineSelected(Machine machine);
 
-        /** Called when command execution is requested. */
-        void onCommandExecute(ContextualCommand command);
+        /** Called when machine selection has been canceled. Note that view will be already closed. */
+        void onCanceled();
     }
 }

@@ -16,7 +16,7 @@ import org.eclipse.che.ide.api.command.ContextualCommand;
 import java.util.List;
 
 /**
- * Factory for tree nodes which are used by Commands Explorer, Commands Palette, commands editor, etc.
+ * Factory for tree nodes which are used by Commands Explorer, Command Palette, commands editor, etc.
  *
  * @author Artem Zatsarynnyi
  */
