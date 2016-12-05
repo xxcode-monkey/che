@@ -13,6 +13,8 @@ package org.eclipse.che.ide.command.palette;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.dom.client.KeyDownEvent;
+import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.event.dom.client.KeyPressHandler;
 import com.google.gwt.event.logical.shared.CloseEvent;
@@ -65,9 +67,7 @@ public class MachineSelectorViewImpl extends PopupPanel implements MachineSelect
             public void onKeyPress(KeyPressEvent event) {
                 final int keyCode = event.getNativeEvent().getKeyCode();
 
-                if (KeyCodes.KEY_ESCAPE == keyCode) {
-                    hide(true);
-                } else if (KeyCodes.KEY_ENTER == keyCode || KeyCodes.KEY_MAC_ENTER == keyCode) {
+                if (KeyCodes.KEY_ENTER == keyCode || KeyCodes.KEY_MAC_ENTER == keyCode) {
                     final String selectedMachineId = machinesList.getSelectedValue();
 
                     if (selectedMachineId != null) {
@@ -81,6 +81,15 @@ public class MachineSelectorViewImpl extends PopupPanel implements MachineSelect
                 }
             }
         }, KeyPressEvent.getType());
+
+        addDomHandler(new KeyDownHandler() {
+            @Override
+            public void onKeyDown(KeyDownEvent event) {
+                if (KeyCodes.KEY_ESCAPE == event.getNativeKeyCode()) {
+                    hide(true);
+                }
+            }
+        }, KeyDownEvent.getType());
 
         addCloseHandler(new CloseHandler<PopupPanel>() {
             @Override
@@ -125,8 +134,8 @@ public class MachineSelectorViewImpl extends PopupPanel implements MachineSelect
         machinesList.setVisibleItemCount(machines.size());
         machinesList.setSelectedIndex(0);
 
-        // set height of the machines list
-        final int machinesListHeight = 20 * machines.size();
+        // set height of each row in the machines list to 15 px
+        final int machinesListHeight = 15 * machines.size();
         machinesList.setHeight(machinesListHeight + "px");
 
         // set height of the entire panel

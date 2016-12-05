@@ -23,10 +23,8 @@ import org.eclipse.che.api.promises.client.js.RejectFunction;
 import org.eclipse.che.api.promises.client.js.ResolveFunction;
 import org.eclipse.che.ide.api.app.AppContext;
 
-import java.util.List;
-
 /**
- * Allows user to select a machine.
+ * Presenter for dialog which allows user to select a machine.
  *
  * @author Artem Zatsarynnyi
  * @see #selectMachine()
@@ -61,9 +59,7 @@ public class MachineSelectorPresenter implements MachineSelectorView.ActionDeleg
         final WorkspaceRuntime runtime = appContext.getWorkspace().getRuntime();
 
         if (runtime != null) {
-            final List<? extends Machine> machines = runtime.getMachines();
-
-            view.setMachines(machines);
+            view.setMachines(runtime.getMachines());
         }
 
         view.show();
@@ -86,6 +82,6 @@ public class MachineSelectorPresenter implements MachineSelectorView.ActionDeleg
 
     @Override
     public void onCanceled() {
-        rejectFunction.apply(JsPromiseError.create("machine selection has been canceled"));
+        rejectFunction.apply(JsPromiseError.create("Machine selection has been canceled"));
     }
 }
