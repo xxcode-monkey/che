@@ -27,7 +27,7 @@ public class StatusMessageReporterOverlay extends JavaScriptObject {
 
     /**
      * Create StatusMessageReporterOverlay for delegation status message
-     * reporting to class class {@link StatusMessageReporter}.
+     * reporting to class {@link StatusMessageReporter}.
      *
      * @param messageReporter
      *         delegate to report message status of the editor.
