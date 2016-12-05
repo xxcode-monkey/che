@@ -284,7 +284,7 @@ public class CommandEditor extends AbstractEditorPresenter implements CommandEdi
 
     @Override
     public void onCommandRemoved(ContextualCommand command) {
-        if (command.equals(editedCommand)) {
+        if (command.getName().equals(editedCommand.getName())) {
             editorAgent.closeEditor(this);
         }
     }

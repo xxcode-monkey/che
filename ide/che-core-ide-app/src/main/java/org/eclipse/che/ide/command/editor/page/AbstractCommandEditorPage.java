@@ -48,9 +48,12 @@ public abstract class AbstractCommandEditorPage implements CommandEditorPage {
 
         initialize();
         notifyDirtyStateChanged();
-
     }
 
+    /**
+     * This method is called every time when command is opening in the editor.
+     * Typically, implementor should initialize the page with the {@link #editedCommand}.
+     */
     protected abstract void initialize();
 
     @Override
