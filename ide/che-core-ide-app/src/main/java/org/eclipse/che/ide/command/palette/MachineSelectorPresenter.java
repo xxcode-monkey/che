@@ -23,6 +23,8 @@ import org.eclipse.che.api.promises.client.js.RejectFunction;
 import org.eclipse.che.api.promises.client.js.ResolveFunction;
 import org.eclipse.che.ide.api.app.AppContext;
 
+import java.util.List;
+
 /**
  * Presenter for dialog which allows user to select a machine.
  *
@@ -59,7 +61,13 @@ public class MachineSelectorPresenter implements MachineSelectorView.ActionDeleg
         final WorkspaceRuntime runtime = appContext.getWorkspace().getRuntime();
 
         if (runtime != null) {
-            view.setMachines(runtime.getMachines());
+            final List<? extends Machine> machines = runtime.getMachines();
+
+            if (machines.size() == 1) {
+                return promiseProvider.resolve((Machine)machines.get(0));
+            }
+
+            view.setMachines(machines);
         }
 
         view.show();

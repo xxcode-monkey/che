@@ -17,6 +17,8 @@ import com.google.inject.Singleton;
 import com.google.inject.assistedinject.Assisted;
 
 import org.eclipse.che.api.core.model.machine.Machine;
+import org.eclipse.che.api.promises.client.Operation;
+import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
@@ -25,13 +27,13 @@ import org.eclipse.che.ide.api.command.CommandManager;
 import org.eclipse.che.ide.api.command.CommandType;
 import org.eclipse.che.ide.api.command.CommandTypeRegistry;
 import org.eclipse.che.ide.api.command.ContextualCommand;
-import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.icon.Icon;
 import org.eclipse.che.ide.api.icon.IconRegistry;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.selection.Selection;
 import org.eclipse.che.ide.api.selection.SelectionAgent;
+import org.eclipse.che.ide.command.palette.MachineSelectorPresenter;
 import org.vectomatic.dom.svg.ui.SVGImage;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
@@ -45,13 +47,13 @@ import java.util.List;
 @Singleton
 class ContextualCommandAction extends Action {
 
-    private final CommandManager      commandManager;
-    private final AppContext          appContext;
-    private final IconRegistry        iconRegistry;
-    private final CommandTypeRegistry commandTypeRegistry;
-    private final SelectionAgent      selectionAgent;
-    private final DialogFactory       dialogFactory;
-    private final ContextualCommand   command;
+    private final ContextualCommand        command;
+    private final CommandManager           commandManager;
+    private final AppContext               appContext;
+    private final IconRegistry             iconRegistry;
+    private final CommandTypeRegistry      commandTypeRegistry;
+    private final SelectionAgent           selectionAgent;
+    private final MachineSelectorPresenter machineSelectorPresenter;
 
     @Inject
     ContextualCommandAction(@Assisted ContextualCommand command,
@@ -60,16 +62,16 @@ class ContextualCommandAction extends Action {
                             IconRegistry iconRegistry,
                             CommandTypeRegistry commandTypeRegistry,
                             SelectionAgent selectionAgent,
-                            DialogFactory dialogFactory) {
+                            MachineSelectorPresenter machineSelectorPresenter) {
         super(command.getName());
 
+        this.command = command;
         this.commandManager = commandManager;
         this.appContext = appContext;
         this.iconRegistry = iconRegistry;
         this.commandTypeRegistry = commandTypeRegistry;
         this.selectionAgent = selectionAgent;
-        this.dialogFactory = dialogFactory;
-        this.command = command;
+        this.machineSelectorPresenter = machineSelectorPresenter;
 
         // set icon
         final SVGResource commandIcon = getCommandIcon();
@@ -118,12 +120,15 @@ class ContextualCommandAction extends Action {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        final Machine machine = getSelectedMachine();
-
-        if (machine != null) {
-            commandManager.executeCommand(command, machine);
+        if (isMachineSelected()) {
+            commandManager.executeCommand(command, getSelectedMachine());
         } else {
-            dialogFactory.createMessageDialog("", "Machine isn't selected", null).show();
+            machineSelectorPresenter.selectMachine().then(new Operation<Machine>() {
+                @Override
+                public void apply(Machine arg) throws OperationException {
+                    commandManager.executeCommand(command, arg);
+                }
+            });
         }
     }
 

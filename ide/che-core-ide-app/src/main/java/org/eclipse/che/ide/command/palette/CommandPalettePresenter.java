@@ -90,20 +90,16 @@ public class CommandPalettePresenter implements CommandPaletteView.ActionDelegat
     public void onCommandExecute(final ContextualCommand command) {
         view.close();
 
-        final List<? extends Machine> machines = getMachines();
-
-        if (machines.isEmpty()) {
+        if (getMachines().isEmpty()) {
             // should not happen, but let's play safe
             dialogFactory.createMessageDialog("", "No machine is available for executing command", null).show();
-        } else if (machines.size() > 1) {
+        } else {
             machineSelectorPresenter.selectMachine().then(new Operation<Machine>() {
                 @Override
                 public void apply(Machine arg) throws OperationException {
                     commandExecutor.executeCommand(command, arg);
                 }
             });
-        } else {
-            commandExecutor.executeCommand(command, machines.get(0));
         }
     }
 

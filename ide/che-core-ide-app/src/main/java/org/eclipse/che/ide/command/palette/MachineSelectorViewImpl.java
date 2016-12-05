@@ -33,7 +33,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Implementation of {@link MachineSelectorView}.
+ * Implementation of {@link MachineSelectorView} which show pop-up that contains list of machines.
+ * User can select machine with Enter key or cancel selection with Esc key.
  *
  * @author Artem Zatsarynnyi
  */
