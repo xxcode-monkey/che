@@ -9,9 +9,11 @@
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.che.ide.command.palette;
+package org.eclipse.che.ide.machine.chooser;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.DoubleClickEvent;
+import com.google.gwt.event.dom.client.DoubleClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
@@ -33,12 +35,12 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Implementation of {@link MachineSelectorView} which show pop-up that contains list of machines.
+ * Implementation of {@link MachineChooserView} which show pop-up that contains list of machines.
  * User can select machine with Enter key or cancel selection with Esc key.
  *
  * @author Artem Zatsarynnyi
  */
-public class MachineSelectorViewImpl extends PopupPanel implements MachineSelectorView {
+public class MachineChooserViewImpl extends PopupPanel implements MachineChooserView {
 
     private static final MachineSelectorViewImplUiBinder UI_BINDER = GWT.create(MachineSelectorViewImplUiBinder.class);
 
@@ -54,16 +56,47 @@ public class MachineSelectorViewImpl extends PopupPanel implements MachineSelect
     private ActionDelegate delegate;
 
     @Inject
-    public MachineSelectorViewImpl() {
+    public MachineChooserViewImpl() {
         machinesById = new HashMap<>();
 
         setWidget(UI_BINDER.createAndBindUi(this));
 
+        initView();
+        addHandlers();
+    }
+
+    private void initView() {
         setAutoHideEnabled(true);
         setAnimationEnabled(true);
         setAnimationType(AnimationType.ROLL_DOWN);
+    }
 
-        addDomHandler(new KeyPressHandler() {
+    private void addHandlers() {
+        addCloseHandler(new CloseHandler<PopupPanel>() {
+            @Override
+            public void onClose(CloseEvent<PopupPanel> event) {
+                if (event.isAutoClosed()) {
+                    delegate.onCanceled();
+                }
+            }
+        });
+
+        machinesList.addDoubleClickHandler(new DoubleClickHandler() {
+            @Override
+            public void onDoubleClick(DoubleClickEvent event) {
+                final String selectedMachineId = machinesList.getSelectedValue();
+
+                if (selectedMachineId != null) {
+                    final Machine selectedMachine = machinesById.get(selectedMachineId);
+
+                    if (selectedMachine != null) {
+                        delegate.onMachineSelected(selectedMachine);
+                    }
+                }
+            }
+        });
+
+        machinesList.addKeyPressHandler(new KeyPressHandler() {
             @Override
             public void onKeyPress(KeyPressEvent event) {
                 final int keyCode = event.getNativeEvent().getKeyCode();
@@ -78,25 +111,15 @@ public class MachineSelectorViewImpl extends PopupPanel implements MachineSelect
                             delegate.onMachineSelected(selectedMachine);
                         }
                     }
-
                 }
             }
-        }, KeyPressEvent.getType());
+        });
 
-        addDomHandler(new KeyDownHandler() {
+        machinesList.addKeyDownHandler(new KeyDownHandler() {
             @Override
             public void onKeyDown(KeyDownEvent event) {
                 if (KeyCodes.KEY_ESCAPE == event.getNativeKeyCode()) {
                     hide(true);
-                }
-            }
-        }, KeyDownEvent.getType());
-
-        addCloseHandler(new CloseHandler<PopupPanel>() {
-            @Override
-            public void onClose(CloseEvent<PopupPanel> event) {
-                if (event.isAutoClosed()) {
-                    delegate.onCanceled();
                 }
             }
         });
@@ -143,6 +166,6 @@ public class MachineSelectorViewImpl extends PopupPanel implements MachineSelect
         layoutPanel.setHeight(20 + machinesListHeight + "px");
     }
 
-    interface MachineSelectorViewImplUiBinder extends UiBinder<DockLayoutPanel, MachineSelectorViewImpl> {
+    interface MachineSelectorViewImplUiBinder extends UiBinder<DockLayoutPanel, MachineChooserViewImpl> {
     }
 }

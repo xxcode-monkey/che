@@ -9,7 +9,7 @@
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.che.ide.command.macro;
+package org.eclipse.che.ide.macro.chooser;
 
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.GWT;
@@ -34,13 +34,13 @@ import org.eclipse.che.ide.api.macro.Macro;
 import org.eclipse.che.ide.ui.window.Window;
 
 /**
- * The implementation of the {@link MacrosExplorerView} that shows table for exploring and choosing macros.
+ * The implementation of the {@link MacroChooserView} that shows table for exploring and choosing macros.
  * Also provides ability to filter data in the table.
  *
  * @author Artem Zatsarynnyi
  */
 @Singleton
-public class MacrosExplorerViewImpl extends Window implements MacrosExplorerView {
+public class MacroChooserViewImpl extends Window implements MacroChooserView {
 
     private static final MacrosExplorerViewImplUiBinder UI_BINDER = GWT.create(MacrosExplorerViewImplUiBinder.class);
 
@@ -53,11 +53,11 @@ public class MacrosExplorerViewImpl extends Window implements MacrosExplorerView
     private ActionDelegate delegate;
 
     @Inject
-    public MacrosExplorerViewImpl(org.eclipse.che.ide.Resources resources) {
-        macrosTable = new CellTable<>(500, resources);
-        initMacrosTable();
-
+    public MacroChooserViewImpl(org.eclipse.che.ide.Resources resources) {
         setTitle("Command Macros");
+
+        initMacrosTable(resources);
+
         setWidget(UI_BINDER.createAndBindUi(this));
 
         filterField.getElement().setAttribute("placeholder", "Search macro");
@@ -66,7 +66,9 @@ public class MacrosExplorerViewImpl extends Window implements MacrosExplorerView
         getFooter().removeFromParent();
     }
 
-    private void initMacrosTable() {
+    private void initMacrosTable(org.eclipse.che.ide.Resources resources) {
+        macrosTable = new CellTable<>(500, resources);
+
         final Column<Macro, String> nameColumn = new Column<Macro, String>(new TextCell()) {
             @Override
             public String getValue(Macro remote) {
@@ -139,6 +141,6 @@ public class MacrosExplorerViewImpl extends Window implements MacrosExplorerView
         delegate.onFilterChanged(filterField.getValue());
     }
 
-    interface MacrosExplorerViewImplUiBinder extends UiBinder<Widget, MacrosExplorerViewImpl> {
+    interface MacrosExplorerViewImplUiBinder extends UiBinder<Widget, MacroChooserViewImpl> {
     }
 }

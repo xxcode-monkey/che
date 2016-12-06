@@ -8,11 +8,11 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.command.macro;
+
+package org.eclipse.che.ide.macro.chooser;
 
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.macro.Macro;
@@ -26,14 +26,12 @@ import java.util.List;
 import static org.eclipse.che.ide.util.StringUtils.containsIgnoreCase;
 
 /**
- * The presenter for macros explorer.
- * <p>Caller may provide callback to the {@link #showDialog(MacroChosenCallback)} method
- * to be notified when some macro has been chosen.
+ * Provides a simple mechanism for the user to choose a {@link Macro}.
  *
  * @author Artem Zatsarynnyi
+ * @see #show(MacroChosenCallback)
  */
-@Singleton
-public class MacrosExplorerPresenter implements MacrosExplorerView.ActionDelegate {
+public class MacroChooser implements MacroChooserView.ActionDelegate {
 
     /** Comparator for ordering macros by it's name. */
     private static final Comparator<Macro> MACRO_COMPARATOR = new Comparator<Macro>() {
@@ -43,8 +41,8 @@ public class MacrosExplorerPresenter implements MacrosExplorerView.ActionDelegat
         }
     };
 
-    private final MacrosExplorerView view;
-    private final MacroRegistry      macroRegistry;
+    private final MacroChooserView view;
+    private final MacroRegistry    macroRegistry;
 
     /**
      * Provides macros list for the view.
@@ -55,7 +53,7 @@ public class MacrosExplorerPresenter implements MacrosExplorerView.ActionDelegat
     private MacroChosenCallback callback;
 
     @Inject
-    public MacrosExplorerPresenter(MacrosExplorerView view, MacroRegistry macroRegistry) {
+    public MacroChooser(MacroChooserView view, MacroRegistry macroRegistry) {
         this.view = view;
         this.macroRegistry = macroRegistry;
 
@@ -66,13 +64,13 @@ public class MacrosExplorerPresenter implements MacrosExplorerView.ActionDelegat
     }
 
     /**
-     * Open Macros Explorer.
-     * If {@code callback} is provided, it will be called to report about chosen {@link Macro}.
+     * Pops up a macro chooser dialog.
+     * {@link MacroChosenCallback} can be specified to be invoked when the user chose a {@link Macro}.
      *
      * @param callback
      *         callback that will be called to report about chosen {@link Macro}
      */
-    public void showDialog(@Nullable MacroChosenCallback callback) {
+    public void show(@Nullable MacroChosenCallback callback) {
         this.callback = callback;
 
         updateMacrosProvider(macroRegistry.getMacros());

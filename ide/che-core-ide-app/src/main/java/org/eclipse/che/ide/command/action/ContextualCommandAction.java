@@ -33,7 +33,7 @@ import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.selection.Selection;
 import org.eclipse.che.ide.api.selection.SelectionAgent;
-import org.eclipse.che.ide.command.palette.MachineSelectorPresenter;
+import org.eclipse.che.ide.machine.chooser.MachineChooser;
 import org.vectomatic.dom.svg.ui.SVGImage;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
@@ -47,13 +47,13 @@ import java.util.List;
 @Singleton
 class ContextualCommandAction extends Action {
 
-    private final ContextualCommand        command;
-    private final CommandManager           commandManager;
-    private final AppContext               appContext;
-    private final IconRegistry             iconRegistry;
-    private final CommandTypeRegistry      commandTypeRegistry;
-    private final SelectionAgent           selectionAgent;
-    private final MachineSelectorPresenter machineSelectorPresenter;
+    private final ContextualCommand   command;
+    private final CommandManager      commandManager;
+    private final AppContext          appContext;
+    private final IconRegistry        iconRegistry;
+    private final CommandTypeRegistry commandTypeRegistry;
+    private final SelectionAgent      selectionAgent;
+    private final MachineChooser      machineChooser;
 
     @Inject
     ContextualCommandAction(@Assisted ContextualCommand command,
@@ -62,7 +62,7 @@ class ContextualCommandAction extends Action {
                             IconRegistry iconRegistry,
                             CommandTypeRegistry commandTypeRegistry,
                             SelectionAgent selectionAgent,
-                            MachineSelectorPresenter machineSelectorPresenter) {
+                            MachineChooser machineChooser) {
         super(command.getName());
 
         this.command = command;
@@ -71,7 +71,7 @@ class ContextualCommandAction extends Action {
         this.iconRegistry = iconRegistry;
         this.commandTypeRegistry = commandTypeRegistry;
         this.selectionAgent = selectionAgent;
-        this.machineSelectorPresenter = machineSelectorPresenter;
+        this.machineChooser = machineChooser;
 
         // set icon
         final SVGResource commandIcon = getCommandIcon();
@@ -123,7 +123,7 @@ class ContextualCommandAction extends Action {
         if (isMachineSelected()) {
             commandManager.executeCommand(command, getSelectedMachine());
         } else {
-            machineSelectorPresenter.selectMachine().then(new Operation<Machine>() {
+            machineChooser.show().then(new Operation<Machine>() {
                 @Override
                 public void apply(Machine arg) throws OperationException {
                     commandManager.executeCommand(command, arg);

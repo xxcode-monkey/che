@@ -9,7 +9,7 @@
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.che.ide.command.palette;
+package org.eclipse.che.ide.machine.chooser;
 
 import com.google.inject.Inject;
 
@@ -26,24 +26,24 @@ import org.eclipse.che.ide.api.app.AppContext;
 import java.util.List;
 
 /**
- * Presenter for dialog which allows user to select a machine.
+ * Provides a simple mechanism for the user to choose a {@link Machine}.
  *
  * @author Artem Zatsarynnyi
- * @see #selectMachine()
+ * @see #show()
  */
-public class MachineSelectorPresenter implements MachineSelectorView.ActionDelegate {
+public class MachineChooser implements MachineChooserView.ActionDelegate {
 
-    private final MachineSelectorView view;
-    private final AppContext          appContext;
-    private final PromiseProvider     promiseProvider;
+    private final MachineChooserView view;
+    private final AppContext         appContext;
+    private final PromiseProvider    promiseProvider;
 
     private ResolveFunction<Machine> resolveFunction;
     private RejectFunction           rejectFunction;
 
     @Inject
-    public MachineSelectorPresenter(MachineSelectorView view,
-                                    AppContext appContext,
-                                    PromiseProvider promiseProvider) {
+    public MachineChooser(MachineChooserView view,
+                          AppContext appContext,
+                          PromiseProvider promiseProvider) {
         this.view = view;
         this.appContext = appContext;
         this.promiseProvider = promiseProvider;
@@ -52,12 +52,12 @@ public class MachineSelectorPresenter implements MachineSelectorView.ActionDeleg
     }
 
     /**
-     * Opens dialog for selecting machine.
+     * Pops up a machine chooser dialog.
      *
-     * @return promise that will be resolved with a selected {@link Machine}
+     * @return promise that will be resolved with a chosen {@link Machine}
      * or rejected in case machine selection has been cancelled
      */
-    public Promise<Machine> selectMachine() {
+    public Promise<Machine> show() {
         final WorkspaceRuntime runtime = appContext.getWorkspace().getRuntime();
 
         if (runtime != null) {

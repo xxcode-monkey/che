@@ -22,6 +22,7 @@ import org.eclipse.che.ide.api.command.CommandManager;
 import org.eclipse.che.ide.api.command.CommandManager3;
 import org.eclipse.che.ide.api.command.ContextualCommand;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
+import org.eclipse.che.ide.machine.chooser.MachineChooser;
 
 import java.util.Collections;
 import java.util.List;
@@ -37,12 +38,12 @@ import static org.eclipse.che.ide.util.StringUtils.containsIgnoreCase;
 @Singleton
 public class CommandPalettePresenter implements CommandPaletteView.ActionDelegate {
 
-    private final CommandPaletteView       view;
-    private final CommandManager3          commandManager;
-    private final CommandManager           commandExecutor;
-    private final DialogFactory            dialogFactory;
-    private final AppContext               appContext;
-    private final MachineSelectorPresenter machineSelectorPresenter;
+    private final CommandPaletteView view;
+    private final CommandManager3    commandManager;
+    private final CommandManager     commandExecutor;
+    private final DialogFactory      dialogFactory;
+    private final AppContext         appContext;
+    private final MachineChooser     machineChooser;
 
     @Inject
     public CommandPalettePresenter(CommandPaletteView view,
@@ -50,13 +51,13 @@ public class CommandPalettePresenter implements CommandPaletteView.ActionDelegat
                                    CommandManager commandExecutor,
                                    DialogFactory dialogFactory,
                                    AppContext appContext,
-                                   MachineSelectorPresenter machineSelectorPresenter) {
+                                   MachineChooser machineChooser) {
         this.view = view;
         this.commandManager = commandManager;
         this.commandExecutor = commandExecutor;
         this.dialogFactory = dialogFactory;
         this.appContext = appContext;
-        this.machineSelectorPresenter = machineSelectorPresenter;
+        this.machineChooser = machineChooser;
 
         view.setDelegate(this);
     }
@@ -94,7 +95,7 @@ public class CommandPalettePresenter implements CommandPaletteView.ActionDelegat
             // should not happen, but let's play safe
             dialogFactory.createMessageDialog("", "No machine is available for executing command", null).show();
         } else {
-            machineSelectorPresenter.selectMachine().then(new Operation<Machine>() {
+            machineChooser.show().then(new Operation<Machine>() {
                 @Override
                 public void apply(Machine arg) throws OperationException {
                     commandExecutor.executeCommand(command, arg);

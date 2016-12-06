@@ -26,7 +26,7 @@ import org.eclipse.che.ide.api.parts.PropertyListener;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.command.editor.page.AbstractCommandEditorPage;
 import org.eclipse.che.ide.command.editor.page.CommandEditorPage;
-import org.eclipse.che.ide.command.macro.MacrosExplorerPresenter;
+import org.eclipse.che.ide.macro.chooser.MacroChooser;
 
 import static org.eclipse.che.ide.api.editor.EditorPartPresenter.PROP_DIRTY;
 import static org.eclipse.che.ide.api.editor.EditorPartPresenter.PROP_INPUT;
@@ -38,9 +38,9 @@ import static org.eclipse.che.ide.api.editor.EditorPartPresenter.PROP_INPUT;
  */
 public class ArgumentsPage extends AbstractCommandEditorPage implements ArgumentsPageView.ActionDelegate {
 
-    private final ArgumentsPageView       view;
-    private final FileTypeRegistry        fileTypeRegistry;
-    private final MacrosExplorerPresenter macrosExplorerPresenter;
+    private final ArgumentsPageView view;
+    private final FileTypeRegistry  fileTypeRegistry;
+    private final MacroChooser      macroChooser;
 
     /** Command line editor. */
     private TextEditor editor;
@@ -52,12 +52,12 @@ public class ArgumentsPage extends AbstractCommandEditorPage implements Argument
     public ArgumentsPage(final ArgumentsPageView view,
                          EditorBuilder editorBuilder,
                          FileTypeRegistry fileTypeRegistry,
-                         MacrosExplorerPresenter macrosExplorerPresenter) {
+                         MacroChooser macroChooser) {
         super("Arguments", "Command line");
 
         this.view = view;
         this.fileTypeRegistry = fileTypeRegistry;
-        this.macrosExplorerPresenter = macrosExplorerPresenter;
+        this.macroChooser = macroChooser;
 
         view.setDelegate(this);
 
@@ -128,7 +128,7 @@ public class ArgumentsPage extends AbstractCommandEditorPage implements Argument
 
     @Override
     public void onExploreMacros() {
-        macrosExplorerPresenter.showDialog(new MacrosExplorerPresenter.MacroChosenCallback() {
+        macroChooser.show(new MacroChooser.MacroChosenCallback() {
             @Override
             public void onMacroChosen(Macro macro) {
                 final Document document = editor.getDocument();

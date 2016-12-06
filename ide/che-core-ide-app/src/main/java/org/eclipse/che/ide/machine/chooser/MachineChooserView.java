@@ -9,7 +9,7 @@
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.che.ide.command.palette;
+package org.eclipse.che.ide.machine.chooser;
 
 import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.ide.api.mvp.View;
@@ -21,7 +21,7 @@ import java.util.List;
  *
  * @author Artem Zatsarynnyi
  */
-public interface MachineSelectorView extends View<MachineSelectorView.ActionDelegate> {
+public interface MachineChooserView extends View<MachineChooserView.ActionDelegate> {
 
     /** Show the view. */
     void show();

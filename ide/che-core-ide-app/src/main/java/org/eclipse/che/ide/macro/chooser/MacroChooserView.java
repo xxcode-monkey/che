@@ -8,7 +8,8 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.command.macro;
+
+package org.eclipse.che.ide.macro.chooser;
 
 import com.google.gwt.view.client.ListDataProvider;
 
@@ -20,7 +21,7 @@ import org.eclipse.che.ide.api.mvp.View;
  *
  * @author Artem Zatsarynnyi
  */
-public interface MacrosExplorerView extends View<MacrosExplorerView.ActionDelegate> {
+public interface MacroChooserView extends View<MacroChooserView.ActionDelegate> {
 
     /** Show the view. */
     void show();
