@@ -300,14 +300,14 @@
 }
 
 .sshButton {
+    position: relative;
     font-size: 10px;
     float: right;
     margin-right: 2px;
     color: categoryHeaderButtonColor;
     cursor: pointer;
-    position: absolute;
-    right: 24px;
-    top: 0px;
+    right: 0;
+    top: 0;
 }
 
 .processTree .newTerminalButton {
@@ -321,9 +321,9 @@
     box-sizing: border-box;
     text-align: center;
     cursor: pointer;
-    position: absolute;
-    right: 0px;
-    top: 0px;
+    position: relative;
+    right: 0;
+    top: 0;
 }
 
 .processTree .newTerminalButton > svg {
@@ -414,6 +414,7 @@
 }
 
 .processesPanelStopButtonForProcess {
+    position: relative;
     float: right;
     background-color: editorTabIconColor;
     opacity: 0.3;
@@ -423,8 +424,6 @@
     border-radius: 2px;
     box-sizing: border-box;
     cursor: pointer;
-    position: absolute;
-    right: 24px;
     top: 0px;
 }
 
@@ -437,6 +436,7 @@
 }
 
 .processesPanelCloseButtonForProcess svg {
+    position: relative;
     cursor: pointer;
     opacity: 0.5;
     padding-top: 6px;
@@ -445,9 +445,6 @@
     padding-right: 9px;
     float: right;
     fill: editorTabIconColor;
-    position: absolute;
-    right: 0px;
-    top: 0px;
 }
 
 .processesPanelCloseButtonForProcess svg g,
