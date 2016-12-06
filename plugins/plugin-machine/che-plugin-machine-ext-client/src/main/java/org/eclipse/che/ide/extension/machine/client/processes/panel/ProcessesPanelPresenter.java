@@ -475,6 +475,8 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
 
     @Override
     public void onTreeNodeSelected(final ProcessTreeNode node) {
+        setSelection(new Selection.NoSelectionProvided());
+
         if (node != null) {
             if (ProcessTreeNode.ProcessNodeType.MACHINE_NODE == node.getType()) {
                 final MachineEntity machine = getMachine(node.getId());

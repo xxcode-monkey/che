@@ -46,20 +46,22 @@ public class ContextualCommandActionManager implements Component,
 
     private final CommandManager3                commandManager;
     private final ActionManager                  actionManager;
+    private final CommandsActionGroup            commandsActionGroup;
     private final CommandTypePopUpGroupFactory   commandTypePopUpGroupFactory;
     private final ContextualCommandActionFactory contextualCommandActionFactory;
 
-    private final DefaultActionGroup              commandsPopUpGroup;
     private final Map<String, Action>             command2Action;
     private final Map<String, DefaultActionGroup> commandTypePopUpGroups;
 
     @Inject
     public ContextualCommandActionManager(CommandManager3 commandManager,
                                           ActionManager actionManager,
+                                          CommandsActionGroup commandsActionGroup,
                                           CommandTypePopUpGroupFactory commandTypePopUpGroupFactory,
                                           ContextualCommandActionFactory contextualCommandActionFactory) {
         this.commandManager = commandManager;
         this.actionManager = actionManager;
+        this.commandsActionGroup = commandsActionGroup;
         this.commandTypePopUpGroupFactory = commandTypePopUpGroupFactory;
         this.contextualCommandActionFactory = contextualCommandActionFactory;
 
@@ -69,13 +71,12 @@ public class ContextualCommandActionManager implements Component,
         commandManager.addCommandLoadedListener(this);
         commandManager.addCommandChangedListener(this);
 
-        commandsPopUpGroup = new DefaultActionGroup("Commands", true, actionManager);
-        actionManager.registerAction("commandsPopUpGroup", commandsPopUpGroup);
+        actionManager.registerAction("commandsActionGroup", commandsActionGroup);
 
         // inject 'Commands' menu into context menus
-        ((DefaultActionGroup)actionManager.getAction(GROUP_MAIN_CONTEXT_MENU)).add(commandsPopUpGroup);
-        ((DefaultActionGroup)actionManager.getAction(GROUP_EDITOR_TAB_CONTEXT_MENU)).add(commandsPopUpGroup);
-        ((DefaultActionGroup)actionManager.getAction(GROUP_CONSOLES_TREE_CONTEXT_MENU)).add(commandsPopUpGroup);
+        ((DefaultActionGroup)actionManager.getAction(GROUP_MAIN_CONTEXT_MENU)).add(commandsActionGroup);
+        ((DefaultActionGroup)actionManager.getAction(GROUP_EDITOR_TAB_CONTEXT_MENU)).add(commandsActionGroup);
+        ((DefaultActionGroup)actionManager.getAction(GROUP_CONSOLES_TREE_CONTEXT_MENU)).add(commandsActionGroup);
     }
 
     @Override
@@ -123,7 +124,7 @@ public class ContextualCommandActionManager implements Component,
             actionManager.registerAction(commandTypeId, commandTypePopUpGroup);
             commandTypePopUpGroups.put(commandTypeId, commandTypePopUpGroup);
 
-            commandsPopUpGroup.add(commandTypePopUpGroup);
+            commandsActionGroup.add(commandTypePopUpGroup);
         }
 
         return commandTypePopUpGroup;
@@ -161,7 +162,7 @@ public class ContextualCommandActionManager implements Component,
 
                 // remove action group if it is empty
                 if (commandTypePopUpGroup.getChildrenCount() == 0) {
-                    commandsPopUpGroup.remove(commandTypePopUpGroup);
+                    commandsActionGroup.remove(commandTypePopUpGroup);
                 }
             }
         }

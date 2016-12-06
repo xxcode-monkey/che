@@ -14,7 +14,7 @@ import org.vectomatic.dom.svg.ui.SVGImage;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 /**
- * Pop-up action group for command type.
+ * Action group for command type.
  *
  * @author Artem Zatsarynnyi
  */
@@ -47,8 +47,6 @@ class CommandTypePopUpGroup extends DefaultActionGroup {
 
     @Override
     public void update(ActionEvent e) {
-        super.update(e);
-
         e.getPresentation().setText(commandType.getDisplayName() + " (" + getChildrenCount() + ")");
     }
 
