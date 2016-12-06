@@ -33,7 +33,7 @@ public interface CommandEditorPage {
     /**
      * This method is called every time when command is opening in the editor.
      * Typically, implementor should hold the given {@code command}
-     * instance for subsequent modifying it directly.
+     * instance for subsequent modifying it directly and do pages's initial setup.
      */
     void setCommand(ContextualCommand command);
 

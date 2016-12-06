@@ -67,10 +67,10 @@ public class MacrosExplorerPresenter implements MacrosExplorerView.ActionDelegat
 
     /**
      * Open Macros Explorer.
-     * If {@code callback} is provided, it will be used for notifying about selecting a macro.
+     * If {@code callback} is provided, it will be called to report about chosen {@link Macro}.
      *
      * @param callback
-     *         callback for receiving notification about choosing a macro. May be {@code null}.
+     *         callback that will be called to report about chosen {@link Macro}
      */
     public void showDialog(@Nullable MacroChosenCallback callback) {
         this.callback = callback;
