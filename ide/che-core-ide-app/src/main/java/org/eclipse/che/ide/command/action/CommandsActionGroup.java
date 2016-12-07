@@ -44,6 +44,8 @@ public class CommandsActionGroup extends DefaultActionGroup {
     public void update(ActionEvent e) {
         e.getPresentation().setEnabledAndVisible(false);
 
+        // action group should be visible when current selection is machine or project
+
         final Selection<?> selection = selectionAgent.getSelection();
 
         if (selection != null && !selection.isEmpty() && selection.isSingleSelection()) {
