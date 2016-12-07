@@ -20,26 +20,30 @@
         @eval partBackground org.eclipse.che.ide.api.theme.Style.theme.partBackground();
         @eval tabsPanelBackground org.eclipse.che.ide.api.theme.Style.theme.tabsPanelBackground();
 
-        .tabsPanel {
-            background-color: tabsPanelBackground;
-        }
-
         .mainPanel {
             background-color: partBackground;
         }
 
+        .header {
+            background-color: tabsPanelBackground;
+            padding: 10px 0 0 10px;
+        }
+
+        .tabsPanel {
+            float: left;
+        }
+
         .button {
-            margin-left: 77px;
-            float: none;
+            float: left;
         }
     </ui:style>
 
     <g:DockLayoutPanel addStyleNames="{style.mainPanel}">
-        <g:north size="30" addStyleNames="{style.tabsPanel}">
-            <g:FlowPanel>
-                <g:SimplePanel>
+        <g:north size="50">
+            <g:FlowPanel height="40px" addStyleNames="{style.header}">
+                <g:FlowPanel width="450px" height="30px" addStyleNames="{style.tabsPanel}">
                     <che:radiobuttongroup.RadioButtonGroup ui:field="pagesSwitcher" debugId="command-editor-pages-switcher"/>
-                </g:SimplePanel>
+                </g:FlowPanel>
                 <g:Button ui:field="saveButton" text="Save" addStyleNames="{style.button}" debugId="command-editor-button-save"/>
             </g:FlowPanel>
         </g:north>

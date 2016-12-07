@@ -23,7 +23,7 @@ import com.google.gwt.user.client.ui.Widget;
 import org.eclipse.che.ide.ui.switcher.Switcher;
 
 /**
- * //
+ * Switcher widget which is associated with some project name.
  *
  * @author Artem Zatsarynnyi
  */

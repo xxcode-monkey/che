@@ -15,20 +15,49 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
              xmlns:g='urn:import:com.google.gwt.user.client.ui'>
 
+    <ui:style>
+        .section {
+            margin-left: 10px;
+            margin-top: 15px;
+        }
+
+        .checkbox-panel {
+            margin-left: 10px;
+        }
+
+        .table-header {
+            background-color: #2f353b;
+        }
+
+        .column-header {
+            display: inline-block;
+            width: 150px;
+            margin-left: 10px;
+        }
+    </ui:style>
+
     <g:DockLayoutPanel unit="PX">
-        <g:north size="100">
+        <g:north size="115">
             <g:FlowPanel>
-                <g:Label text="Name"/>
-                <g:TextBox ui:field="commandName" width="400px"/>
-                <g:Label text="Context"/>
-                <g:FlowPanel>
-                    <g:CheckBox ui:field="workspace" text="Workspace"/>
+                <g:FlowPanel addStyleNames="{style.section}">
+                    <g:Label text="Name"/>
+                    <g:TextBox ui:field="commandName" width="500px"/>
+                </g:FlowPanel>
+                <g:FlowPanel addStyleNames="{style.section}">
+                    <g:Label text="Context"/>
+                    <g:FlowPanel addStyleNames="{style.checkbox-panel}">
+                        <g:CheckBox ui:field="workspace" text="Workspace"/>
+                    </g:FlowPanel>
                 </g:FlowPanel>
             </g:FlowPanel>
         </g:north>
         <g:center>
-            <g:FlowPanel>
+            <g:FlowPanel width="500px" addStyleNames="{style.section}">
                 <g:Label text="Projects"/>
+                <g:FlowPanel addStyleNames="{style.table-header}">
+                    <g:Label text="Project" addStyleNames="{style.column-header}"/>
+                    <g:Label text="Applicable" addStyleNames="{style.column-header}"/>
+                </g:FlowPanel>
                 <g:FlowPanel ui:field="projectsPanel"/>
             </g:FlowPanel>
         </g:center>
