@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.menu;
 
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.RootPanel;
@@ -88,7 +89,7 @@ public class ContextMenu implements CloseMenuHandler, ActionSelectedHandler {
      * @param y
      *         y coordinate
      */
-    public void show(int x, int y) {
+    public void show(final int x, final int y) {
         hide();
         ActionGroup actions = updateActions();
 
@@ -101,19 +102,33 @@ public class ContextMenu implements CloseMenuHandler, ActionSelectedHandler {
                                   this,
                                   keyBindingAgent,
                                   "contextMenu");
+
+        popupMenu.getElement().getStyle().setProperty("opacity", "0");
+        popupMenu.getElement().getStyle().setProperty("transition", "opacity 0.5s ease");
+
         lockLayer.add(popupMenu);
 
-        calculatePosition(popupMenu, x, y);
+        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+            @Override
+            public void execute() {
+                popupMenu.getElement().getStyle().setProperty("opacity", "1");
+                updateMenuPosition(popupMenu, x, y);
+            }
+        });
     }
 
-    private void calculatePosition(PopupMenu popupMenu, int x, int y) {
-        int windowHeight = Window.getClientHeight();
-        int popupHeight = popupMenu.getOffsetHeight();
+    private void updateMenuPosition(PopupMenu popupMenu, int x, int y) {
+        if (x + popupMenu.getOffsetWidth() > Window.getClientWidth()) {
+            popupMenu.getElement().getStyle().setLeft(x - popupMenu.getOffsetWidth() - 1, PX);
+        } else {
+            popupMenu.getElement().getStyle().setLeft(x, PX);
+        }
 
-        boolean isMenuWithinWindow = popupHeight + y < windowHeight;
-
-        popupMenu.getElement().getStyle().setTop(isMenuWithinWindow ? y : y - popupHeight, PX);
-        popupMenu.getElement().getStyle().setLeft(x, PX);
+        if (y + popupMenu.getOffsetHeight() > Window.getClientHeight()) {
+            popupMenu.getElement().getStyle().setTop(y - popupMenu.getOffsetHeight() - 1, PX);
+        } else {
+            popupMenu.getElement().getStyle().setTop(y, PX);
+        }
     }
 
     /**
@@ -156,4 +171,5 @@ public class ContextMenu implements CloseMenuHandler, ActionSelectedHandler {
             lockLayer = null;
         }
     }
+
 }

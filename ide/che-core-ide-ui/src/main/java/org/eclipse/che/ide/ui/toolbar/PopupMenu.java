@@ -127,7 +127,6 @@ public class PopupMenu extends Composite {
         }
     };
 
-
     /**
      * Creates new popup.
      *

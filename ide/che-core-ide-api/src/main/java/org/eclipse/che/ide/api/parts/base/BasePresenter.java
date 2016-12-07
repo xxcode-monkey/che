@@ -51,6 +51,7 @@ public abstract class BasePresenter extends AbstractPartPresenter implements Bas
 
     @Override
     public void onPartMenu(int mouseX, int mouseY) {
+        partStack.showPartMenu(mouseX, mouseY);
     }
 
     /**
