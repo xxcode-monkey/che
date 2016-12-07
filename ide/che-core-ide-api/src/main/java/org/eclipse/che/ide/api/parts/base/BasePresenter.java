@@ -49,6 +49,10 @@ public abstract class BasePresenter extends AbstractPartPresenter implements Bas
         partStack.setActivePart(this);
     }
 
+    @Override
+    public void onPartMenu(int mouseX, int mouseY) {
+    }
+
     /**
      * Set PartStack where this part added.
      *

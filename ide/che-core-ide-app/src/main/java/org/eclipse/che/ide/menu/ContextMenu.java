@@ -120,8 +120,6 @@ public class ContextMenu implements CloseMenuHandler, ActionSelectedHandler {
      * Updates the list of visible actions.
      */
     protected ActionGroup updateActions() {
-
-
         final ActionGroup mainActionGroup = (ActionGroup)actionManager.getAction(getGroupMenu());
         if (mainActionGroup == null) {
             return new DefaultActionGroup(actionManager);

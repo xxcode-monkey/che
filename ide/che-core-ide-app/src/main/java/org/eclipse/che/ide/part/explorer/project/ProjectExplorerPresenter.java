@@ -175,11 +175,11 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
 
         ProjectExplorer.expandAll = $entry(function () {
             that.@org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter::doExpand()();
-        })
+        });
 
         ProjectExplorer.collapseAll = $entry(function () {
             that.@org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter::doCollapse()();
-        })
+        });
 
         $wnd.IDE.ProjectExplorer = ProjectExplorer;
     }-*/;
