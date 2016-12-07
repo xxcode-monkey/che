@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.api;
+package org.eclipse.che.ide;
 
 /**
  * Font awesome icons.

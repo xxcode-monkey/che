@@ -32,7 +32,7 @@ import org.eclipse.che.ide.api.parts.PartStack;
 import org.eclipse.che.ide.api.parts.PartStackType;
 import org.eclipse.che.ide.api.parts.Perspective;
 import org.eclipse.che.ide.api.parts.PerspectiveManager;
-import org.eclipse.che.ide.api.FontAwesome;
+import org.eclipse.che.ide.FontAwesome;
 
 /**
  * @author Evgen Vidolob
