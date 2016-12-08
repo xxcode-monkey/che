@@ -41,7 +41,7 @@ import org.eclipse.che.ide.command.node.CommandFileNode;
 import org.vectomatic.dom.svg.ui.SVGImage;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
@@ -96,7 +96,7 @@ public class CommandEditor extends AbstractEditorPresenter implements CommandEdi
 
         commandManager.addCommandChangedListener(this);
 
-        pages = new ArrayList<>();
+        pages = new LinkedList<>();
         pages.add(infoPage);
         pages.add(argumentsPage);
         pages.add(previewUrlPage);

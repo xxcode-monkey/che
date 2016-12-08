@@ -17,23 +17,25 @@
              xmlns:che='urn:import:org.eclipse.che.ide.ui.switcher'>
 
     <ui:style>
-        .background {
+        .panel {
             background-color: #3d4750;
+            padding: 5px 0 5px 0;
         }
 
         .label {
             display: inline-block;
             width: 150px;
-            margin-left: 10px;
+            margin: 0 0 0 10px;
         }
 
         .switcher {
             display: inline-block;
             margin-left: 10px;
+            vertical-align: middle;
         }
     </ui:style>
 
-    <g:FlowPanel addStyleNames="{style.background}">
+    <g:FlowPanel addStyleNames="{style.panel}">
         <g:Label ui:field="label" addStyleNames="{style.label}"/>
         <che:Switcher ui:field="switcher" addStyleNames="{style.switcher}"/>
     </g:FlowPanel>

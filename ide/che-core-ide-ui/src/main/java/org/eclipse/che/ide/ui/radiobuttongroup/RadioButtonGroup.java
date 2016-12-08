@@ -50,6 +50,7 @@ public class RadioButtonGroup extends Composite {
     /** Creates new mutually-exclusion group of buttons. */
     public RadioButtonGroup() {
         GROUP_NAME = "buttons-group-" + UUID.uuid();
+
         buttons = new ArrayList<>();
         mainPanel = new FlowPanel();
         mainPanel.setStyleName(resources.getCSS().mainPanel());
