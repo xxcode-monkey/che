@@ -41,7 +41,7 @@
             <g:FlowPanel>
                 <g:FlowPanel addStyleNames="{style.section}">
                     <g:Label text="Name"/>
-                    <g:TextBox ui:field="commandName" width="500px"/>
+                    <g:TextBox ui:field="commandName" width="490px"/>
                 </g:FlowPanel>
                 <g:FlowPanel addStyleNames="{style.section}">
                     <g:Label text="Context"/>
@@ -52,7 +52,7 @@
             </g:FlowPanel>
         </g:north>
         <g:center>
-            <g:FlowPanel width="500px" addStyleNames="{style.section}">
+            <g:FlowPanel ui:field="projectsSection" width="500px" addStyleNames="{style.section}">
                 <g:Label text="Projects"/>
                 <g:FlowPanel addStyleNames="{style.table-header}">
                     <g:Label text="Project" addStyleNames="{style.column-header}"/>

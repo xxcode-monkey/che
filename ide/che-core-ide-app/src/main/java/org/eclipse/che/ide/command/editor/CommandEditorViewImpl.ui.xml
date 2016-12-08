@@ -25,11 +25,14 @@
         }
 
         .header {
-            background-color: tabsPanelBackground;
+            height: 38px;
             padding-top: 5px;
+            background-color: tabsPanelBackground;
         }
 
         .tabsPanel {
+            width: 285px;
+            height: 30px;
             background-color: #303336;
             float: left;
             box-shadow: 0 1px 0 0 #3c3c3c;
@@ -50,8 +53,8 @@
 
     <g:DockLayoutPanel addStyleNames="{style.mainPanel}">
         <g:north size="44">
-            <g:FlowPanel height="38px" addStyleNames="{style.header}">
-                <g:FlowPanel width="285px" height="30px" addStyleNames="{style.tabsPanel}">
+            <g:FlowPanel addStyleNames="{style.header}">
+                <g:FlowPanel addStyleNames="{style.tabsPanel}">
                     <che:radiobuttongroup.RadioButtonGroup ui:field="pagesSwitcher"
                                                            addStyleNames="{style.switcher}"
                                                            debugId="command-editor-pages-switcher"/>

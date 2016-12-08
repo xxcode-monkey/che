@@ -44,6 +44,9 @@ public class InfoPageViewImpl extends Composite implements InfoPageView {
     CheckBox workspace;
 
     @UiField
+    FlowPanel projectsSection;
+
+    @UiField
     FlowPanel projectsPanel;
 
     private ActionDelegate delegate;
@@ -51,6 +54,8 @@ public class InfoPageViewImpl extends Composite implements InfoPageView {
     @Inject
     public InfoPageViewImpl() {
         initWidget(UI_BINDER.createAndBindUi(this));
+
+        projectsSection.setVisible(false);
     }
 
     @Override
@@ -71,6 +76,8 @@ public class InfoPageViewImpl extends Composite implements InfoPageView {
     @Override
     public void setProjectsState(Map<Project, Boolean> projects) {
         projectsPanel.clear();
+
+        projectsSection.setVisible(!projects.isEmpty());
 
         for (final Map.Entry<Project, Boolean> entry : projects.entrySet()) {
             final Project project = entry.getKey();
