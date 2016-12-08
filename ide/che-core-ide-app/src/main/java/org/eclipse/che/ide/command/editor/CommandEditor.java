@@ -38,7 +38,6 @@ import org.eclipse.che.ide.command.editor.page.arguments.ArgumentsPage;
 import org.eclipse.che.ide.command.editor.page.info.InfoPage;
 import org.eclipse.che.ide.command.editor.page.previewurl.PreviewUrlPage;
 import org.eclipse.che.ide.command.node.CommandFileNode;
-import org.eclipse.che.ide.util.loging.Log;
 import org.vectomatic.dom.svg.ui.SVGImage;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
@@ -46,9 +45,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
-import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
-import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
-import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.WARNING;
 
 /**
@@ -144,7 +140,7 @@ public class CommandEditor extends AbstractEditorPresenter implements CommandEdi
                 }
             });
 
-            page.setCommand(editedCommand);
+            page.edit(editedCommand);
         }
     }
 
@@ -259,14 +255,6 @@ public class CommandEditor extends AbstractEditorPresenter implements CommandEdi
                         }
                     }).show();
         }
-    }
-
-    @Override
-    public void minimize() {
-    }
-
-    @Override
-    public void activatePart() {
     }
 
     @Override

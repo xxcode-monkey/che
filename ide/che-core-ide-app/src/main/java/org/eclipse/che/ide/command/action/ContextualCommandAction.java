@@ -8,12 +8,10 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-
 package org.eclipse.che.ide.command.action;
 
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 import com.google.inject.assistedinject.Assisted;
 
 import org.eclipse.che.api.core.model.machine.Machine;
@@ -44,7 +42,6 @@ import java.util.List;
  *
  * @author Artem Zatsarynnyi
  */
-@Singleton
 class ContextualCommandAction extends Action {
 
     private final ContextualCommand   command;

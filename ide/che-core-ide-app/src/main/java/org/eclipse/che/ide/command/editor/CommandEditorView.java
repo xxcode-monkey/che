@@ -14,7 +14,6 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.google.inject.ImplementedBy;
 
 import org.eclipse.che.ide.api.mvp.View;
-import org.eclipse.che.ide.api.parts.base.BaseActionDelegate;
 
 /**
  * The view for {@link CommandEditor}.
@@ -45,7 +44,7 @@ public interface CommandEditorView extends View<CommandEditorView.ActionDelegate
     void setSaveEnabled(boolean enable);
 
     /** The action delegate for this view. */
-    interface ActionDelegate extends BaseActionDelegate {
+    interface ActionDelegate {
 
         /** Called when saving command is requested. */
         void onCommandSave();

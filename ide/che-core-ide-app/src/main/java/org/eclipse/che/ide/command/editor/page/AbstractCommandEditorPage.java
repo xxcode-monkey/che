@@ -43,7 +43,7 @@ public abstract class AbstractCommandEditorPage implements CommandEditorPage {
     }
 
     @Override
-    public void setCommand(ContextualCommand command) {
+    public void edit(ContextualCommand command) {
         editedCommand = command;
 
         initialize();

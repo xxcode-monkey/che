@@ -35,7 +35,7 @@ public interface CommandEditorPage {
      * Typically, implementor should hold the given {@code command}
      * instance for subsequent modifying it directly and do pages's initial setup.
      */
-    void setCommand(ContextualCommand command);
+    void edit(ContextualCommand command);
 
     /**
      * Whether the page has been modified or not?

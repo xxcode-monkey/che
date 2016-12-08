@@ -111,10 +111,6 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
     }
 
     @Override
-    public void setVisible(boolean visible) {
-    }
-
-    @Override
     public IsWidget getView() {
         return view;
     }
