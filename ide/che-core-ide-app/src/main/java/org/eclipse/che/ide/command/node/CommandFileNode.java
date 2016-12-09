@@ -56,13 +56,8 @@ public class CommandFileNode extends AbstractCommandNode implements HasAction, V
     }
 
     @Override
-    public String getPath() {
-        return "commands/" + getData().getType() + "/" + getData().getName();
-    }
-
-    @Override
     public Path getLocation() {
-        return Path.valueOf(getPath());
+        return Path.valueOf("commands/" + getData().getType() + "/" + getData().getName());
     }
 
     @Override

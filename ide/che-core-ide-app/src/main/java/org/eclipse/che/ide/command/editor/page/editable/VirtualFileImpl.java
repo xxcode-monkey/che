@@ -44,13 +44,8 @@ class VirtualFileImpl implements VirtualFile {
     }
 
     @Override
-    public String getPath() {
-        return name;
-    }
-
-    @Override
     public Path getLocation() {
-        return Path.valueOf(getPath());
+        return Path.valueOf(getName());
     }
 
     @Override
