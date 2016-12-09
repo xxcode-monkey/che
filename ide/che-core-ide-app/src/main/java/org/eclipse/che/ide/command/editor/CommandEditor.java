@@ -112,7 +112,8 @@ public class CommandEditor extends AbstractEditorPresenter implements CommandEdi
         final VirtualFile file = getEditorInput().getFile();
 
         if (file instanceof CommandFileNode) {
-            editedCommand = ((CommandFileNode)file).getData();
+            // make a copy of the given command to avoid modifying of the provided command
+            editedCommand = new ContextualCommand(((CommandFileNode)file).getData());
 
             initializePages();
 
@@ -124,10 +125,8 @@ public class CommandEditor extends AbstractEditorPresenter implements CommandEdi
         }
     }
 
-    /** Initialize editor's pages with the edit command. */
+    /** Initialize editor's pages with the edited command. */
     private void initializePages() {
-        // save initial value of the edited command's name
-        // in order to be able to detect whether the command was renamed during editing or not
         commandNameInitial = editedCommand.getName();
 
         for (final CommandEditorPage page : pages) {
