@@ -8,7 +8,8 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.command.editor.page.arguments;
+
+package org.eclipse.che.ide.command.editor.page.editable;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -22,13 +23,13 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 
 /**
- * Implementation of {@link ArgumentsPageView}.
+ * Implementation of {@link PageWithEditorView}.
  *
  * @author Artem Zatsarynnyi
  */
-public class ArgumentsPageViewImpl extends Composite implements ArgumentsPageView {
+public class PageWithEditorViewImpl extends Composite implements PageWithEditorView {
 
-    private static final ArgumentsPageViewImplUiBinder UI_BINDER = GWT.create(ArgumentsPageViewImplUiBinder.class);
+    private static final PageWithEditorViewImplUiBinder UI_BINDER = GWT.create(PageWithEditorViewImplUiBinder.class);
 
     @UiField
     Hyperlink exploreMacrosLink;
@@ -40,7 +41,7 @@ public class ArgumentsPageViewImpl extends Composite implements ArgumentsPageVie
     private ActionDelegate delegate;
 
     @Inject
-    public ArgumentsPageViewImpl() {
+    public PageWithEditorViewImpl() {
         initWidget(UI_BINDER.createAndBindUi(this));
     }
 
@@ -59,6 +60,6 @@ public class ArgumentsPageViewImpl extends Composite implements ArgumentsPageVie
         delegate.onExploreMacros();
     }
 
-    interface ArgumentsPageViewImplUiBinder extends UiBinder<Widget, ArgumentsPageViewImpl> {
+    interface PageWithEditorViewImplUiBinder extends UiBinder<Widget, PageWithEditorViewImpl> {
     }
 }

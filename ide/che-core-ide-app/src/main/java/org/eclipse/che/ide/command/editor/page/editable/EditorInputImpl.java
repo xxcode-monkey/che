@@ -8,17 +8,18 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.command.editor.page.arguments;
+
+package org.eclipse.che.ide.command.editor.page.editable;
 
 import org.eclipse.che.ide.api.editor.EditorInput;
 import org.eclipse.che.ide.api.filetypes.FileType;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
-/** @author Vitaly Parfonov */
-final class EditorInputImpl implements EditorInput {
+class EditorInputImpl implements EditorInput {
+
     private VirtualFile file;
-    private FileType fileType;
+    private FileType    fileType;
 
     EditorInputImpl(FileType fileType, VirtualFile file) {
         this.fileType = fileType;

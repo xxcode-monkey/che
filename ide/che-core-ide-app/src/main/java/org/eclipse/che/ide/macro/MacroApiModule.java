@@ -59,6 +59,6 @@ public class MacroApiModule extends AbstractGinModule {
         macrosBinder.addBinding().to(ExplorerCurrentProjectTypeMacro.class);
         macrosBinder.addBinding().to(WorkspaceNameMacro.class);
 
-        bind(MacroChooserView.class).to(MacroChooserViewImpl.class).in(Singleton.class);
+        bind(MacroChooserView.class).to(MacroChooserViewImpl.class);
     }
 }

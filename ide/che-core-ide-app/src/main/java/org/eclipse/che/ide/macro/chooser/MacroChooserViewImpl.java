@@ -28,7 +28,6 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.api.macro.Macro;
 import org.eclipse.che.ide.ui.window.Window;
@@ -39,7 +38,6 @@ import org.eclipse.che.ide.ui.window.Window;
  *
  * @author Artem Zatsarynnyi
  */
-@Singleton
 public class MacroChooserViewImpl extends Window implements MacroChooserView {
 
     private static final MacrosExplorerViewImplUiBinder UI_BINDER = GWT.create(MacrosExplorerViewImplUiBinder.class);

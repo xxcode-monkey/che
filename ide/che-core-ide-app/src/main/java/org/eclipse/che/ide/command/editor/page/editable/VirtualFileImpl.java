@@ -8,39 +8,36 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.command.editor.page.arguments;
 
-import com.google.common.annotations.Beta;
+package org.eclipse.che.ide.command.editor.page.editable;
+
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.js.Promises;
+import org.eclipse.che.ide.api.resources.SyntheticFile;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.resource.Path;
 
 /**
- * Implementation for {@link VirtualFile} which describe resource which doesn't exist on file system and is auto generated.
- * For example it may be effective version of such resource.
- * <p/>
- * This file is read only and doesn't have link to the content url.
- * Calling {@link #updateContent(String)} will cause {@link UnsupportedOperationException}.
+ * Copy of the {@link SyntheticFile} which ability to update it's content
+ * since {@link SyntheticFile} is read only.
  *
- * @author Vlad Zhukovskiy
- * @see VirtualFile
+ * @author Artem Zatsarynnyi
+ * @see SyntheticFile
  */
-@Beta
-public class CommandLineFile implements VirtualFile {
+class VirtualFileImpl implements VirtualFile {
 
     private String name;
     private String content;
     private String displayName;
 
-    public CommandLineFile(String name, String content) {
+    VirtualFileImpl(String name, String content) {
         this(name, name, content);
     }
 
-    public CommandLineFile(String name, String displayName, String content) {
+    VirtualFileImpl(String name, String displayName, String content) {
         this.name = name;
         this.displayName = displayName;
         this.content = content;
@@ -95,8 +92,8 @@ public class CommandLineFile implements VirtualFile {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof CommandLineFile)) return false;
-        CommandLineFile that = (CommandLineFile)o;
+        if (!(o instanceof VirtualFileImpl)) return false;
+        VirtualFileImpl that = (VirtualFileImpl)o;
         return Objects.equal(name, that.name) &&
                Objects.equal(content, that.content);
     }

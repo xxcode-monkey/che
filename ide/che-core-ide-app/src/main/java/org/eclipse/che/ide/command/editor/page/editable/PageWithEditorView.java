@@ -8,35 +8,29 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.command.editor.page.previewurl;
 
+package org.eclipse.che.ide.command.editor.page.editable;
+
+import com.google.gwt.user.client.ui.SimpleLayoutPanel;
 import com.google.inject.ImplementedBy;
 
 import org.eclipse.che.ide.api.mvp.View;
 
 /**
- * The view of {@link PreviewUrlPage}.
+ * Contract of the view for {@link AbstractPageWithEditor}.
  *
  * @author Artem Zatsarynnyi
  */
-@ImplementedBy(PreviewUrlPageViewImpl.class)
-public interface PreviewUrlPageView extends View<PreviewUrlPageView.ActionDelegate> {
+@ImplementedBy(PageWithEditorViewImpl.class)
+public interface PageWithEditorView extends View<PageWithEditorView.ActionDelegate> {
 
-    /** Returns the command preview URL value. */
-    String getPreviewUrl();
-
-    /** Sets the command preview URL value. */
-    void setPreviewUrl(String previewUrl);
+    /** Returns the container where the editor should be placed. */
+    SimpleLayoutPanel getEditorContainer();
 
     /** The action delegate for this view. */
     interface ActionDelegate {
 
-        /**
-         * Called when command preview URL has been changed.
-         *
-         * @param previewUrl
-         *         changed value of the command preview URL
-         */
-        void onPreviewUrlChanged(String previewUrl);
+        /** Called when exploring macros is requested. */
+        void onExploreMacros();
     }
 }

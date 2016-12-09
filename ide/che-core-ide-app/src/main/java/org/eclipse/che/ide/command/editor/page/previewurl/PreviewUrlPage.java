@@ -10,12 +10,14 @@
  *******************************************************************************/
 package org.eclipse.che.ide.command.editor.page.previewurl;
 
-import com.google.gwt.user.client.ui.IsWidget;
 import com.google.inject.Inject;
 
-import org.eclipse.che.ide.api.command.ContextualCommand;
-import org.eclipse.che.ide.command.editor.page.AbstractCommandEditorPage;
+import org.eclipse.che.ide.api.editor.defaulteditor.EditorBuilder;
+import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
 import org.eclipse.che.ide.command.editor.page.CommandEditorPage;
+import org.eclipse.che.ide.command.editor.page.editable.AbstractPageWithEditor;
+import org.eclipse.che.ide.command.editor.page.editable.PageWithEditorView;
+import org.eclipse.che.ide.macro.chooser.MacroChooser;
 
 import static org.eclipse.che.api.workspace.shared.Constants.COMMAND_PREVIEW_URL_ATTRIBUTE_NAME;
 
@@ -24,52 +26,30 @@ import static org.eclipse.che.api.workspace.shared.Constants.COMMAND_PREVIEW_URL
  *
  * @author Artem Zatsarynnyi
  */
-public class PreviewUrlPage extends AbstractCommandEditorPage implements PreviewUrlPageView.ActionDelegate {
-
-    private final PreviewUrlPageView view;
-
-    // initial value of the command's preview URL
-    private String previewUrlInitial;
+public class PreviewUrlPage extends AbstractPageWithEditor {
 
     @Inject
-    public PreviewUrlPage(PreviewUrlPageView view) {
-        super("Preview URL", "Command preview URL");
-
-        this.view = view;
-
-        view.setDelegate(this);
+    public PreviewUrlPage(PageWithEditorView view,
+                          EditorBuilder editorBuilder,
+                          FileTypeRegistry fileTypeRegistry,
+                          MacroChooser macroChooser) {
+        super(view,
+              editorBuilder,
+              fileTypeRegistry,
+              macroChooser,
+              "Preview URL",
+              "Command preview URL");
     }
 
     @Override
-    public IsWidget getView() {
-        return view;
-    }
-
-    @Override
-    protected void initialize() {
-        previewUrlInitial = getCommandPreviewUrl(editedCommand);
-
-        view.setPreviewUrl(previewUrlInitial);
-    }
-
-    @Override
-    public boolean isDirty() {
-        if (editedCommand == null) {
-            return false;
-        }
-
-        return !(previewUrlInitial.equals(getCommandPreviewUrl(editedCommand)));
-    }
-
-    @Override
-    public void onPreviewUrlChanged(String previewUrl) {
-        editedCommand.getAttributes().put(COMMAND_PREVIEW_URL_ATTRIBUTE_NAME, previewUrl);
-
-        notifyDirtyStateChanged();
-    }
-
-    private String getCommandPreviewUrl(ContextualCommand command) {
+    protected String getCommandPropertyValue() {
         final String previewUrl = editedCommand.getAttributes().get(COMMAND_PREVIEW_URL_ATTRIBUTE_NAME);
+
         return previewUrl != null ? previewUrl : "";
+    }
+
+    @Override
+    protected void updateCommandPropertyValue(String content) {
+        editedCommand.getAttributes().put(COMMAND_PREVIEW_URL_ATTRIBUTE_NAME, content);
     }
 }
