@@ -35,8 +35,9 @@ import java.util.Map;
  */
 public class InfoPage extends AbstractCommandEditorPage implements InfoPageView.ActionDelegate {
 
-    private final InfoPageView          view;
-    private final AppContext            appContext;
+    private final InfoPageView view;
+    private final AppContext   appContext;
+
     private final Map<Project, Boolean> projectsState;
 
     // initial value of the command's name
@@ -52,6 +53,7 @@ public class InfoPage extends AbstractCommandEditorPage implements InfoPageView.
 
         this.view = view;
         this.appContext = appContext;
+
         projectsState = new HashMap<>();
 
         view.setDelegate(this);
@@ -73,13 +75,22 @@ public class InfoPage extends AbstractCommandEditorPage implements InfoPageView.
         view.setCommandName(editedCommand.getName());
         view.setWorkspace(editedCommand.getApplicableContext().isWorkspaceApplicable());
 
-        // initialize projects
+        refreshProjects();
+    }
+
+    /** Refresh projects in the view. */
+    private void refreshProjects() {
+        projectsState.clear();
+
+        final ApplicableContext context = editedCommand.getApplicableContext();
+
         for (Project project : appContext.getProjects()) {
-            final boolean state = context.getApplicableProjects().contains(project.getPath());
-            projectsState.put(project, state);
+            final boolean applicable = context.getApplicableProjects().contains(project.getPath());
+
+            projectsState.put(project, applicable);
         }
 
-        view.setProjectsState(projectsState);
+        view.setProjects(projectsState);
     }
 
     @Override
@@ -118,6 +129,7 @@ public class InfoPage extends AbstractCommandEditorPage implements InfoPageView.
         projectsState.put(project, value);
 
         final ApplicableContext applicableContext = editedCommand.getApplicableContext();
+
         if (value) {
             applicableContext.addProject(project.getPath());
         } else {

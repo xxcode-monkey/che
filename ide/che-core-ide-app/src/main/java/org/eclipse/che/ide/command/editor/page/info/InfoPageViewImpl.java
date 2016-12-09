@@ -74,7 +74,7 @@ public class InfoPageViewImpl extends Composite implements InfoPageView {
     }
 
     @Override
-    public void setProjectsState(Map<Project, Boolean> projects) {
+    public void setProjects(Map<Project, Boolean> projects) {
         projectsPanel.clear();
 
         projectsSection.setVisible(!projects.isEmpty());

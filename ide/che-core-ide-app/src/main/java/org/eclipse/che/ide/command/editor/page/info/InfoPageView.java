@@ -33,7 +33,7 @@ public interface InfoPageView extends View<InfoPageView.ActionDelegate> {
 
     void setWorkspace(boolean value);
 
-    void setProjectsState(Map<Project, Boolean> projects);
+    void setProjects(Map<Project, Boolean> projects);
 
     /** The action delegate for this view. */
     interface ActionDelegate {
