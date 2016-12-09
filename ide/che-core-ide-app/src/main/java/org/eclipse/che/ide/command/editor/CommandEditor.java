@@ -230,7 +230,7 @@ public class CommandEditor extends AbstractEditorPresenter implements CommandEdi
 
     @Override
     public void onClose(final AsyncCallback<Void> callback) {
-        // TODO: find the right place for this code since #onClose is never called
+        // TODO: find the right place for this code since #onClose is never calling
         if (!isDirty()) {
             handleClose();
             callback.onSuccess(null);
