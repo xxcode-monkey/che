@@ -38,11 +38,21 @@ import (
 	"os/exec"
 	"sync"
 	"unicode/utf8"
+	"syscall"
 )
 
 type wsPty struct {
 	Cmd     *exec.Cmd // pty builds on os.exec
 	PtyFile *os.File  // a pty is simply an os.File
+}
+
+func (wp *wsPty) Stop(finalizer *ReadWriteRoutingFinalizer) {
+	closeFile(wp.PtyFile, finalizer)
+	pid := wp.Cmd.Process.Pid;
+	//See more https://en.wikipedia.org/wiki/Unix_signal#SIGHUP
+	if err := syscall.Kill(pid, syscall.SIGHUP);err != nil {
+		fmt.Errorf("Failed to SIGHUP terminal process. Cause: '%s'", err)
+	}
 }
 
 type WebSocketMessage struct {
@@ -54,6 +64,7 @@ type ReadWriteRoutingFinalizer struct {
 	*sync.Mutex
 	readDone  bool
 	writeDone bool
+	fileClosed bool
 }
 
 var (
@@ -121,7 +132,8 @@ func isNormalPtyError(err error) bool {
 
 // read from the web socket, copying to the pty master
 // messages are expected to be text and base64 encoded
-func sendConnectionInputToPty(conn *websocket.Conn, reader io.ReadCloser, f *os.File, finalizer *ReadWriteRoutingFinalizer) {
+func sendConnectionInputToPty(conn *websocket.Conn, reader io.ReadCloser, wp *wsPty, finalizer *ReadWriteRoutingFinalizer) {
+	f := wp.PtyFile
 	defer closeReader(reader, f, finalizer)
 
 	for {
@@ -140,6 +152,10 @@ func sendConnectionInputToPty(conn *websocket.Conn, reader io.ReadCloser, f *os.
 			if err := json.Unmarshal(payload, &msg); err != nil {
 				log.Printf("Invalid message %s\n", err)
 				continue
+			}
+			if msg.Type == "kill" {
+				wp.Stop(finalizer);
+				return
 			}
 			if errMsg := handleMessage(msg, f); errMsg != nil {
 				log.Printf(errMsg.Error())
@@ -247,25 +263,32 @@ func ptyHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	reader := ioutil.NopCloser(wp.PtyFile)
-	finalizer := ReadWriteRoutingFinalizer{&sync.Mutex{}, false, false}
+	finalizer := ReadWriteRoutingFinalizer{&sync.Mutex{}, false, false, false}
 
 	defer waitAndClose(wp, &finalizer, conn, reader)
 
 	//read output from terminal
 	go sendPtyOutputToConnection(conn, reader, &finalizer)
 	//write input to terminal
-	go sendConnectionInputToPty(conn, reader, wp.PtyFile, &finalizer)
+	go sendConnectionInputToPty(conn, reader, wp, &finalizer)
 
 	fmt.Println("New terminal succesfully initialized.")
 }
 
 func waitAndClose(wp *wsPty, finalizer *ReadWriteRoutingFinalizer, conn *websocket.Conn, reader io.ReadCloser) {
 	if err := wp.Cmd.Wait(); err != nil {
-		log.Printf("Failed to stop process, due to occurred error '%s'", err.Error())
+		//check if process is alive.
+		killErr := wp.Cmd.Process.Signal(syscall.Signal(0))
+		processExists := killErr == nil || err == syscall.EPERM
+
+		if processExists {
+			if err := wp.Cmd.Process.Kill(); err != nil {
+				fmt.Errorf("Failed to terminate terminal process '%s' with pid: '%s'", err, wp.Cmd.Process.Pid);
+			}
+		};
 	}
 
-	wp.PtyFile.Close()
-
+	closeFile(wp.PtyFile, finalizer)
 	closeConn(conn, finalizer)
 	closeReader(reader, wp.PtyFile, finalizer)
 
@@ -297,6 +320,17 @@ func closeConn(conn *websocket.Conn, finalizer *ReadWriteRoutingFinalizer) {
 		conn.Close()
 		finalizer.writeDone = true
 		fmt.Println("Terminal writer closed.")
+	}
+}
+
+func closeFile(file *os.File, finalizer *ReadWriteRoutingFinalizer) {
+	defer finalizer.Unlock()
+
+	finalizer.Lock()
+	if !finalizer.fileClosed {
+		file.Close()
+		finalizer.fileClosed = true
+		fmt.Println("Pty file closed.")
 	}
 }
 
